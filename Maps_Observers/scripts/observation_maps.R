@@ -23,7 +23,7 @@ library(ggplot2); library(grid) # graphing packages
 # ---------------------
 # Setting File paths
 # ---------------------
-dir.base <- "~/Desktop/Research/Phenology_LivingCollections/Maps/"
+dir.base <- "~/Desktop/Research/Phenology_LivingCollections/Maps_Observers/"
 setwd(dir.base)
 
 maps.out <- "figures"
