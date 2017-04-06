@@ -24,10 +24,10 @@ library(ggplot2); library(grid) # graphing packages
 # ---------------------
 # Setting File paths
 # ---------------------
-dir.base <- "~/Desktop/Research/Phenology_LivingCollections/Map_Status/"
+dir.base <- "~/Desktop/Research/Phenology_LivingCollections/"
 setwd(dir.base)
 
-maps.out <- "figures"
+maps.out <- "figures/maps_status"
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 # ---------------------
 
@@ -36,7 +36,7 @@ path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repe
 # ---------------------
 # Loading Tree Data & Metadata
 # ---------------------
-pheno.data <- read.csv("data/Observations_2017_LC_Oaks_TreeShrub_2017-04-04.csv", na.strings="")
+pheno.data <- read.csv("data/observations/Observations_2017_LC_Oaks_TreeShrub_2017-04-04.csv", na.strings="")
 pheno.data <- pheno.data[!is.na(pheno.data$genus),]
 pheno.data$date_observed <- as.Date(pheno.data$date_observed)
 pheno.data$date_entered <- as.Date(pheno.data$date_entered)
@@ -86,7 +86,7 @@ summary(pheno.data)
     # writeOGR(quercus, "data/Collection_Quercus", "Collection_Quercus", driver="ESRI Shapefile")
   }
   
-  quercus <- readOGR("data/Collection_Quercus/quercus.shp")
+  quercus <- readOGR("data/spatial/Collection_Quercus/quercus.shp")
   summary(quercus)
   # ------------
   

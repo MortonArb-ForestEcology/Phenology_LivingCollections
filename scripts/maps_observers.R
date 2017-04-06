@@ -23,10 +23,10 @@ library(ggplot2); library(grid) # graphing packages
 # ---------------------
 # Setting File paths
 # ---------------------
-dir.base <- "~/Desktop/Research/Phenology_LivingCollections/Maps_Observers/"
+dir.base <- "~/Desktop/Research/Phenology_LivingCollections/"
 setwd(dir.base)
 
-maps.out <- "figures"
+maps.out <- "figures/maps_observers"
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 # ---------------------
 
@@ -37,10 +37,12 @@ path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repe
 # Trees! 2016 is the most recent I could find
 # Note: there's a LOT of info I don't want
 db.cols <- c("sci_name", "sort_scina", "sci_nm3", "type", "trade_nm", "plant_id", "habitat", "coll_id", "coll_nm", "collsuba", "grid_loc", "x_coord", "y_coord")
-trees <- readOGR("/Volumes/GIS/Collections/PLANTDB/HDB_2015-05-12.shp")
-summary(trees[,db.cols])
-names(trees)
+# trees <- readOGR("/Volumes/GIS/Collections/PLANTDB/HDB_2015-05-12.shp")
+# summary(trees[,db.cols])
+# names(trees)
 # plot(trees)
+# read in the pre-made Quercus file
+quercus <- readOGR("data/spatial/Collection_Quercus/quercus.shp")
 
 
 #Collection Boundaries
@@ -76,7 +78,7 @@ woods <- woods[2,] # We only want to worry about the main block; row 1 = King's 
 # ---------------------
 # Loading Tree Data & Metadata
 # ---------------------
-pheno.trees <- read.csv("data/Living Collections - Oak Collection Observers - 2017-04-03.csv")
+pheno.trees <- read.csv("data/observations/Living Collections - Oak Collection Observers - 2017-04-03.csv")
 # ---------------------
 
 # ----------------------------------------
@@ -84,10 +86,10 @@ pheno.trees <- read.csv("data/Living Collections - Oak Collection Observers - 20
 # ----------------------------------------
 # Subsetting and graphing
 # ----------------------------------------
-unique(trees$coll_nm)
-quercus <- trees[!is.na(trees$coll_nm) & trees$coll_nm=="Quercus",db.cols]
-summary(quercus); 
-dim(quercus)
+# unique(trees$coll_nm)
+# quercus <- trees[!is.na(trees$coll_nm) & trees$coll_nm=="Quercus",db.cols]
+# summary(quercus); 
+# dim(quercus)
 
 # The start poitn was found by trial and error
 grid.labs.x <- data.frame(grid.x=seq(323102, by=30.5, length.out=length(89:107)), grid.y=571230, x.lab=89:107)
