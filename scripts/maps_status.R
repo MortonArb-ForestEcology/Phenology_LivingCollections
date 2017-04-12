@@ -36,7 +36,7 @@ path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repe
 # ---------------------
 # Loading Tree Data & Metadata
 # ---------------------
-pheno.data <- read.csv("data/observations/Observations_2017_LC_Oaks_TreeShrub_2017-04-04.csv", na.strings="")
+pheno.data <- read.csv("data/observations/Observations_2017_LC_Oaks_TreeShrub_2017-04-12.csv", na.strings="")
 pheno.data <- pheno.data[!is.na(pheno.data$genus),]
 pheno.data$date_observed <- as.Date(pheno.data$date_observed)
 pheno.data$date_entered <- as.Date(pheno.data$date_entered)
@@ -139,7 +139,7 @@ obs.last <- aggregate(pheno.data$date_observed, by=list(pheno.data$id), FUN=max)
 summary(as.factor(obs.last$x))
 
 # subsetting to just the most recent window with lots of observations
-pheno.new <- pheno.data[pheno.data$date_observed>=as.Date("2017-03-27"),]
+pheno.new <- pheno.data[pheno.data$date_observed>=as.Date("2017-04-03"),]
 summary(pheno.new)
 pheno.new[pheno.new$leaf_color_observed=="Y",]
 
@@ -159,9 +159,9 @@ plot(paths, add=T, lwd=2, col="brown", lty="dashed")
 plot(morton.grid, add=T, lty="dashed", lwd=0.3, col="black")
 plot(quercus, add=T, pch=19, cex=0.5)
 plot(quercus[quercus$plant_id %in% pheno.new[pheno.new$leaf_breaking_bud_observed=="N","id"],], add=T, pch=19, col="gray50", cex=1.5)
-plot(quercus[quercus$plant_id %in% pheno.new[pheno.new$leaf_breaking_bud_observed=="Y","id"],], add=T, pch=19, col="darkolivegreen1", cex=1.5)
+plot(quercus[quercus$plant_id %in% pheno.new[pheno.new$leaf_breaking_bud_observed=="Y","id"],], add=T, pch=19, col="darkolivegreen3", cex=1.5)
 legend(x=grid.oaks.x$grid.x[1], y=grid.oaks.y$grid.y[1], xjust=0, yjust=0, legend=c("Roads", "Trails"), col=c("tan4", "brown"), lty=c("solid", "dashed"), lwd=c(3,2), cex=1.5)
-legend(x=grid.oaks.x$grid.x[1], y=grid.oaks.y$grid.y[4]-30.5/2, xjust=0, yjust=0, legend=c("Dormant", "Bud Burst", "Unmonitored"), col=c("gray50", "darkolivegreen1", "black"), pch=19, cex=1.5)
+legend(x=grid.oaks.x$grid.x[1], y=grid.oaks.y$grid.y[4]-30.5/2, xjust=0, yjust=0, legend=c("Dormant", "Bud Burst", "Unmonitored"), col=c("gray50", "darkolivegreen3", "black"), pch=19, cex=1.5)
 # text(x=grid.oaks.x$grid.x, y=grid.oaks.x$grid.y, labels=grid.oaks.x$x.lab, font=2)
 # text(x=grid.oaks.y$grid.x, y=grid.oaks.y$grid.y, labels=grid.oaks.y$y.lab, font=2)
 dev.off()
