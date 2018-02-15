@@ -210,7 +210,7 @@ summary(pheno.data)
 
   # Seeing what we have observations for that aren't in our observing list
   summary(pheno.data[!pheno.data$id %in% trees.obs,])
-  summary(droplevels(pheno.data[!pheno.data$id %in% trees.obs,"id"]))
+  summary(droplevels(pheno.data[!pheno.data$id %in% trees.obs$Accession,"id"]))
   
   # Subsetting the massive trees database to just those with phenology observations  
   trees.pheno <- trees[trees$plant_id %in% unique(pheno.data$id),db.cols]
