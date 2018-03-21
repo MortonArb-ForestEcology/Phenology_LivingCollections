@@ -29,6 +29,13 @@ pheno.lc
 # get the data from a particular sheet
 dat.raw <- data.frame(gs_read(pheno.lc, ws="Raw Observations"))
 
+# Coming up with handy groups for our columns
+cols.meta <- c("Timestamp", "Email.Address", "Observer", "Date.Observed", "Species", "PlantNumber", "NOTES")
+pheno.leaf <- names(dat.raw)[grep("leaf", tolower(names(dat.raw)))]
+pheno.flower <- names(dat.raw)[grep("flower", tolower(names(dat.raw)))]
+pheno.fruit <- names(dat.raw)[grep("fruit", tolower(names(dat.raw)))]
+
+
 # Setting things to factors
 for(i in 1:ncol(dat.raw)){
   if(class(dat.raw[,i])=="character") dat.raw[,i] <- as.factor(dat.raw[,i])
@@ -40,6 +47,7 @@ dat.clean <- dat.raw[,1:27]
 dat.clean$PlantNumber <- as.factor(apply(dat.raw[,cols.id], 1, FUN=function(x) {x[which(!is.na(x))][1]})) # Get the PlantNumber
 dat.clean$Timestamp <- strptime(dat.clean$Timestamp, format="%m/%d/%Y %H:%M:%S")
 dat.clean$Date.Observed <- as.Date(dat.clean$Date.Observed, format="%m/%d/%Y")
+dat.clean <- dat.clean[,c(cols.meta, pheno.leaf, pheno.flower, pheno.fruit)] # Just re-organizing to how I like to see thigns
 summary(dat.clean)
 
 # Get rid of observations that have TEST in them or are before our last phenology training
