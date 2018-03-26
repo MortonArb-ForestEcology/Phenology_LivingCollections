@@ -9,7 +9,7 @@
 library(googlesheets)
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
-
+library(lubridate)
 
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
@@ -55,8 +55,13 @@ dat.clean <- dat.clean[,c(cols.meta, pheno.leaf, pheno.flower, pheno.fruit)] # J
 summary(dat.clean)
 
 # Get rid of observations that have TEST in them or are before our last phenology training
-rows.remove <- c(which(is.na(dat.clean$Species)), grep("TEST", toupper(dat.clean$NOTES)), grep("TEST", toupper(dat.clean$Observer)), which(dat.clean$Date.Observed < as.Date("2018-03-09")))
-dat.clean <- dat.clean[!(1:nrow(dat.clean) %in% rows.remove),] # 
+rows.remove <- c(which(is.na(dat.clean$Species)), grep("TEST", toupper(dat.clean$NOTES)), grep("TEST", toupper(dat.clean$Observer)) )
+dat.clean <- dat.clean[(1:nrow(dat.clean) %in% rows.remove),] # 
+
+# We had some rows where the year got entered wrong as 0018 rather than 2018
+yr.wrong <- dat.clean[year(dat.clean$Date.Observed)==0018,"Date.Observed"]
+
+dat.clean[dat.clean$Date.Observed==yr.wrong,"Date.Observed"] <- as.Date(paste(2018, month(yr.wrong), day(yr.wrong), sep="-"))
 
 dat.clean <- droplevels(dat.clean) # Get rid of unused levels
 summary(dat.clean)
