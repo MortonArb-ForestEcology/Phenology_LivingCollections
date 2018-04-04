@@ -17,8 +17,10 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 
 path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
 maps.out <- file.path(path.dat)
-path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
+#path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
+path.gis <- "Y:/Collections" # Path on a PC
 # -------------------------------------------------------------
+
 
 # -------------------------------------------------------------
 # Access & format the observations
@@ -56,7 +58,7 @@ summary(dat.clean)
 
 # Get rid of observations that have TEST in them or are before our last phenology training
 rows.remove <- c(which(is.na(dat.clean$Species)), grep("TEST", toupper(dat.clean$NOTES)), grep("TEST", toupper(dat.clean$Observer)) )
-dat.clean <- dat.clean[(1:nrow(dat.clean) %in% rows.remove),] # 
+if(length(rows.remove)>0) dat.clean <- dat.clean[(1:nrow(dat.clean) %in% rows.remove),] # 
 
 # We had some rows where the year got entered wrong as 0018 rather than 2018
 yr.wrong <- dat.clean[year(dat.clean$Date.Observed)==0018,"Date.Observed"]
@@ -66,7 +68,19 @@ dat.clean[dat.clean$Date.Observed==yr.wrong,"Date.Observed"] <- as.Date(paste(20
 dat.clean <- droplevels(dat.clean) # Get rid of unused levels
 summary(dat.clean)
 
-#
+# Looking at some problematic records
+dat.clean[is.na(dat.clean$PlantNumber),]
+
+# Fixing missing accession numbers
+dat.clean$PlantNumber <- as.character(dat.clean$PlantNumber)
+
+# Once we figure out what that accession number is, change from "missing" to an actual accession number
+# dat.clean[dat.clean$Observer=="Rose" & dat.clean$Species=="Quercus montana" & is.na(dat.clean$PlantNumber),"PlantNumber"] <- "missing" 
+
+dat.clean$PlantNumber <- as.factor(dat.clean$PlantNumber)
+
+# Cleaning up observer tags
+summary(dat.clean$Observer)
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -81,7 +95,7 @@ summary(oaks.all)
 # Read in & formate Arb GIS layers
 # ---------------
 #Collection Boundaries
-collections <- readOGR("/Volumes/GIS/Collections/Collections_outlines/coll_bndry_master_plan.shp")
+collections <- readOGR(file.path(path.gis, "Collections_outlines/coll_bndry_master_plan.shp"))
 summary(collections)
 
 # Morton Grid system
