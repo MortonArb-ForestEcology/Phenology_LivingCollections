@@ -17,8 +17,8 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 
 path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
 maps.out <- file.path(path.dat)
-#path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
-path.gis <- "Y:/Collections" # Path on a PC
+path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
+# path.gis <- "Y:/Collections" # Path on a PC
 # -------------------------------------------------------------
 
 
@@ -81,6 +81,7 @@ dat.clean$PlantNumber <- as.factor(dat.clean$PlantNumber)
 
 # Cleaning up observer tags
 summary(dat.clean$Observer)
+write.csv(dat.clean, file.path(dir.base, "Data_Observations/LivingCollections_Oaks/Data_csv/", "PhenologyObservations_2018_LC_Oaks.csv"), row.names=F)
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
