@@ -9,3 +9,5 @@ data/observations/*.csv
 *.tiff
 *.history
 scripts/FallColor_First_2018_Map.png
+scripts/.Rhistory
+*.png

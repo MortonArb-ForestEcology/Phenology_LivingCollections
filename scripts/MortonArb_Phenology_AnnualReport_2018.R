@@ -21,7 +21,7 @@ dat.raw <- data.frame(gs_read(pheno.lc, ws="Raw Observations"))
 
 # Renaming some columns
 names(dat.raw)[grep("OPTIONAL", names(dat.raw))] <- "Notes"
-names(dat.raw)[grep("Species", names(dat.raw))] <- "Species"
+names(dat.raw)[grep("species", names(dat.raw))] <- "Species"
 
 # Coming up with handy groups for our columns
 cols.meta <- c("Timestamp", "Email.Address", "Observer", "Date.Observed", "Species", "PlantNumber", "Notes")
@@ -99,63 +99,98 @@ budburst <- aggregate(dat.clean[dat.clean$Breaking.leaf.buds=="Yes", "Date.Obser
                       by=dat.clean[dat.clean$Breaking.leaf.buds=="Yes", c("Species", "PlantNumber")], 
                       FUN=min)
 names(budburst)[which(names(budburst)=="x")] <- "Date.Observed"
-budburst$type <- "first"
+budburst$type <- "budburst-first"
 summary(budburst)
 
 budburst2 <- aggregate(dat.clean[dat.clean$Breaking.leaf.buds=="Yes", "Date.Observed"], 
                        by=dat.clean[dat.clean$Breaking.leaf.buds=="Yes", c("Species", "PlantNumber")], 
                        FUN=mean)
 names(budburst2)[which(names(budburst2)=="x")] <- "Date.Observed"
-budburst2$type <- "mean"
+budburst2$type <- "budburst-mean"
 summary(budburst2)
 
-budburst <- rbind(budburst, budburst2)
+leafout <- aggregate(dat.clean[dat.clean$Leaf.observed=="Yes", "Date.Observed"], 
+                       by=dat.clean[dat.clean$Leaf.observed=="Yes", c("Species", "PlantNumber")], 
+                       FUN=min)
+names(leafout)[which(names(leafout)=="x")] <- "Date.Observed"
+leafout$type <- "leafout-first"
+leafout[leafout$Date.Observed>"2018-07-01","Date.Observed"] <- NA
+summary(leafout)
+
+budburst <- rbind(budburst, budburst2, leafout)
 budburst <- merge(budburst, quercus[,c("PlantNumber", "BgLongitude", "BgLatitude")])
 budburst$doy <- lubridate::yday(budburst$Date.Observed)
 summary(budburst)
 
 dates.bb <- c("2018-05-01", "2018-05-08", "2018-05-15", "2018-05-22", "2018-05-29")
-doy.bb <- sapply(dates, lubridate::yday)
-# png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
-ggplot(data=budburst[budburst$type=="first" & budburst$doy>90,]) +
+doy.bb <- sapply(dates.bb, lubridate::yday)
+
+png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
+ggplot(data=budburst[budburst$type=="budburst-first" & budburst$doy>90,]) +
   coord_cartesian() +
   ggtitle("Date of First Budburst") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
-  scale_colour_distiller(palette="PiYG", direction = 2, breaks=doy.bb, labels=dates.bb) +
-  theme(legend.position="bottom",
-        legend.text = element_text(angle=-45, vjust=0.5),
-        panel.grid=element_blank(),
-        panel.background = element_rect(fill="black"))
-# dev.off()
+  scale_colour_distiller(palette=rev("PiYG"), breaks=doy.bb, labels=dates.bb, trans="reverse") +
+  theme(legend.position=c(0.25, 0.25),
+        legend.text=element_text(color='white', face="bold"),
+        legend.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.background=element_rect(fill="black"),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks=element_blank())
+dev.off()
 
-# png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
-ggplot(data=budburst[budburst$type=="mean",]) +
-  ggtitle("Mean Date of Budburst") +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy)) +
+dates.lo <- c("2018-05-01", "2018-05-15", "2018-06-01", "2018-06-15")
+doy.lo <- sapply(dates.lo, lubridate::yday)
+
+png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
+ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
+  coord_cartesian() +
+  ggtitle("Date of First Budburst") +
+  geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
-  scale_colour_distiller(palette="RdYlBu") +
-  theme(legend.position="bottom")
-# dev.off()
-
+  scale_colour_distiller(palette=rev("PiYG"), breaks=doy.lo, labels=dates.lo, trans="reverse") +
+  theme(legend.position=c(0.25, 0.25),
+        legend.text=element_text(color='white', face="bold"),
+        legend.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.background=element_rect(fill="black"),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks=element_blank())
+dev.off()
 
 png("Budburst_First_2018.png", height=4, width=7, units="in", res=120)
-ggplot(data=budburst[budburst$type=="first",]) +
+ggplot(data=budburst[budburst$type=="budburst-first",]) +
   ggtitle("Date of First Budburst") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
   theme_bw() +
+  guides(fill=F) +
   # scale_fill_discrete(colors=brewer.pal(length(unique(budburst$Species)),"Set3")) +
   theme(legend.position="bottom")
 dev.off()
 
+png("LeafOut_First_2018.png", height=4, width=7, units="in", res=120)
+ggplot(data=budburst[budburst$type=="leafout-first",]) +
+  ggtitle("Date of First Leaf Out") +
+  geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
+  theme_bw() +
+  guides(fill=F) +
+  # scale_fill_discrete(colors=brewer.pal(length(unique(budburst$Species)),"Set3")) +
+  theme(legend.position="bottom")
+dev.off()
 
-png("Budburst_2018.png", height=4, width=7, units="in", res=120)
-ggplot(data=budburst) +
-  ggtitle("Date of Budburst") +
+png("SpringPhenology_2018.png", height=4, width=7, units="in", res=120)
+ggplot(data=budburst[budburst$doy>90 & !is.na(budburst$doy) & budburst$type != "budburst-mean",]) +
+  # ggtitle("Date of Budburst") +
   facet_grid(type~.) +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
   theme_bw() +
+  guides(fill=F) +
   # scale_fill_discrete(colors=brewer.pal(length(unique(budburst$Species)),"Set3")) +
   theme(legend.position="bottom")
 dev.off()
@@ -198,14 +233,15 @@ summary(fall.color)
 
 dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01")
 doy.fc <- sapply(dates.fc, lubridate::yday)
+
 png("FallColor_First_2018_Map.png", height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   ggtitle("Mean Date of Peak Color") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
-  scale_colour_distiller(palette=rev("RdYlBu"), breaks=doy.fc, labels=dates.fc) +
-  theme(legend.position=c(0.25, 0.25),
+  scale_colour_distiller(palette="RdYlBu", direction=2, breaks=doy.fc, labels=dates.fc, trans="reverse") +
+  theme(legend.position=c(0.25, 0.4),
         legend.text=element_text(color='white', face="bold"),
         legend.background = element_blank(),
         panel.grid = element_blank(),
@@ -227,12 +263,18 @@ dev.off()
 
 png("FallColor_Peak_2018.png", height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
-  ggtitle("Date of Peak Fall Color") +
+  # ggtitle("Date of Peak Fall Color") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
   theme_bw() +
   guides(fill=F) +
+  labs(x="Date") +
+  # scale_x_continuous(name="Date", expand=c(0,0)) +
+  scale_y_continuous(name="Number Trees", expand=c(0,0)) +
   # scale_fill_discrete(colors=brewer.pal(length(unique(budburst$Species)),"Set3")) +
-  theme(legend.position="bottom")
+  theme(legend.position="bottom",
+        axis.title = element_text(size=rel(2), face="bold"),
+        axis.text  = element_text(size=rel(2)),
+        panel.grid = element_blank())
 dev.off()
 
 
