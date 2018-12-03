@@ -5,6 +5,8 @@ library(ggplot2); library(googlesheets);
 # For the npn_get_obs function:
 library(raster); library(httr); library(jsonlite)
 
+figures.out <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Figures/2018"
+dir.create(figures.out, recursive=T)
 # ----------------------------
 # 1. Grabbing our raw data
 # ----------------------------
@@ -125,7 +127,7 @@ summary(budburst)
 dates.bb <- c("2018-05-01", "2018-05-08", "2018-05-15", "2018-05-22", "2018-05-29")
 doy.bb <- sapply(dates.bb, lubridate::yday)
 
-png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "Budburst_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="budburst-first" & budburst$doy>90,]) +
   coord_cartesian() +
   ggtitle("Date of First Budburst") +
@@ -146,7 +148,7 @@ dev.off()
 dates.lo <- c("2018-05-01", "2018-05-15", "2018-06-01", "2018-06-15")
 doy.lo <- sapply(dates.lo, lubridate::yday)
 
-png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "Budburst_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
   coord_cartesian() +
   ggtitle("Date of First Budburst") +
@@ -164,7 +166,7 @@ ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
         axis.ticks=element_blank())
 dev.off()
 
-png("Budburst_First_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "Budburst_First_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="budburst-first",]) +
   ggtitle("Date of First Budburst") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -174,7 +176,7 @@ ggplot(data=budburst[budburst$type=="budburst-first",]) +
   theme(legend.position="bottom")
 dev.off()
 
-png("LeafOut_First_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "LeafOut_First_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first",]) +
   ggtitle("Date of First Leaf Out") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -184,7 +186,7 @@ ggplot(data=budburst[budburst$type=="leafout-first",]) +
   theme(legend.position="bottom")
 dev.off()
 
-png("SpringPhenology_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "SpringPhenology_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$doy>90 & !is.na(budburst$doy) & budburst$type != "budburst-mean",]) +
   # ggtitle("Date of Budburst") +
   facet_grid(type~.) +
@@ -234,7 +236,7 @@ summary(fall.color)
 dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01")
 doy.fc <- sapply(dates.fc, lubridate::yday)
 
-png("FallColor_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_Peak_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   ggtitle("Mean Date of Peak Color") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
@@ -251,7 +253,7 @@ ggplot(data=fall.color[fall.color$type=="peak",]) +
         axis.ticks=element_blank())
 dev.off()
 
-png("FallColor_First_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_First_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="first",]) +
   ggtitle("Date of First Fall Color") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -261,7 +263,7 @@ ggplot(data=fall.color[fall.color$type=="first",]) +
   theme(legend.position="bottom")
 dev.off()
 
-png("FallColor_Peak_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_Peak_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   # ggtitle("Date of Peak Fall Color") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -278,7 +280,7 @@ ggplot(data=fall.color[fall.color$type=="peak",]) +
 dev.off()
 
 
-png("FallColor_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color) +
   ggtitle("Date of Fall Color") +
   facet_grid(type~.) +
