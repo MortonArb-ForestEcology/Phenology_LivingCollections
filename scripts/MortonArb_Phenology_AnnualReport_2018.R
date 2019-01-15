@@ -73,6 +73,31 @@ summary(dat.clean$Observer)
 
 # ----------------------------
 
+# ----------- 
+# Load some GIS layers
+# ----------- 
+library(raster); library(rgdal); library(rgeos) # spatial analysis packages
+
+collections <- readOGR("/Volumes/GIS/Collections/Collections_outlines/coll_bndry_master_plan.shp")
+summary(collections)
+
+# Roads, Trails
+roads <- readOGR("/Volumes/GIS/Collections/Transportation/roads_parking/circ_veh_rd_2011-2020_ctrln.shp")
+paths <- readOGR("/Volumes/GIS/Collections/Transportation/trails_paths/paths.shp")
+parking <- readOGR("/Volumes/GIS/Collections/Transportation/roads_parking/parking_lots.shp")
+# summary(roads)
+# summary(paths)
+
+# Woodland boundarys
+woods <- readOGR("/Volumes/GIS/Collections/Natural Resources Management/2008 vegetative cover type/Woodland.shp")
+woods <- woods[2,] # We only want to worry about the main block; row 1 = King's Grove, row 2= main tract; row 3 = weird patch
+
+
+woods <- spTransform(woods, CRS("+proj=longlat"))
+roads <- spTransform(roads, CRS("+proj=longlat"))
+paths <- spTransform(paths, CRS("+proj=longlat"))
+# ----------- 
+
 # ----------------------------
 # Generate some summary numbers for our phenology report
 # ----------------------------
@@ -129,8 +154,11 @@ doy.bb <- sapply(dates.bb, lubridate::yday)
 
 png(file.path(figures.out, "Budburst_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="budburst-first" & budburst$doy>90,]) +
-  coord_cartesian() +
   ggtitle("Date of First Budburst") +
+  coord_equal(xlim=range(fall.color$BgLongitude), ylim=range(fall.color$BgLatitude)) +
+  geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
+  geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
+  geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
@@ -148,10 +176,13 @@ dev.off()
 dates.lo <- c("2018-05-01", "2018-05-15", "2018-06-01", "2018-06-15")
 doy.lo <- sapply(dates.lo, lubridate::yday)
 
-png(file.path(figures.out, "Budburst_First_2018_Map.png"), height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "LeafOut_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
-  coord_cartesian() +
-  ggtitle("Date of First Budburst") +
+  ggtitle("Date of First Leaf out") +
+  coord_equal(xlim=range(fall.color$BgLongitude), ylim=range(fall.color$BgLatitude)) +
+  geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
+  geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
+  geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
@@ -233,12 +264,18 @@ fall.color$doy <- lubridate::yday(fall.color$Date.Observed)
 summary(fall.color)
 
 
-dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01")
+dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01", "2018-11-15")
 doy.fc <- sapply(dates.fc, lubridate::yday)
+
+
 
 png(file.path(figures.out, "FallColor_Peak_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   ggtitle("Mean Date of Peak Color") +
+  coord_equal(xlim=range(fall.color$BgLongitude), ylim=range(fall.color$BgLatitude)) +
+  geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
+  geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
+  geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
