@@ -6,7 +6,8 @@ library(ggplot2); library(googlesheets);
 library(raster); library(httr); library(jsonlite)
 
 figures.out <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Figures/2018"
-dir.create(figures.out, recursive=T)
+dir.create(figures.out, recursive=T, showWarnings = F)
+
 # ----------------------------
 # 1. Grabbing our raw data
 # ----------------------------
@@ -58,7 +59,8 @@ dat.clean <- droplevels(dat.clean) # Get rid of unused levels
 summary(dat.clean)
 
 # Looking at some problematic records
-dat.clean[is.na(dat.clean$PlantNumber),]
+summary(dat.clean[is.na(dat.clean$PlantNumber),])
+dat.clean[is.na(dat.clean$PlantNumber) & dat.clean$Observer=="Zumwalde",]
 
 # Fixing missing accession numbers
 dat.clean$PlantNumber <- as.character(dat.clean$PlantNumber)
@@ -155,7 +157,7 @@ doy.bb <- sapply(dates.bb, lubridate::yday)
 png(file.path(figures.out, "Budburst_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="budburst-first" & budburst$doy>90,]) +
   ggtitle("Date of First Budburst") +
-  coord_equal(xlim=range(fall.color$BgLongitude), ylim=range(fall.color$BgLatitude)) +
+  coord_equal(xlim=range(budburst$BgLongitude), ylim=range(budburst$BgLatitude)) +
   geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
   geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
   geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
@@ -179,7 +181,7 @@ doy.lo <- sapply(dates.lo, lubridate::yday)
 png(file.path(figures.out, "LeafOut_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
   ggtitle("Date of First Leaf out") +
-  coord_equal(xlim=range(fall.color$BgLongitude), ylim=range(fall.color$BgLatitude)) +
+  coord_equal(xlim=range(budburst$BgLongitude), ylim=range(budburst$BgLatitude)) +
   geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
   geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
   geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
