@@ -146,7 +146,7 @@ dev.off()
 dates.lo <- c("2018-05-01", "2018-05-15", "2018-06-01", "2018-06-15")
 doy.lo <- sapply(dates.lo, lubridate::yday)
 
-png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png("LeafOut_First_2018_Map.png", height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
   coord_cartesian() +
   ggtitle("Date of First Budburst") +
@@ -234,7 +234,7 @@ summary(fall.color)
 dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01")
 doy.fc <- sapply(dates.fc, lubridate::yday)
 
-png("FallColor_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png("FallColor_Peak_2018_Map.png", height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   ggtitle("Mean Date of Peak Color") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
