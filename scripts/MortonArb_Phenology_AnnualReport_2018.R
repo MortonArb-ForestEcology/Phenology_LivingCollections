@@ -5,6 +5,9 @@ library(ggplot2); library(googlesheets);
 # For the npn_get_obs function:
 library(raster); library(httr); library(jsonlite)
 
+figures.out <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Figures/2018"
+dir.create(figures.out, recursive=T, showWarnings = F)
+
 # ----------------------------
 # 1. Grabbing our raw data
 # ----------------------------
@@ -56,7 +59,8 @@ dat.clean <- droplevels(dat.clean) # Get rid of unused levels
 summary(dat.clean)
 
 # Looking at some problematic records
-dat.clean[is.na(dat.clean$PlantNumber),]
+summary(dat.clean[is.na(dat.clean$PlantNumber),])
+dat.clean[is.na(dat.clean$PlantNumber) & dat.clean$Observer=="Zumwalde",]
 
 # Fixing missing accession numbers
 dat.clean$PlantNumber <- as.character(dat.clean$PlantNumber)
@@ -70,6 +74,31 @@ dat.clean$PlantNumber <- as.factor(dat.clean$PlantNumber)
 summary(dat.clean$Observer)
 
 # ----------------------------
+
+# ----------- 
+# Load some GIS layers
+# ----------- 
+library(raster); library(rgdal); library(rgeos) # spatial analysis packages
+
+collections <- readOGR("/Volumes/GIS/Collections/Collections_outlines/coll_bndry_master_plan.shp")
+summary(collections)
+
+# Roads, Trails
+roads <- readOGR("/Volumes/GIS/Collections/Transportation/roads_parking/circ_veh_rd_2011-2020_ctrln.shp")
+paths <- readOGR("/Volumes/GIS/Collections/Transportation/trails_paths/paths.shp")
+parking <- readOGR("/Volumes/GIS/Collections/Transportation/roads_parking/parking_lots.shp")
+# summary(roads)
+# summary(paths)
+
+# Woodland boundarys
+woods <- readOGR("/Volumes/GIS/Collections/Natural Resources Management/2008 vegetative cover type/Woodland.shp")
+woods <- woods[2,] # We only want to worry about the main block; row 1 = King's Grove, row 2= main tract; row 3 = weird patch
+
+
+woods <- spTransform(woods, CRS("+proj=longlat"))
+roads <- spTransform(roads, CRS("+proj=longlat"))
+paths <- spTransform(paths, CRS("+proj=longlat"))
+# ----------- 
 
 # ----------------------------
 # Generate some summary numbers for our phenology report
@@ -125,10 +154,13 @@ summary(budburst)
 dates.bb <- c("2018-05-01", "2018-05-08", "2018-05-15", "2018-05-22", "2018-05-29")
 doy.bb <- sapply(dates.bb, lubridate::yday)
 
-png("Budburst_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "Budburst_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="budburst-first" & budburst$doy>90,]) +
-  coord_cartesian() +
   ggtitle("Date of First Budburst") +
+  coord_equal(xlim=range(budburst$BgLongitude), ylim=range(budburst$BgLatitude)) +
+  geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
+  geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
+  geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
@@ -146,10 +178,13 @@ dev.off()
 dates.lo <- c("2018-05-01", "2018-05-15", "2018-06-01", "2018-06-15")
 doy.lo <- sapply(dates.lo, lubridate::yday)
 
-png("LeafOut_First_2018_Map.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "LeafOut_First_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
-  coord_cartesian() +
-  ggtitle("Date of First Budburst") +
+  ggtitle("Date of First Leaf out") +
+  coord_equal(xlim=range(budburst$BgLongitude), ylim=range(budburst$BgLatitude)) +
+  geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
+  geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
+  geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
@@ -164,7 +199,7 @@ ggplot(data=budburst[budburst$type=="leafout-first" ,]) +
         axis.ticks=element_blank())
 dev.off()
 
-png("Budburst_First_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "Budburst_First_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="budburst-first",]) +
   ggtitle("Date of First Budburst") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -174,7 +209,7 @@ ggplot(data=budburst[budburst$type=="budburst-first",]) +
   theme(legend.position="bottom")
 dev.off()
 
-png("LeafOut_First_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "LeafOut_First_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$type=="leafout-first",]) +
   ggtitle("Date of First Leaf Out") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -184,7 +219,7 @@ ggplot(data=budburst[budburst$type=="leafout-first",]) +
   theme(legend.position="bottom")
 dev.off()
 
-png("SpringPhenology_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "SpringPhenology_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=budburst[budburst$doy>90 & !is.na(budburst$doy) & budburst$type != "budburst-mean",]) +
   # ggtitle("Date of Budburst") +
   facet_grid(type~.) +
@@ -231,12 +266,16 @@ fall.color$doy <- lubridate::yday(fall.color$Date.Observed)
 summary(fall.color)
 
 
-dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01")
+dates.fc <- c("2018-09-01", "2018-09-15", "2018-10-01", "2018-10-15", "2018-11-01", "2018-11-15")
 doy.fc <- sapply(dates.fc, lubridate::yday)
 
-png("FallColor_Peak_2018_Map.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_Peak_2018_Map.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   ggtitle("Mean Date of Peak Color") +
+  coord_equal(xlim=range(fall.color$BgLongitude), ylim=range(fall.color$BgLatitude)) +
+  geom_polygon(data=woods, aes(x=long, y=lat, group=group), fill="darkgreen", alpha=0.5) +
+  geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=3, color="gray80") +
+  geom_path(data=paths, aes(x=long, y=lat, group=group), size=1, linetype="dashed", color="brown") +
   geom_point(data=quercus, aes(x=BgLongitude, y=BgLatitude), size=1, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=doy), size=3) +
   theme_bw() +
@@ -251,7 +290,7 @@ ggplot(data=fall.color[fall.color$type=="peak",]) +
         axis.ticks=element_blank())
 dev.off()
 
-png("FallColor_First_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_First_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="first",]) +
   ggtitle("Date of First Fall Color") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -261,7 +300,7 @@ ggplot(data=fall.color[fall.color$type=="first",]) +
   theme(legend.position="bottom")
 dev.off()
 
-png("FallColor_Peak_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_Peak_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color[fall.color$type=="peak",]) +
   # ggtitle("Date of Peak Fall Color") +
   geom_histogram(aes(x=Date.Observed, fill=Species), binwidth=7) +
@@ -278,7 +317,7 @@ ggplot(data=fall.color[fall.color$type=="peak",]) +
 dev.off()
 
 
-png("FallColor_2018.png", height=4, width=7, units="in", res=120)
+png(file.path(figures.out, "FallColor_2018.png"), height=4, width=7, units="in", res=120)
 ggplot(data=fall.color) +
   ggtitle("Date of Fall Color") +
   facet_grid(type~.) +
