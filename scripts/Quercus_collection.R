@@ -376,6 +376,10 @@ obs.list
 write.csv(obs.list, file.path(path.dat, "Phenology_LivingCollections_ObservingList_2018.csv"), row.names = F)
 # --------
 
+
+obs.list <- read.csv(file.path(path.dat, "Phenology_LivingCollections_ObservingList_2018.csv"))
+summary(obs.list)
+
 # Merge Observer names into quercus.list
 names(obs.list)[1] <- c("group1")
 obs.list$observer <- as.factor(obs.list$observer)
@@ -385,6 +389,22 @@ quercus.list <- merge(quercus.list, obs.list[,c("group1", "observer")], all=T)
 
 summary(quercus.list)
 
+
+png(file.path(path.dat, "Quercus_lists_ListID.png"), height=8, width=12, units="in", res=320)
+ggplot(data=quercus.list[]) +
+  ggtitle("Phenology Monitoring Lists 2018:\nOak Collection") +
+  labs(x="Longitude", y="Latitude") +
+  facet_wrap(~group1) +
+  geom_point(data=quercus[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
+  geom_point(data=quercus2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
+  # geom_text(data=oak.groups, x=quantile(quercus2$BgLongitude, 0.05), y=quantile(quercus2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
+  guides(color=F) +
+  geom_text(data=obs.list, x=quantile(quercus2$BgLongitude, 0.05, na.rm=T), y=quantile(quercus2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.group)), fontface="bold") +
+  coord_equal() +
+  theme_bw() +
+  theme(plot.title=element_text(hjust=0.5, face="bold"))
+dev.off()
 
 png(file.path(path.dat, "Quercus_lists_2018_Names.png"), height=8, width=12, units="in", res=320)
 ggplot(data=quercus.list[]) +
@@ -464,10 +484,10 @@ grid.crop <- crop(morton.grid, extent.map)
 
 # cols.save <- c("observer", "Taxon", "")
 
-for(OBS in unique(quercus.list$observer) ){
-  dat.tmp <- quercus.list[quercus.list$observer==OBS & !is.na(quercus.list$BgLatitude), ]
+for(ID in unique(quercus.list$group1) ){
+  dat.tmp <- quercus.list[quercus.list$group1==ID & !is.na(quercus.list$BgLatitude), !names(quercus.list)=="observer"]
   
-  png(file.path(path.dat, paste0("Quercus_ObservingList_2018_", OBS, ".png")), height=8, width=10, units="in", res=120)
+  png(file.path(path.dat, paste0("Quercus_ObservingList_2018_", stringr::str_pad(ID, 2, side="left", "0"), ".png")), height=8, width=10, units="in", res=120)
   print(
     ggplot() +
       coord_equal(xlim=extent.map[1:2], ylim=extent.map[3:4]) +
@@ -481,7 +501,7 @@ for(OBS in unique(quercus.list$observer) ){
       geom_text(data=labs.x[2:nrow(labs.x),], aes(x=long, y=lat+0.0002, label=x.lab), color="black", fontface="bold") +
       geom_text(data=labs.y[2:nrow(labs.y),], aes(x=long+0.0005, y=lat, label=y.lab), color="black", fontface="bold") +
       # scale_color_manual(values=c("gray50", "darkolivegreen3", "green4")) +
-      ggtitle(paste0("The Morton Arboretum\nQuercus Phenology 2018: ", OBS)) +
+      ggtitle(paste0("The Morton Arboretum\nQuercus Phenology: ", stringr::str_pad(ID, 2, side="left", "0"))) +
       # labs(x="x (meters)", y="y (meters)") +
       theme(panel.grid=element_blank(),
             plot.background=element_blank(),
@@ -497,7 +517,7 @@ for(OBS in unique(quercus.list$observer) ){
   )
   dev.off()
   
-  write.csv(dat.tmp, paste0("Quercus_ObservingList_2018_", OBS, ".csv"), row.names=F)
+  write.csv(dat.tmp, paste0("Quercus_ObservingList_2018_", stringr::str_pad(ID, 2, side="left", "0"), ".csv"), row.names=F)
 }
 
 
