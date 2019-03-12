@@ -4,7 +4,6 @@ Map_Status/data/*.csv
 figures/maps*
 data/observations/*.csv
 
-*.csv
 
 *.tiff
 *.history
