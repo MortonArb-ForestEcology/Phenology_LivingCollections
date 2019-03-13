@@ -55,32 +55,10 @@ dim(acer)
 unique(acer2$Taxon)
 
 unique(acer[!acer$PlantNumber %in% acer2$PlantNumber, "Taxon"])
-acer[acer$Taxon=="Acer saccharum 'Green Mountain'", ]
+unique(acer[!acer$PlantNumber %in% acer2$PlantNumber, "species"])
+unique(acer2$Taxon)
+unique(acer2$species)
 
-# Funding out what has unknown origin
-summary(acer2[acer2$ProvenanceType!="U", ])
-dim(acer2[acer2$ProvenanceType!="U", ])
-
-summary(acer2[acer2$ProvenanceType=="W", ])
-summary(droplevels(acer2[acer2$ProvenanceType=="W", "Taxon"]))
-summary(droplevels(acer2[acer2$ProvenanceType!="U", "Taxon"]))
-
-
-#
-length(npn[paste("Acer", npn) %in% unique(acer2$Taxon)])
-npn[paste("Acer", npn) %in% unique(acer2$Taxon)]
-
-
-# Possibly prioritize US Red List species over Wild Type origin
-# spp.filter <- acer2$ProvenanceType!="U" & (acer2$Taxon %in% paste("Acer", npn) | acer2$ProvenanceType=="W")
-spp.filter <- acer2$Taxon %in% paste("Acer", npn) | acer2$ProvenanceType!="U"
-nrow(acer2[spp.filter,])
-
-summary(acer2[spp.filter,])
-summary(droplevels(acer2[spp.filter,"Taxon"]))
-
-acer2 <- acer2[spp.filter,]
-summary(acer2)
 # ----------------------------
 
 
