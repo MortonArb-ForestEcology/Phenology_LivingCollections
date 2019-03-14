@@ -11,6 +11,7 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 path.dat <- file.path(dir.base, "Observing Lists/Quercus")
 maps.out <- file.path(path.dat)
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
+dir.create(path.dat, recursive = T, showWarnings = F)
 
 # ----------------------------
 # Narrowing down the phenology observering lists
@@ -192,8 +193,13 @@ oak.groups$group.kmean = oak.groups$clust1
 # According to Carol Nemec, Q. hartwissiana at L-100/94-36 was removed last year (27-95*5)
 # Since getting rid of it all together might cause some issues, we'll just give it NAs for 
 # its lat & lon and then not write those rows again
-quercus[quercus$PlantNumber=="27-95*5",c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-quercus2[quercus2$PlantNumber=="27-95*5",c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+quercus.remove <- c("134-U*5", "134-U*7", "422-48*1", "386-2010*1", "27-95*5", "526-2000*4", "526-2000*3", "539-96*5", "498-2005*3", "222-2015*1", "326-99*2", "521-54*1", "255-99*1", "466-37*1")
+quercus[quercus$PlantNumber %in% quercus.remove,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+quercus2[quercus2$PlantNumber %in% quercus.remove,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+quercus2 <- quercus2[!is.na(quercus2$BgLatitude),]
+
+groups.n <- aggregate(quercus2$BgLatitude, by=list(quercus2$group1), FUN=length)
+names(groups.n) <- c("group1", "n.trees")
 
 summary(quercus2)
 library(ggplot2)
@@ -207,7 +213,7 @@ ggplot(data=quercus2) +
   geom_point(data=quercus2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
   # geom_text(data=oak.groups, x=quantile(quercus2$BgLongitude, 0.05), y=quantile(quercus2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-  geom_text(data=oak.group2, x=quantile(quercus2$BgLongitude, 0.05, na.rm=T), y=quantile(quercus2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n)), fontface="bold") +
+  geom_text(data=groups.n, x=quantile(quercus2$BgLongitude, 0.05, na.rm=T), y=quantile(quercus2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.trees)), fontface="bold") +
   guides(color=F) +
   theme_bw() +
   theme(plot.title=element_text(hjust=0.5, face="bold"),
@@ -269,13 +275,13 @@ library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
 
 
-dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
+# dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 
-
-path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
-maps.out <- file.path(path.dat)
-path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
+# 
+# path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
+# maps.out <- file.path(path.dat)
+# path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 
 # ---------------
 # Read in data about the oak collection
@@ -286,145 +292,6 @@ quercus.list <- read.csv(file.path(path.dat, "ObservingLists_Quercus.csv"))
 quercus.list$group1 <- as.factor(quercus.list$group1)
 summary(quercus.list); 
 dim(quercus.list)
-
-# Create the basis for the observing list
-obs.list <- aggregate(quercus.list[,c("BgLatitude", "BgLongitude")], by=list(quercus.list$group1), FUN=mean)
-obs.list$n.group <- aggregate(quercus.list[,c("BgLatitude")], by=list(quercus.list$group1), FUN=length)[,2]
-
-# --------
-# Find out which one overlaps with Carol's the most
-# --------
-# Found out one of Carol's old trees is gone, so we're going to remove it and just give her 
-# 7 (which is what she was previously assigned with my algorithm)
-# list.2017.sheet <- gs_title("Phenology_LivingCollections_ObservingLists")
-# list.2017 <- data.frame(gs_read(list.2017.sheet, ws="2017 Observers - Oak Collection"))
-# summary(list.2017)
-# unique(list.2017$Primary.Observer)
-# 
-# trees.carol <- quercus.list[quercus.list$PlantNumber %in% list.2017[list.2017$Primary.Observer == "Carol Nemec", "Accession"], ]
-# trees.carol <- summary(trees.carol$group1)
-# list.carol <- names(trees.carol[which(trees.carol == max(trees.carol))])
-# summary(trees.carol)
-
-obs.list[obs.list$Group.1==7,"observer"] <- "Nemec"
-
-
-trees.brock <- quercus.list[quercus.list$PlantNumber %in% list.2017[list.2017$Primary.Observer == "Brock Bigsby", "Accession"], ]
-trees.brock <- summary(trees.brock$group1)
-list.brock <- names(trees.brock[which(trees.brock == max(trees.brock))])[1]
-trees.brock
-
-obs.list[obs.list$Group.1==list.brock,"observer"] <- "Bigsby"
-
-# --------
-
-# --------
-# For Robin & Ellen, pick the 2 with the fewest trees that are closest together
-# --------
-for(i in 1:nrow(obs.list)){
-  dist.lat <- quercus.list[quercus.list$group1==i,"BgLatitude"] - obs.list[i,"BgLatitude"]
-  dist.lon <- quercus.list[quercus.list$group1==i,"BgLongitude"] - obs.list[i,"BgLongitude"]
-  dist.trees <- sqrt(dist.lat^2 + dist.lon^2)
-  
-  obs.list[i,"dist.mean"] <- mean(dist.trees)
-  obs.list[i,"dist.sd"  ] <- sd(dist.trees)
-}
-obs.list
-
-for(OBS in c("Solomon", "Raimondi")){
-  dat.temp <- obs.list[is.na(obs.list$observer),]
-  list.clump <-dat.temp[dat.temp$n.group == min(dat.temp$n.group) & dat.temp$dist.mean==min(dat.temp$dist.mean),"Group.1"]
-  obs.list[obs.list$Group.1 == list.clump,"observer"] <- OBS
-}
-obs.list
-# --------
-
-# --------
-# Giving Frank and Larry the lists with the most trees
-# --------
-for(OBS in c("Zibrat", "Peterman")){
-  dat.temp <- obs.list[is.na(obs.list$observer),]
-  list.clump <-dat.temp[dat.temp$n.group == max(dat.temp$n.group) ,"Group.1"]
-  obs.list[obs.list$Group.1 == list.clump,"observer"] <- OBS
-}
-obs.list
-# --------
-
-# --------
-# Find the remaining list with the most key local species
-# --------
-spp.key <- c("Quercus macrocarpa", "Quercus alba", "Quercus rubra", "Quercus palustris", "Quercus velutina")
-summary(quercus.list$Taxon)
-
-dat.temp <- quercus.list[quercus.list$group1 %in% unique(obs.list[is.na(obs.list$observer), "Group.1"]) & quercus.list$Taxon %in% spp.key,]
-dim(dat.temp)
-summary(dat.temp)
-
-trees.br <- summary(dat.temp$group1)
-list.br <- names(trees.br[which(trees.br == max(trees.br))])
-obs.list[obs.list$Group.1==list.br,"observer"] <- "Rose"
-# --------
-
-# --------
-# Assign the remaining peopel in Alphabetical Order
-# --------
-unassigned <- c("Coffey-Sears", "Dorrell", "Frerichs", "Krummel", "Wilderman")
-
-for(OBS in unassigned){
-  grp.obs <- obs.list[is.na(obs.list$observer), "Group.1"][1]
-  obs.list[obs.list$Group.1==grp.obs, "observer"] <- OBS
-}
-obs.list
-
-write.csv(obs.list, file.path(path.dat, "Phenology_LivingCollections_ObservingList_2018.csv"), row.names = F)
-# --------
-
-
-obs.list <- read.csv(file.path(path.dat, "Phenology_LivingCollections_ObservingList_2018.csv"))
-summary(obs.list)
-
-# Merge Observer names into quercus.list
-names(obs.list)[1] <- c("group1")
-obs.list$observer <- as.factor(obs.list$observer)
-summary(obs.list)
-
-quercus.list <- merge(quercus.list, obs.list[,c("group1", "observer")], all=T)
-
-summary(quercus.list)
-
-
-png(file.path(path.dat, "Quercus_lists_ListID.png"), height=8, width=12, units="in", res=320)
-ggplot(data=quercus.list[]) +
-  ggtitle("Phenology Monitoring Lists 2018:\nOak Collection") +
-  labs(x="Longitude", y="Latitude") +
-  facet_wrap(~group1) +
-  geom_point(data=quercus[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
-  geom_point(data=quercus2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
-  # geom_text(data=oak.groups, x=quantile(quercus2$BgLongitude, 0.05), y=quantile(quercus2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-  guides(color=F) +
-  geom_text(data=obs.list, x=quantile(quercus2$BgLongitude, 0.05, na.rm=T), y=quantile(quercus2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.group)), fontface="bold") +
-  coord_equal() +
-  theme_bw() +
-  theme(plot.title=element_text(hjust=0.5, face="bold"))
-dev.off()
-
-# png(file.path(path.dat, "Quercus_lists_2018_Names.png"), height=8, width=12, units="in", res=320)
-# ggplot(data=quercus.list[]) +
-#   ggtitle("Phenology Monitoring Lists 2018:\nOak Collection") +
-#   labs(x="Longitude", y="Latitude") +
-#   facet_wrap(~observer) +
-#   geom_point(data=quercus[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
-#   geom_point(data=quercus2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
-#   geom_point(aes(x=BgLongitude, y=BgLatitude, color=observer)) + 
-#   # geom_text(data=oak.groups, x=quantile(quercus2$BgLongitude, 0.05), y=quantile(quercus2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-#   geom_text(data=obs.list, x=quantile(quercus2$BgLongitude, 0.05, na.rm=T), y=quantile(quercus2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.group)), fontface="bold") +
-#   coord_equal() +
-#   theme_bw() +
-#   theme(plot.title=element_text(hjust=0.5, face="bold"))
-# dev.off()
-# ---------------
-
 
 
 # ---------------
@@ -520,7 +387,7 @@ for(ID in unique(quercus.list$group1) ){
   )
   dev.off()
   
-  write.csv(dat.tmp, paste0("ObservingList_Quercus_", stringr::str_pad(ID, 2, side="left", "0"), ".csv"), row.names=F)
+  write.csv(dat.tmp, file.path(path.dat, paste0("ObservingList_Quercus_", stringr::str_pad(ID, 2, side="left", "0"), ".csv")), row.names=F)
 }
 
 

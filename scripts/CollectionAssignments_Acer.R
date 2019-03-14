@@ -216,7 +216,13 @@ acer.groups$group.kmean = acer.groups$clust1
 acer.remove <- c()
 acer[acer$PlantNumber %in% acer.remove, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 acer2[acer2$PlantNumber %in% acer.remove, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+acer2 <- acer2[!is.na(acer2$BgLatitude),]
 summary(acer2)
+dim(acer2)
+
+groups.n <- aggregate(acer2$BgLatitude, by=list(acer2$group1), FUN=length)
+names(groups.n) <- c("group1", "n.trees")
+
 
 library(ggplot2)
 png(file.path(path.dat, "CollectionAssignments_Acer.png"), height=8, width=12, units="in", res=320)
@@ -229,7 +235,7 @@ ggplot(data=acer2) +
   geom_point(data=acer2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
   # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-  geom_text(data=acer.group2, x=quantile(acer$BgLongitude, 0.95, na.rm=T), y=max(acer$BgLatitude, 0.995, na.rm=T), aes(label=paste0("n = ", n)), fontface="bold") +
+  geom_text(data=groups.n, x=quantile(acer$BgLongitude, 0.95, na.rm=T), y=max(acer$BgLatitude, 0.995, na.rm=T), aes(label=paste0("n = ", n.trees)), fontface="bold") +
   guides(color=F) +
   theme_bw() +
   theme(plot.title=element_text(hjust=0.5, face="bold"),
