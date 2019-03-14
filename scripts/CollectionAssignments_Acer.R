@@ -11,12 +11,13 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 path.dat <- file.path(dir.base, "Observing Lists/Acer")
 maps.out <- file.path(path.dat)
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
+dir.create(path.dat, recursive = T, showWarnings = F)
 
 # Species in the NPN database
 npn <- c("macrophyllum", "grandidentatum", "nigrum", "negundo", "spicatum", "platanoides", "rubrum", "glabrum", "saccharinum", "pensylvanicum", "saccharum", "pseudoplatanus", "circinatum")
 length(npn)
 
-spp.keep <- c("palmatum", "miyabei", "freemanii", "campestre")
+# spp.keep <- c("palmatum", "miyabei", "freemanii", "campestre")
 
 # ----------------------------
 # Narrowing down the phenology observering lists
@@ -47,10 +48,16 @@ for(i in 1:nrow(acer)){
 summary(as.factor(acer$species))
 dim(acer)
 
-acer2 <- acer[acer$species %in% npn | acer$ProvenanceType %in% c("U", "W", "Z"),]
+# Getting rid of a tree that's really far away from everything else 
+# I think I/Christy may monitor this one myself for forecasting based on Matt Lobdell's suggestion
+trees.exclude <- acer[acer$BgLatitude==max(acer$BgLatitude),"PlantNumber"] 
+
+# Provenance Codes: G = garden source; U = Unknown (for us, often natural recruit); W = wild source accession; Z = propagule from wild source
+acer2 <- acer[(acer$species %in% npn | acer$ProvenanceType %in% c("U", "W", "Z")) & !is.na(acer$species) & !acer$PlantNumber %in% trees.exclude,]
 summary(acer2)
 dim(acer2)
 dim(acer)
+
 
 unique(acer2$Taxon)
 
@@ -58,32 +65,31 @@ unique(acer[!acer$PlantNumber %in% acer2$PlantNumber, "Taxon"])
 unique(acer[!acer$PlantNumber %in% acer2$PlantNumber, "species"])
 unique(acer2$Taxon)
 unique(acer2$species)
-
+summary(as.factor(acer2$species))
 # ----------------------------
 
 
 # ----------------------------
 # Doing some clustering and mapping
 # ----------------------------
-set.seed(12040302)
 # Compute a euclidean distance matrix
 acer.dist <- dist(acer2[,c("BgLongitude", "BgLatitude")])
 summary(acer.dist)
 
 # Go through and add in the closest group so that groups are between 20 & 30 trees
-n.groups <- 12+1 # Number of observers plus 1-2
-max.trees <- round(nrow(acer2)/n.groups*1.5 )
-min.trees <- round(nrow(acer2)/n.groups)
-
+max.trees <- 25
+min.trees <- 15
+n.groups <- round(nrow(acer2)/mean(max.trees, min.trees))
 
 # ---------
 # Option 1: Group groups based on distance
 # ---------
 # k-means clustering
 # nrow(acer2)/18
-set.seed(12040302)
+# set.seed(30141038)
+set.seed(30141103)
 
-acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=n.groups*5) # Starting with our desired end point x ~5 so we have small clusters that get added
+acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=n.groups*3) # Starting with our desired end point x ~5 so we have small clusters that get added
 # acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=12) # Starting with an average of paired trees
 summary(summary(as.factor(acer.kmeans$cluster))) # Looking at average number of members when pairing
 acer.kmeans$centers
@@ -107,9 +113,11 @@ summary(acer.groups)
 acer.groups <- acer.groups[order(acer.groups$n.clust1, acer.groups$BgLongitude, acer.groups$BgLatitude, decreasing=T),]
 head(acer.groups)
 
+# Initialize with cluster 1
 clust.new = 1
 acer.groups[1, "clust2"] <- clust.new
 
+# Loop through and combine groups
 pb <- txtProgressBar(min=0, max=nrow(acer.groups), style=3)
 for(i in 1:nrow(acer.groups)){
   
@@ -129,23 +137,33 @@ for(i in 1:nrow(acer.groups)){
   while(n.group<min.trees & length(groups.open)>0){
     groups.open <- acer.groups[is.na(acer.groups$clust2), "clust1"] # Update this in our loop
     
-    # Find the closest trees(s)
-    group.closest <- groups.open[which(dist.kmeans[groups.open,group1]==min(dist.kmeans[groups.open,group1], na.rm=T))]
+    # Find the closest trees(s) to the existing groups
+    dist.closest <- min(dist.kmeans[groups.open,group1], na.rm=T)
+    
+    # If the group is further than the average distance among current groups, just skip over it
+    grps.now <- which(acer.groups$clust2==clust.new)
+    if(length(grps.now)>1 & dist.closest>sd(dist.kmeans[grps.now,grps.now])*1.5) break
+    # Make sure we're not adding an oddball group:
+    # dist.grp <- 
+    # if(dist.closet >=)
+    
+    group.closest <- groups.open[which(dist.kmeans[groups.open,group1]==dist.closest)]
     
     # If: 
-    #  1. adding all groups of closest trees keeps us under 15, add them all
+    #  1. adding all groups of closest trees keeps us under the maximum, add them all
     # #  2a. if adding the group with the most trees keeps us under 15, add that one
-    #  2b. add the first one in the list
+    # #  2b. add the first one in the list
     if(sum(n.group, acer.groups[acer.groups$clust1 %in% group.closest, "n.clust1"]) <= max.trees) {
       acer.groups[acer.groups$clust1 %in% group.closest, "clust2"] <- clust.new
-    } else {
+    } else if(length(group.closest)>1) {
       acer.groups[acer.groups$clust1 %in% group.closest[1], "clust2"] <- clust.new
-    }
+    } 
     n.group <- sum(acer.groups$n.clust1[which(acer.groups$clust2==clust.new)])
+    # group1 <- acer.groups$clust1[which(acer.groups$clust2==clust.new)] # Update group1 with the new cluster
   } # end while
   
   # If we have a less than full group, add the component groups to the closest group
-  if(n.group < min.trees*0.75 & length(groups.open)==0){
+  if(n.group < min.trees & i==nrow(acer.groups)){
     # Find the groups we're lumping
     clust.redo <- acer.groups[acer.groups$clust2==clust.new, "clust1"]
     
@@ -163,6 +181,10 @@ for(i in 1:nrow(acer.groups)){
 } # End loop
 acer.groups$clust2 <- as.factor(acer.groups$clust2)
 summary(acer.groups)
+
+# This looks pretty good, but needs just a bit of re-tweaking
+# Manually moving the tiny south cluster from group 9 to group 10
+# acer.groups[acer.groups$clust2==9,]
 
 acer.group2 <- aggregate(acer.groups$n.clust1, by=list(acer.groups$clust2), sum)
 names(acer.group2) <- c("group1", "n")
@@ -190,13 +212,12 @@ summary(acer2)
 
 acer.groups$group.kmean = acer.groups$clust1
 
-# According to Carol Nemec, Q. hartwissiana at L-100/94-36 was removed last year (27-95*5)
-# Since getting rid of it all together might cause some issues, we'll just give it NAs for 
-# its lat & lon and then not write those rows again
-acer[acer$PlantNumber=="27-95*5",c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-acer2[acer2$PlantNumber=="27-95*5",c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-
+# Remove plants that no longer exist
+acer.remove <- c()
+acer[acer$PlantNumber %in% acer.remove, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+acer2[acer2$PlantNumber %in% acer.remove, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 summary(acer2)
+
 library(ggplot2)
 png(file.path(path.dat, "CollectionAssignments_Acer.png"), height=8, width=12, units="in", res=320)
 ggplot(data=acer2) +
@@ -208,7 +229,7 @@ ggplot(data=acer2) +
   geom_point(data=acer2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
   # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-  geom_text(data=acer.group2, x=quantile(acer2$BgLongitude, 0.05, na.rm=T), y=quantile(acer2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n)), fontface="bold") +
+  geom_text(data=acer.group2, x=quantile(acer$BgLongitude, 0.95, na.rm=T), y=max(acer$BgLatitude, 0.995, na.rm=T), aes(label=paste0("n = ", n)), fontface="bold") +
   guides(color=F) +
   theme_bw() +
   theme(plot.title=element_text(hjust=0.5, face="bold"),
@@ -234,7 +255,7 @@ ggplot(data=acer2) +
   labs(x="Longitude", y="Latitude") +
   geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=1, color="black", alpha=0.2) +
   geom_point(aes(x=BgLongitude, y=BgLatitude), size=2, color="black") +
-  geom_point(data=acer2[acer2$Taxon %in% paste("Acer", npn),], aes(x=BgLongitude, y=BgLatitude, color="NPN Species"), size=3) + 
+  geom_point(data=acer2[acer2$species %in% npn,], aes(x=BgLongitude, y=BgLatitude, color="NPN Species"), size=3) + 
   scale_color_manual(values="green4") +
   guides(color=F) +
   # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
@@ -255,177 +276,30 @@ write.csv(acer.list[!is.na(acer.list$BgLatitude),], file.path(path.dat, "Observi
 
 
 # ----------------------------
-# Creating list assignments by observer
+# Making lists for each assignment
 # ----------------------------
-# observer.list <- data.frame(list=1:12, Name=c())
-# Assigning names based on interests & time commitment# 
-# -- Ellen Raimondi & Robin Solomon need the shortest lists
-# -- Carol Nemec wanted as much overlap with last year as possible
-# -- Barabara Rose would like as many natives as possible
-# -- Larry Peterman & Frank Zibrat have the fewest time constraints
-# ----------------------------
-
 library(googlesheets)
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
 
 
-dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
+# dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 
 
-path.dat <- file.path(dir.base, "Observing Lists/2018_Acer")
-maps.out <- file.path(path.dat)
-path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
+# path.dat <- file.path(dir.base, "Observing Lists/2018_Acer")
+# maps.out <- file.path(path.dat)
+# path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 
 # ---------------
 # Read in data about the acer collection
-acers.all <- read.csv("../data/collections/Acer_2018-03-19_161744393-BRAHMSOnlineData.csv")
+acers.all <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData.csv")
 summary(acers.all)
 
 acer.list <- read.csv(file.path(path.dat, "ObservingLists_Acer.csv"))
 acer.list$group1 <- as.factor(acer.list$group1)
 summary(acer.list); 
 dim(acer.list)
-
-# Create the basis for the observing list
-obs.list <- aggregate(acer.list[,c("BgLatitude", "BgLongitude")], by=list(acer.list$group1), FUN=mean)
-obs.list$n.group <- aggregate(acer.list[,c("BgLatitude")], by=list(acer.list$group1), FUN=length)[,2]
-
-# --------
-# Find out which one overlaps with Carol's the most
-# --------
-# Found out one of Carol's old trees is gone, so we're going to remove it and just give her 
-# 7 (which is what she was previously assigned with my algorithm)
-# list.2017.sheet <- gs_title("Phenology_LivingCollections_ObservingLists")
-# list.2017 <- data.frame(gs_read(list.2017.sheet, ws="2017 Observers - Acer Collection"))
-# summary(list.2017)
-# unique(list.2017$Primary.Observer)
-# 
-# trees.carol <- acer.list[acer.list$PlantNumber %in% list.2017[list.2017$Primary.Observer == "Carol Nemec", "Accession"], ]
-# trees.carol <- summary(trees.carol$group1)
-# list.carol <- names(trees.carol[which(trees.carol == max(trees.carol))])
-# summary(trees.carol)
-
-obs.list[obs.list$Group.1==7,"observer"] <- "Nemec"
-
-
-trees.brock <- acer.list[acer.list$PlantNumber %in% list.2017[list.2017$Primary.Observer == "Brock Bigsby", "Accession"], ]
-trees.brock <- summary(trees.brock$group1)
-list.brock <- names(trees.brock[which(trees.brock == max(trees.brock))])[1]
-trees.brock
-
-obs.list[obs.list$Group.1==list.brock,"observer"] <- "Bigsby"
-
-# --------
-
-# --------
-# For Robin & Ellen, pick the 2 with the fewest trees that are closest together
-# --------
-for(i in 1:nrow(obs.list)){
-  dist.lat <- acer.list[acer.list$group1==i,"BgLatitude"] - obs.list[i,"BgLatitude"]
-  dist.lon <- acer.list[acer.list$group1==i,"BgLongitude"] - obs.list[i,"BgLongitude"]
-  dist.trees <- sqrt(dist.lat^2 + dist.lon^2)
-  
-  obs.list[i,"dist.mean"] <- mean(dist.trees)
-  obs.list[i,"dist.sd"  ] <- sd(dist.trees)
-}
-obs.list
-
-for(OBS in c("Solomon", "Raimondi")){
-  dat.temp <- obs.list[is.na(obs.list$observer),]
-  list.clump <-dat.temp[dat.temp$n.group == min(dat.temp$n.group) & dat.temp$dist.mean==min(dat.temp$dist.mean),"Group.1"]
-  obs.list[obs.list$Group.1 == list.clump,"observer"] <- OBS
-}
-obs.list
-# --------
-
-# --------
-# Giving Frank and Larry the lists with the most trees
-# --------
-for(OBS in c("Zibrat", "Peterman")){
-  dat.temp <- obs.list[is.na(obs.list$observer),]
-  list.clump <-dat.temp[dat.temp$n.group == max(dat.temp$n.group) ,"Group.1"]
-  obs.list[obs.list$Group.1 == list.clump,"observer"] <- OBS
-}
-obs.list
-# --------
-
-# --------
-# Find the remaining list with the most key local species
-# --------
-spp.key <- c("Acer macrocarpa", "Acer alba", "Acer rubra", "Acer palustris", "Acer velutina")
-summary(acer.list$Taxon)
-
-dat.temp <- acer.list[acer.list$group1 %in% unique(obs.list[is.na(obs.list$observer), "Group.1"]) & acer.list$Taxon %in% spp.key,]
-dim(dat.temp)
-summary(dat.temp)
-
-trees.br <- summary(dat.temp$group1)
-list.br <- names(trees.br[which(trees.br == max(trees.br))])
-obs.list[obs.list$Group.1==list.br,"observer"] <- "Rose"
-# --------
-
-# --------
-# Assign the remaining peopel in Alphabetical Order
-# --------
-unassigned <- c("Coffey-Sears", "Dorrell", "Frerichs", "Krummel", "Wilderman")
-
-for(OBS in unassigned){
-  grp.obs <- obs.list[is.na(obs.list$observer), "Group.1"][1]
-  obs.list[obs.list$Group.1==grp.obs, "observer"] <- OBS
-}
-obs.list
-
-write.csv(obs.list, file.path(path.dat, "Phenology_LivingCollections_ObservingList_2018.csv"), row.names = F)
-# --------
-
-
-obs.list <- read.csv(file.path(path.dat, "Phenology_LivingCollections_ObservingList_2018.csv"))
-summary(obs.list)
-
-# Merge Observer names into acer.list
-names(obs.list)[1] <- c("group1")
-obs.list$observer <- as.factor(obs.list$observer)
-summary(obs.list)
-
-acer.list <- merge(acer.list, obs.list[,c("group1", "observer")], all=T)
-
-summary(acer.list)
-
-
-png(file.path(path.dat, "Acer_lists_ListID.png"), height=8, width=12, units="in", res=320)
-ggplot(data=acer.list[]) +
-  ggtitle("Phenology Monitoring Lists 2018:\nAcer Collection") +
-  labs(x="Longitude", y="Latitude") +
-  facet_wrap(~group1) +
-  geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
-  geom_point(data=acer2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
-  # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-  guides(color=F) +
-  geom_text(data=obs.list, x=quantile(acer2$BgLongitude, 0.05, na.rm=T), y=quantile(acer2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.group)), fontface="bold") +
-  coord_equal() +
-  theme_bw() +
-  theme(plot.title=element_text(hjust=0.5, face="bold"))
-dev.off()
-
-# png(file.path(path.dat, "Acer_lists_2018_Names.png"), height=8, width=12, units="in", res=320)
-# ggplot(data=acer.list[]) +
-#   ggtitle("Phenology Monitoring Lists 2018:\nAcer Collection") +
-#   labs(x="Longitude", y="Latitude") +
-#   facet_wrap(~observer) +
-#   geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
-#   geom_point(data=acer2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
-#   geom_point(aes(x=BgLongitude, y=BgLatitude, color=observer)) + 
-#   # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-#   geom_text(data=obs.list, x=quantile(acer2$BgLongitude, 0.05, na.rm=T), y=quantile(acer2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.group)), fontface="bold") +
-#   coord_equal() +
-#   theme_bw() +
-#   theme(plot.title=element_text(hjust=0.5, face="bold"))
-# dev.off()
-# ---------------
-
 
 
 # ---------------
@@ -459,27 +333,27 @@ woods <- readOGR("/Volumes/GIS/Collections/Natural Resources Management/2008 veg
 woods <- woods[2,] # We only want to worry about the main block; row 1 = King's Grove, row 2= main tract; row 3 = weird patch
 
 # The start point was found by trial and error
-grid.labs.x <- data.frame(grid.x=seq(323102, by=30.5, length.out=length(89:107)), grid.y=571230, x.lab=89:107)
-grid.labs.y <- data.frame(grid.x=323102-30.5, grid.y=seq(571227+30.5, by=30.5, length.out=length(3:15)), y.lab=LETTERS[seq(from=3, to=15)])
+# grid.labs.x <- data.frame(grid.x=seq(323102, by=30.5, length.out=length(89:107)), grid.y=571230, x.lab=89:107)
+# grid.labs.y <- data.frame(grid.x=323102-30.5, grid.y=seq(571227+30.5, by=30.5, length.out=length(3:15)), y.lab=LETTERS[seq(from=3, to=15)])
 
 # summary(grid.labs.x)
-labs.x <- SpatialPointsDataFrame(coords = grid.labs.x[,c("grid.x", "grid.y")], grid.labs.x, proj4string=CRS(projection(roads)))
-labs.y <- SpatialPointsDataFrame(coords = grid.labs.y[,c("grid.x", "grid.y")], grid.labs.y, proj4string=CRS(projection(roads)))
+# labs.x <- SpatialPointsDataFrame(coords = grid.labs.x[,c("grid.x", "grid.y")], grid.labs.x, proj4string=CRS(projection(roads)))
+# labs.y <- SpatialPointsDataFrame(coords = grid.labs.y[,c("grid.x", "grid.y")], grid.labs.y, proj4string=CRS(projection(roads)))
 
 # Transforming our datalayers to lat/lon to mesh with the tree data
 woods <- spTransform(woods, CRS("+proj=longlat"))
 roads <- spTransform(roads, CRS("+proj=longlat"))
 paths <- spTransform(paths, CRS("+proj=longlat"))
 morton.grid <- spTransform(morton.grid, CRS("+proj=longlat"))
-labs.x <- spTransform(labs.x, CRS("+proj=longlat"))
-labs.y <- spTransform(labs.y, CRS("+proj=longlat"))
+# labs.x <- spTransform(labs.x, CRS("+proj=longlat"))
+# labs.y <- spTransform(labs.y, CRS("+proj=longlat"))
 
-labs.x <- data.frame(labs.x)
-labs.y <- data.frame(labs.y)
-names(labs.x)[4:5] <- c("long", "lat")
-names(labs.y)[4:5] <- c("long", "lat")
+# labs.x <- data.frame(labs.x)
+# labs.y <- data.frame(labs.y)
+# names(labs.x)[4:5] <- c("long", "lat")
+# names(labs.y)[4:5] <- c("long", "lat")
 
-extent.map <- c(range(labs.x$long, na.rm=T)+c(0.0002,-0.0002), range(labs.y$lat, na.rm=T)+c(0, 0.00005))
+extent.map <- c(range(acer.list$BgLongitude, na.rm=T)+c(-0.0005,+0.0005), range(acer.list$BgLatitude, na.rm=T)+c(-0.0005, 0.0005))
 grid.crop <- crop(morton.grid, extent.map)
 
 # ---------------
@@ -502,8 +376,8 @@ for(ID in unique(acer.list$group1) ){
       geom_point(data=acers.all, aes(x=BgLongitude, y=BgLatitude), color="black", size=1.5) +
       geom_point(data=acer.list, aes(x=BgLongitude, y=BgLatitude), color="gray50", size=3) +
       geom_point(data=dat.tmp, aes(x=BgLongitude, y=BgLatitude), color="darkgreen", size=5) +
-      geom_text(data=labs.x[2:nrow(labs.x),], aes(x=long, y=lat+0.0002, label=x.lab), color="black", fontface="bold") +
-      geom_text(data=labs.y[2:nrow(labs.y),], aes(x=long+0.0005, y=lat, label=y.lab), color="black", fontface="bold") +
+      # geom_text(data=labs.x[2:nrow(labs.x),], aes(x=long, y=lat+0.0002, label=x.lab), color="black", fontface="bold") +
+      # geom_text(data=labs.y[2:nrow(labs.y),], aes(x=long+0.0005, y=lat, label=y.lab), color="black", fontface="bold") +
       # scale_color_manual(values=c("gray50", "darkolivegreen3", "green4")) +
       ggtitle(paste0("The Morton Arboretum\nAcer Phenology: ", stringr::str_pad(ID, 2, side="left", "0"))) +
       # labs(x="x (meters)", y="y (meters)") +
@@ -521,7 +395,7 @@ for(ID in unique(acer.list$group1) ){
   )
   dev.off()
   
-  write.csv(dat.tmp, paste0("ObservingList_Acer_", stringr::str_pad(ID, 2, side="left", "0"), ".csv"), row.names=F)
+  write.csv(dat.tmp, file.path(path.dat, paste0("ObservingList_Acer_", stringr::str_pad(ID, 2, side="left", "0"), ".csv")), row.names=F)
 }
 
 
