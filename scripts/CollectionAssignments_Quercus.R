@@ -13,6 +13,15 @@ maps.out <- file.path(path.dat)
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 dir.create(path.dat, recursive = T, showWarnings = F)
 
+# Querying the googlesheet for missing trees up front to make it easier
+sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
+sheet.gone # Prints all the metadata
+
+# Get the particular sheet & coerce it into a data frame rather than something special
+df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
+summary(df.gone)
+
+
 # ----------------------------
 # Narrowing down the phenology observering lists
 # ----------------------------
@@ -193,9 +202,9 @@ oak.groups$group.kmean = oak.groups$clust1
 # According to Carol Nemec, Q. hartwissiana at L-100/94-36 was removed last year (27-95*5)
 # Since getting rid of it all together might cause some issues, we'll just give it NAs for 
 # its lat & lon and then not write those rows again
-quercus.remove <- c("134-U*5", "134-U*7", "422-48*1", "386-2010*1", "27-95*5", "526-2000*4", "526-2000*3", "539-96*5", "498-2005*3", "222-2015*1", "326-99*2", "521-54*1", "255-99*1", "466-37*1")
-quercus[quercus$PlantNumber %in% quercus.remove,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-quercus2[quercus2$PlantNumber %in% quercus.remove,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+# quercus.remove <- c("134-U*5", "134-U*7", "422-48*1", "386-2010*1", "27-95*5", "526-2000*4", "526-2000*3", "539-96*5", "498-2005*3", "222-2015*1", "326-99*2", "521-54*1", "255-99*1", "466-37*1")
+quercus[quercus$PlantNumber %in% df.gone$PlantNumber,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+quercus2[quercus2$PlantNumber %in% df.gone$PlantNumber,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 quercus2 <- quercus2[!is.na(quercus2$BgLatitude),]
 
 groups.n <- aggregate(quercus2$BgLatitude, by=list(quercus2$group1), FUN=length)

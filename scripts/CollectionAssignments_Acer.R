@@ -18,6 +18,13 @@ npn <- c("macrophyllum", "grandidentatum", "nigrum", "negundo", "spicatum", "pla
 length(npn)
 
 # spp.keep <- c("palmatum", "miyabei", "freemanii", "campestre")
+# Querying the googlesheet for missing trees up front to make it easier
+sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
+sheet.gone # Prints all the metadata
+
+# Get the particular sheet & coerce it into a data frame rather than something special
+df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
+summary(df.gone)
 
 # ----------------------------
 # Narrowing down the phenology observering lists
@@ -213,9 +220,8 @@ summary(acer2)
 acer.groups$group.kmean = acer.groups$clust1
 
 # Remove plants that no longer exist
-acer.remove <- c()
-acer[acer$PlantNumber %in% acer.remove, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-acer2[acer2$PlantNumber %in% acer.remove, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+acer[acer$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+acer2[acer2$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 acer2 <- acer2[!is.na(acer2$BgLatitude),]
 summary(acer2)
 dim(acer2)
