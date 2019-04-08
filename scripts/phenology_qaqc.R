@@ -50,6 +50,18 @@ summary(df.gone)
 
 dat.all <- dat.all[!dat.all$PlantNumber %in% df.gone$PlantNumber,]
 summary(dat.all)
+
+# Also merge in the observing lists and volunteer assignments
+quercus.list <- read.csv(file.path(dir.base, "Observing Lists/Quercus", "ObservingLists_Quercus.csv"))
+acer.list <- read.csv(file.path(dir.base, "Observing Lists/Acer", "ObservingLists_Acer.csv"))
+quercus.list$group1 <- paste("Quercus", quercus.list$group1, sep="-")
+acer.list$group1 <- paste("Acer", acer.list$group1, sep="-")
+
+summary(quercus.list)
+summary(acer.list)
+obs.list <- rbind(quercus.list, acer.list)
+
+dat.all <- merge(dat.all, obs.list[,c("group1", "PlantNumber")])
 #----------------------------
 
 
@@ -77,7 +89,8 @@ summary(dat.all)
 # Checking to make sure everybody has made observations in the past week
 obs.gs <- gs_title("VolunteerAssignments_Phenology")
 obs.all <- data.frame(gs_read(obs.gs, ws="2019"))[1:5]
-summary(obs.all)
+obs.all$group1 <- paste(obs.all$Collection, obs.all$List, sep="-")
+obs.all
 
 
 obs.check <- aggregate(dat.all$Date.Observed, by=list(dat.all$Observer), FUN=max)
@@ -89,8 +102,9 @@ obs.check[obs.check$Observation.Last < Sys.Date()-8,] # Return anybody that's mo
 obs.all[!obs.all$Observer.ID %in% obs.check$Observer,]
 
 # Checking to make sure all trees have observations for the past week
-acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Species", "Observer")], FUN=max)
+acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Species", "group1")], FUN=max)
 names(acc.check)[which(names(acc.check)=="x")] <- "Observation.Last"
+acc.check <- merge(acc.check, obs.all[,c("group1", "Observer.ID")], all.x=T)
 summary(acc.check)
 acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 8 days
 #----------------------------
