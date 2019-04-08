@@ -16,11 +16,6 @@ clean.google <- function(pheno.title = "Phenology_Observations_GoogleForm", coll
   pheno.flower <- names(dat.raw)[grep("flower", tolower(names(dat.raw)))]
   pheno.fruit <- names(dat.raw)[grep("fruit", tolower(names(dat.raw)))]
   
-  pheno.leaf <- names(acer)[grep("leaf", tolower(names(acer)))]
-  pheno.flower <- names(acer)[grep("flower", tolower(names(acer)))]
-  pheno.fruit <- names(acer)[grep("fruit", tolower(names(acer)))]
-  
-  
   # Setting things to factors
   for(i in 1:ncol(dat.raw)){
     if(class(dat.raw[,i])=="character") dat.raw[,i] <- as.factor(dat.raw[,i])
