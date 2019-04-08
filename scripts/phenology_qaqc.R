@@ -11,9 +11,11 @@ library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
 library(lubridate)
 
+# Source my cleaning function
+source("clean_google_form.R")
+
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
-
 
 path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
 maps.out <- file.path(path.dat)
@@ -25,63 +27,70 @@ path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
 # -------------------------------------------------------------
 # Access & format the observations
 # -------------------------------------------------------------
-pheno.lc <- gs_title("Phenology_Observations_GoogleForm_2018")
+pheno.lc <- gs_title("Phenology_Observations_GoogleForm")
 pheno.lc
 
 # get the data from a particular sheet
-dat.raw <- data.frame(gs_read(pheno.lc, ws="Raw Observations"))
+quercus <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=lubridate::year(Sys.Date()))
+summary(quercus)
 
-# Renaming some columns
-names(dat.raw)[grep("OPTIONAL", names(dat.raw))] <- "Notes"
-names(dat.raw)[grep("species", names(dat.raw))] <- "Species"
+acer <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Acer", dat.yr=lubridate::year(Sys.Date()))
+summary(acer)
 
-# Coming up with handy groups for our columns
-cols.meta <- c("Timestamp", "Email.Address", "Observer", "Date.Observed", "Species", "PlantNumber", "Notes")
-pheno.leaf <- names(dat.raw)[grep("leaf", tolower(names(dat.raw)))]
-pheno.flower <- names(dat.raw)[grep("flower", tolower(names(dat.raw)))]
-pheno.fruit <- names(dat.raw)[grep("fruit", tolower(names(dat.raw)))]
+dat.all <- rbind(quercus, acer)
+summary(dat.all)
+
+#----------------------------
+# For QAQC, get rid of trees that have been removed
+#----------------------------
+# Querying the googlesheet for missing trees up front to make it easier
+sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
+sheet.gone # Prints all the metadata
+
+# Get the particular sheet & coerce it into a data frame rather than something special
+df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
+summary(df.gone)
+
+dat.all <- dat.all[!dat.all$PlantNumber %in% df.gone$PlantNumber,]
+#----------------------------
 
 
-# Setting things to factors
-for(i in 1:ncol(dat.raw)){
-  if(class(dat.raw[,i])=="character") dat.raw[,i] <- as.factor(dat.raw[,i])
-}
-summary(dat.raw)
-cols.id <- grep("accession", names(dat.raw))
+#----------------------------
+# QAQC sanity checks: Check for the following
+#----------------------------
+# Observation dates prior to the year we're observing
+# Oberservation dates after todays date
+# Missing plant numbers
+#----------------------------
+dat.all[is.na(dat.all$PlantNumber),]
+summary(dat.all[dat.all$Species=="Quercus macrocarpa" & dat.all$Observer=="Dorrell",])
 
-dat.clean <- dat.raw[,c(cols.meta[!cols.meta=="PlantNumber"], pheno.leaf, pheno.flower, pheno.fruit)]
-dat.clean$PlantNumber <- as.factor(apply(dat.raw[,cols.id], 1, FUN=function(x) {x[which(!is.na(x))][1]})) # Get the PlantNumber
-dat.clean$Timestamp <- strptime(dat.clean$Timestamp, format="%m/%d/%Y %H:%M:%S")
-dat.clean$Date.Observed <- as.Date(dat.clean$Date.Observed, format="%m/%d/%Y")
-dat.clean <- dat.clean[,c(cols.meta, pheno.leaf, pheno.flower, pheno.fruit)] # Just re-organizing to how I like to see things
-summary(dat.clean)
+yr.wrong <- dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),"Date.Observed"]
+# dat.all[dat.all$Date.Observed==yr.wrong,"Date.Observed"] <- as.Date(paste(2018, month(yr.wrong), day(yr.wrong), sep="-"))
 
-# Get rid of observations that have TEST in them or are before our last phenology training
-rows.remove <- c(which(is.na(dat.clean$Species)), grep("TEST", toupper(dat.clean$NOTES)), grep("TEST", toupper(dat.clean$Observer)) )
-if(length(rows.remove)>0) dat.clean <- dat.clean[(1:nrow(dat.clean) %in% rows.remove),] # 
+dat.all <- droplevels(dat.all) # Get rid of unused levels
+summary(dat.all)
+#----------------------------
+#----------------------------
 
-# We had some rows where the year got entered wrong as 0018 rather than 2018
-yr.wrong <- dat.clean[year(dat.clean$Date.Observed)==0018,"Date.Observed"]
+#----------------------------
+# Check to make sure observers are entering their data right away
+#----------------------------
+# Check for our list of removed trees 
+# Checking to make sure everybody has made observations in the past week
+obs.check <- aggregate(dat.all$Date.Observed, by=list(dat.all$Observer), FUN=max)
+names(obs.check) <- c("Observer", "Observation.Last")
+obs.check
+obs.check[obs.check$Observation.Last < Sys.Date()-8,] # Return anybody that's more than 8 days old
 
-dat.clean[dat.clean$Date.Observed==yr.wrong,"Date.Observed"] <- as.Date(paste(2018, month(yr.wrong), day(yr.wrong), sep="-"))
+# Checking to make sure all trees have observations for the past week
+acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Species", "Observer")], FUN=max)
+names(acc.check)[which(names(acc.check)=="x")] <- "Observation.Last"
+summary(acc.check)
+acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 8 days
 
-dat.clean <- droplevels(dat.clean) # Get rid of unused levels
-summary(dat.clean)
+#----------------------------
 
-# Looking at some problematic records
-dat.clean[is.na(dat.clean$PlantNumber),]
-
-# Fixing missing accession numbers
-dat.clean$PlantNumber <- as.character(dat.clean$PlantNumber)
-
-# Once we figure out what that accession number is, change from "missing" to an actual accession number
-# dat.clean[dat.clean$Observer=="Rose" & dat.clean$Species=="Quercus montana" & is.na(dat.clean$PlantNumber),"PlantNumber"] <- "missing" 
-
-dat.clean$PlantNumber <- as.factor(dat.clean$PlantNumber)
-
-# Cleaning up observer tags
-summary(dat.clean$Observer)
-write.csv(dat.clean, file.path(dir.base, "Data_Observations/LivingCollections_Oaks/Data_csv/", "PhenologyObservations_2018_LC_Oaks.csv"), row.names=F)
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
