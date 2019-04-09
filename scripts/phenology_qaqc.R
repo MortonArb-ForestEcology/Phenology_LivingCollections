@@ -54,14 +54,18 @@ summary(dat.all)
 # Also merge in the observing lists and volunteer assignments
 quercus.list <- read.csv(file.path(dir.base, "Observing Lists/Quercus", "ObservingLists_Quercus.csv"))
 acer.list <- read.csv(file.path(dir.base, "Observing Lists/Acer", "ObservingLists_Acer.csv"))
-quercus.list$group1 <- paste("Quercus", quercus.list$group1, sep="-")
-acer.list$group1 <- paste("Acer", acer.list$group1, sep="-")
+quercus.list$collection <- "Quercus"
+acer.list$collection <- "Acer"
+quercus.list$group1 <- paste(quercus.list$collection, quercus.list$group1, sep="-")
+acer.list$group1 <- paste(acer.list$collection, acer.list$group1, sep="-")
 
 summary(quercus.list)
 summary(acer.list)
-obs.list <- rbind(quercus.list, acer.list)
 
-dat.all <- merge(dat.all, obs.list[,c("group1", "PlantNumber")])
+obs.list <- rbind(quercus.list, acer.list)
+summary(obs.list)
+
+dat.all <- merge(dat.all, obs.list[,c("group1", "collection", "PlantNumber")])
 #----------------------------
 
 
@@ -111,6 +115,78 @@ acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that has
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
+# Adding status QAQC
+# -------------------------------------------------------------
+#----------------------------
+# Subsetting to just things that have been observed in the past week
+#----------------------------
+# Finding just the most recent observation for each tree
+# acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 
+pheno.now <- dat.all 
+
+for(ID in unique(pheno.now$PlantNumber)){
+  dat.ID <- pheno.now[pheno.now$PlantNumber==ID,]
+  pheno.now <- pheno.now[pheno.now$PlantNumber!=ID | (pheno.now$PlantNumber==ID & pheno.now$Date.Observed==max(dat.ID$Date.Observed)),]
+}
+dim(pheno.now); dim(dat.all)
+
+pheno.now$Status <- as.factor(ifelse(pheno.now$Date.Observed < Sys.Date()-7, "OLD", "Past Week" ))
+summary(pheno.now$Status)
+summary(pheno.now)
+
+pheno.leaf <- names(pheno.now)[grep("leaf", names(pheno.now))]
+pheno.flower <- names(pheno.now)[grep("flower", names(pheno.now))]
+pheno.fruit <- names(pheno.now)[grep("fruit", names(pheno.now))]
+
+pheno.table <- data.frame(stringr::str_split(c(pheno.leaf, pheno.flower, pheno.fruit), "[.]", simplify=T))
+names(pheno.table) <- c("category", "phase", "type")
+
+pdf(paste0("Phenology_LivingCollections_QAQC_", Sys.Date(), ".pdf"), width=11, height=8.5)
+for(CAT in unique(pheno.table$category)){
+ for(PHASE in unique(pheno.table$phase[pheno.table$category==CAT])){
+   dat.tmp <- pheno.now[pheno.now$Status=="Past Week",]
+   dat.tmp$obs <- dat.tmp[,paste(CAT, PHASE, "observed", sep=".")]
+   if(PHASE == "falling"){ 
+     dat.tmp$int <- NA
+    } else {
+      dat.tmp$int <- dat.tmp[,paste(CAT, PHASE, "intensity", sep=".")]
+   }
+  
+   # Set ordered levels 
+   if(length(grep("10,000", unique(dat.tmp$int))>0)){
+     dat.tmp$int <- factor(dat.tmp$int, levels=c("0", "11-100", "101-1000", "1,001-10,000", "> 10,000", NA))
+   } else if(length(grep("%", unique(dat.tmp$int))>0)){
+     dat.tmp$int <- factor(dat.tmp$int, levels=c("0%", "< 5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%", NA))
+   } else {
+     dat.tmp$int <- factor(dat.tmp$int, levels=c("None", "Little", "Some", "Lots", NA))
+   }
+   
+   plot.status <- ggplot(data=dat.tmp) +
+     facet_grid(collection~., scales="free_y") +
+     geom_histogram(aes(x=obs), stat="count") +
+     scale_x_discrete(name="Observed") +
+     ggtitle(paste(CAT, PHASE, "Observed")) +
+     theme_bw()
+   
+   plot.intensity <- ggplot(data=dat.tmp) +
+     facet_grid(collection~., scales="free_y") +
+     geom_histogram(aes(x=int), stat="count") +
+     scale_x_discrete(name="Intensity") +
+     ggtitle(paste(CAT, PHASE, "Intensity")) +
+     theme_bw()
+   
+   print(cowplot::plot_grid(plot.status, plot.intensity, ncol=2))
+   
+ } 
+}
+dev.off()
+#----------------------------
+
+# -------------------------------------------------------------
+
+
+
+# -------------------------------------------------------------
 # Save Maps & Animations
 # -------------------------------------------------------------
 # Read in data about all of the trees in the oak collection
@@ -130,6 +206,12 @@ quercus.loc$collection <- "Quercus"
 acer.loc$collection <- "Acer"
 trees.loc <- rbind(quercus.loc, acer.loc)
 summary(trees.loc)
+
+# Merge in the lat/lon 
+pheno.now <- merge(pheno.now, trees.loc, all.x=T, all.y=F)
+# summary(pheno.now); dim(pheno.now)
+
+
 #----------------------------
 # Read in & formate Arb GIS layers
 #----------------------------
@@ -152,29 +234,6 @@ paths <- spTransform(paths, CRS("+proj=longlat"))
 #----------------------------
 
 
-#----------------------------
-# Subsetting to just things that have been observed in the past week
-#----------------------------
-# Finding just the most recent observation for each tree
-# acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 
-pheno.now <- dat.all 
-
-for(ID in unique(pheno.now$PlantNumber)){
-  dat.ID <- pheno.now[pheno.now$PlantNumber==ID,]
-  pheno.now <- pheno.now[pheno.now$PlantNumber!=ID | (pheno.now$PlantNumber==ID & pheno.now$Date.Observed==max(dat.ID$Date.Observed)),]
-}
-dim(pheno.now); dim(dat.all)
-
-pheno.now$Status <- as.factor(ifelse(pheno.now$Date.Observed < Sys.Date()-7, "OLD", "Past Week" ))
-summary(pheno.now$Status)
-summary(pheno.now)
-
-# Merge in the lat/lon 
-pheno.now <- merge(pheno.now, trees.loc, all.x=T, all.y=F)
-summary(pheno.now); dim(pheno.now)
-
-summary(pheno.now[is.na(pheno.now$BgLongitude),])
-#----------------------------
 
 
 #----------------------------
