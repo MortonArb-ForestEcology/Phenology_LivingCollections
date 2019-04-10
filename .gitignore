@@ -10,3 +10,4 @@ data/observations/*.csv
 scripts/FallColor_First_2018_Map.png
 scripts/.Rhistory
 *.png
+*.pdf
