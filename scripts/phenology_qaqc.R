@@ -35,6 +35,7 @@ acer <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collecti
 summary(acer)
 
 dat.all <- rbind(quercus, acer)
+dat.all$fruit.drop.intensity <- as.factor(dat.all$fruit.drop.intensity)
 summary(dat.all)
 
 #----------------------------
@@ -66,6 +67,9 @@ obs.list <- rbind(quercus.list, acer.list)
 summary(obs.list)
 
 dat.all <- merge(dat.all, obs.list[,c("group1", "collection", "PlantNumber")])
+dat.all$group1 <- as.factor(dat.all$group1)
+dat.all$collection <- as.factor(dat.all$collection)
+summary(dat.all)
 #----------------------------
 
 
@@ -76,9 +80,11 @@ dat.all <- merge(dat.all, obs.list[,c("group1", "collection", "PlantNumber")])
 # Oberservation dates after todays date
 # Missing plant numbers
 #----------------------------
-# dat.all[is.na(dat.all$PlantNumber),]
+summary(dat.all)
+dat.all[is.na(dat.all$PlantNumber),]
 # summary(dat.all[dat.all$Species=="Quercus macrocarpa" & dat.all$Observer=="Dorrell",])
 
+dat.all[dat.all$Date.Observed>Sys.Date(),] # Check for anything observed in future
 yr.wrong <- dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),"Date.Observed"]
 # dat.all[dat.all$Date.Observed==yr.wrong,"Date.Observed"] <- as.Date(paste(2018, month(yr.wrong), day(yr.wrong), sep="-"))
 
@@ -141,7 +147,7 @@ pheno.fruit <- names(pheno.now)[grep("fruit", names(pheno.now))]
 pheno.table <- data.frame(stringr::str_split(c(pheno.leaf, pheno.flower, pheno.fruit), "[.]", simplify=T))
 names(pheno.table) <- c("category", "phase", "type")
 
-pdf(paste0("Phenology_LivingCollections_QAQC_", Sys.Date(), ".pdf"), width=11, height=8.5)
+pdf(file.path(dir.base, "Data_Observations/data_QAQC", paste0("Phenology_LivingCollections_QAQC_", Sys.Date(), ".pdf")), width=11, height=8.5)
 for(CAT in unique(pheno.table$category)){
  for(PHASE in unique(pheno.table$phase[pheno.table$category==CAT])){
    dat.tmp <- pheno.now[pheno.now$Status=="Past Week",]
@@ -180,96 +186,20 @@ for(CAT in unique(pheno.table$category)){
  } 
 }
 dev.off()
-#----------------------------
 
+
+# Doing some more QAQC
+summary(droplevels(pheno.now[pheno.now$collection=="Quercus" & pheno.now$leaf.buds.observed=="Yes",]))
+pheno.now[pheno.now$collection=="Quercus" & pheno.now$leaf.buds.observed=="Yes",]
+
+summary(droplevels(pheno.now[pheno.now$collection=="Acer" & pheno.now$leaf.buds.observed=="Yes",]))
+#----------------------------
 # -------------------------------------------------------------
 
-
-
 # -------------------------------------------------------------
-# Save Maps & Animations
+# Additional QAQC: Options
+# - maps showing patterns of activity
+# - our obs versus NPN
 # -------------------------------------------------------------
-# Read in data about all of the trees in the oak collection
-quercus.all <- read.csv("../data/collections/Quercus_2018-03-19_161744393-BRAHMSOnlineData.csv")
-acer.all <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData.csv")
-summary(quercus.all)
-summary(acer.all)
-
-# Getting rid of duplicates
-quercus.loc <- aggregate(quercus.all[,c("BgLatitude", "BgLongitude")],
-                         by=quercus.all[,c("PlantNumber", "Accession")],
-                         FUN=mean, na.rm=T)
-acer.loc <- aggregate(acer.all[,c("BgLatitude", "BgLongitude")],
-                         by=acer.all[,c("PlantNumber", "Accession")],
-                         FUN=mean, na.rm=T)
-quercus.loc$collection <- "Quercus"
-acer.loc$collection <- "Acer"
-trees.loc <- rbind(quercus.loc, acer.loc)
-summary(trees.loc)
-
-# Merge in the lat/lon 
-pheno.now <- merge(pheno.now, trees.loc, all.x=T, all.y=F)
-# summary(pheno.now); dim(pheno.now)
-
-
-#----------------------------
-# Read in & formate Arb GIS layers
-#----------------------------
-#Collection Boundaries
-collections <- readOGR(file.path(path.gis, "Collections_outlines/coll_bndry_master_plan.shp"))
-summary(collections)
-
-# Roads, Trails
-roads <- readOGR("/Volumes/GIS/Collections/Transportation/roads_parking/circ_veh_rd_2011-2020_ctrln.shp")
-paths <- readOGR("/Volumes/GIS/Collections/Transportation/trails_paths/paths.shp")
-parking <- readOGR("/Volumes/GIS/Collections/Transportation/roads_parking/parking_lots.shp")
-# summary(roads)
-# summary(paths)
-
-
-# Transforming our datalayers to lat/lon to mesh with the tree data
-collections <- spTransform(collections, CRS("+proj=longlat"))
-roads <- spTransform(roads, CRS("+proj=longlat"))
-paths <- spTransform(paths, CRS("+proj=longlat"))
-#----------------------------
-
-
-
-
-#----------------------------
-#----------------------------
-# Making a snapshot update map
-maps.out <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Figures/"
-png(file.path(maps.out, paste0("Map_Phenology_All_BreakingLeafBuds_", Sys.Date(), ".png")), height=7.5, width=10, unit="in", res=180)
-ggplot(data=pheno.now) +
-  coord_equal() +
-  geom_polygon(data=collections[collections$collection %in% c("Acer"),], aes(x=long, y=lat, group=group, fill="Acer"), alpha=0.2) +
-  geom_polygon(data=collections[collections$collection %in% c("Quercus"),], aes(x=long, y=lat, group=group, fill="Quercus"), alpha=0.2) +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=Breaking.leaf.buds..Observed.), size=3) +
-  scale_color_manual(name="Breaking\nLeaf Bud", values=c("chocolate4", "olivedrab3", "green3")) +
-  scale_fill_manual(name="Collection", values=c("red", "blue")) +
-  theme_bw() + 
-  theme(legend.position="top",
-        axis.text=element_blank(),
-        axis.title=element_blank(),
-        axis.ticks=element_blank(),
-        panel.grid = element_blank())
-dev.off()
-
-png(file.path(maps.out, paste0("Map_Phenology_All_Flowers_", Sys.Date(), ".png")), height=7.5, width=10, unit="in", res=180)
-ggplot(data=pheno.now) +
-  coord_equal() +
-  geom_polygon(data=collections[collections$collection %in% c("Acer"),], aes(x=long, y=lat, group=group, fill="Acer"), alpha=0.2) +
-  geom_polygon(data=collections[collections$collection %in% c("Quercus"),], aes(x=long, y=lat, group=group, fill="Quercus"), alpha=0.2) +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=Flower.open.observed..Observed.)) +
-  scale_color_manual(name="Breaking\nLeaf Bud", values=c("chocolate4", "maroon3", "green3")) +
-  scale_fill_manual(name="Collection", values=c("red", "blue")) +
-  theme_bw() + 
-  theme(legend.position="top",
-        axis.text=element_blank(),
-        axis.title=element_blank(),
-        axis.ticks=element_blank(),
-        panel.grid = element_blank())
-dev.off()
-
+# 
 # -------------------------------------------------------------
