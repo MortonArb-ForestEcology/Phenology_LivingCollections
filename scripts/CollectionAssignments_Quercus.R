@@ -32,6 +32,10 @@ quercus$Taxon2 <- gsub("'", "", quercus$Taxon2) # Get rid of '' for names
 quercus$ProvenanceType <- as.factor(toupper(quercus$ProvenanceType))
 dim(quercus)
 
+# Fixing a weird accession number; change from *1 to *2
+quercus[quercus$Accession=="326-99",]
+summary(quercus)
+
 # Figuring out which are not full species or are cultivars
 taxa.split <- strsplit(quercus$Taxon2, split=" ")
 name.length <- unlist(lapply(taxa.split, length))
@@ -68,6 +72,12 @@ summary(droplevels(quercus2[spp.filter,"Taxon"]))
 
 quercus2 <- quercus2[spp.filter,]
 summary(quercus2)
+
+# Fixing a weird accession number; change from *1 to *2
+quercus2[quercus2$Accession=="326-99",]
+# summary(quercus)
+
+
 # ----------------------------
 
 
@@ -187,6 +197,10 @@ for(i in 1:nrow(quercus2)){
 }
 quercus2$group1 <- as.factor(quercus2$group1)
 summary(quercus2$group1)
+
+# Fixing a weird accession number; change from *1 to *2
+quercus2[quercus2$Accession=="326-99",]
+
 # ---------
 
 # oak.clust <- hclust(oak.dist) # Perform hierarchical clustering with the distance matrix
@@ -209,6 +223,9 @@ quercus2 <- quercus2[!is.na(quercus2$BgLatitude),]
 
 groups.n <- aggregate(quercus2$BgLatitude, by=list(quercus2$group1), FUN=length)
 names(groups.n) <- c("group1", "n.trees")
+
+# Fixing a weird accession number; change from *1 to *2
+quercus2[quercus2$Accession=="326-99",]
 
 summary(quercus2)
 library(ggplot2)

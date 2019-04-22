@@ -140,6 +140,17 @@ pheno.now$Status <- as.factor(ifelse(pheno.now$Date.Observed < Sys.Date()-7, "OL
 summary(pheno.now$Status)
 summary(pheno.now)
 
+# Checking some oddballs
+pheno.now[pheno.now$fruit.ripe.observed=="Yes",]
+summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.buds.observed=="Yes" & pheno.now$collection=="Quercus",])
+summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
+
+pheno.now[! pheno.now$leaf.color.intensity %in% c(NA, "0%"),]
+pheno.now[!pheno.now$flower.pollen.intensity %in% c(NA, "None") & pheno.now$collection=="Quercus",]
+
+
 pheno.leaf <- names(pheno.now)[grep("leaf", names(pheno.now))]
 pheno.flower <- names(pheno.now)[grep("flower", names(pheno.now))]
 pheno.fruit <- names(pheno.now)[grep("fruit", names(pheno.now))]
