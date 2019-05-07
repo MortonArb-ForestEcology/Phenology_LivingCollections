@@ -19,7 +19,7 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 
 path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
 maps.out <- file.path(path.dat)
-path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
+# path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
 # path.gis <- "Y:/Collections" # Path on a PC
 # -------------------------------------------------------------
 
@@ -161,7 +161,8 @@ names(pheno.table) <- c("category", "phase", "type")
 pdf(file.path(dir.base, "Data_Observations/data_QAQC", paste0("Phenology_LivingCollections_QAQC_", Sys.Date(), ".pdf")), width=11, height=8.5)
 for(CAT in unique(pheno.table$category)){
  for(PHASE in unique(pheno.table$phase[pheno.table$category==CAT])){
-   dat.tmp <- pheno.now[pheno.now$Status=="Past Week",]
+   # dat.tmp <- pheno.now[pheno.now$Status=="Past Week",]
+   dat.tmp <- pheno.now[,]
    dat.tmp$obs <- dat.tmp[,paste(CAT, PHASE, "observed", sep=".")]
    if(PHASE == "falling"){ 
      dat.tmp$int <- NA
@@ -180,17 +181,21 @@ for(CAT in unique(pheno.table$category)){
    
    plot.status <- ggplot(data=dat.tmp) +
      facet_grid(collection~., scales="free_y") +
-     geom_histogram(aes(x=obs), stat="count") +
+     # geom_histogram(aes(x=obs), stat="count") +
+     geom_histogram(aes(x=obs, fill=Status), stat="count") +
      scale_x_discrete(name="Observed") +
      ggtitle(paste(CAT, PHASE, "Observed")) +
-     theme_bw()
+     theme_bw() +
+     theme(legend.position="top")
    
    plot.intensity <- ggplot(data=dat.tmp) +
      facet_grid(collection~., scales="free_y") +
-     geom_histogram(aes(x=int), stat="count") +
+     # geom_histogram(aes(x=int), stat="count") +
+     geom_histogram(aes(x=int, fill=Status), stat="count") +
      scale_x_discrete(name="Intensity") +
      ggtitle(paste(CAT, PHASE, "Intensity")) +
-     theme_bw()
+     theme_bw() +
+     theme(legend.position="top")
    
    print(cowplot::plot_grid(plot.status, plot.intensity, ncol=2))
    
