@@ -88,6 +88,7 @@ dat.all[dat.all$Date.Observed>Sys.Date(),] # Check for anything observed in futu
 yr.wrong <- dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),"Date.Observed"]
 # dat.all[dat.all$Date.Observed==yr.wrong,"Date.Observed"] <- as.Date(paste(2018, month(yr.wrong), day(yr.wrong), sep="-"))
 
+
 # dat.all <- droplevels(dat.all) # Get rid of unused levels
 summary(dat.all)
 #----------------------------
@@ -142,10 +143,31 @@ summary(pheno.now)
 
 # Checking some oddballs
 pheno.now[pheno.now$fruit.ripe.observed=="Yes",]
-summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
+# summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
 summary(pheno.now[pheno.now$leaf.buds.observed=="Yes" & pheno.now$collection=="Quercus",])
+summary(pheno.now[pheno.now$leaf.present.observed=="No",])
+
+summary(pheno.now[pheno.now$leaf.buds.observed=="No" & pheno.now$leaf.present.observed=="No",])
+
 summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
 summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
+
+# Checking for likely mis-entries
+pheno.now[pheno.now$leaf.buds.observed %in% c("No", "Did not look for") & !pheno.now$leaf.buds.intensity %in% c("0", NA),]
+pheno.now[pheno.now$leaf.present.observed %in% c("No", "Did not look for") & !pheno.now$leaf.present.intensity %in% c("0%", NA),]
+pheno.now[pheno.now$leaf.increasing.observed %in% c("No", "Did not look for") & !pheno.now$leaf.increasing.intensity %in% c("0%", NA),]
+pheno.now[pheno.now$leaf.color.observed %in% c("No", "Did not look for") & !pheno.now$leaf.color.intensity %in% c("0%", NA),]
+pheno.now[!pheno.now$leaf.falling.observed %in% c("No", "Did not look for"),]
+
+pheno.now[pheno.now$flower.buds.observed %in% c("No", "Did not look for") & !pheno.now$flower.buds.intensity %in% c("0", NA),]
+pheno.now[pheno.now$flower.open.observed %in% c("No", "Did not look for") & !pheno.now$flower.open.intensity %in% c("0%", NA),]
+pheno.now[pheno.now$flower.pollen.observed %in% c("No", "Did not look for") & !pheno.now$flower.pollen.intensity %in% c("None", NA),]
+pheno.now[pheno.now$fruit.present.observed %in% c("No", "Did not look for") & !pheno.now$fruit.present.intensity %in% c("0", NA),]
+pheno.now[pheno.now$fruit.ripe.observed %in% c("No", "Did not look for") & !pheno.now$fruit.ripe.intensity %in% c("0%", NA),]
+pheno.now[pheno.now$fruit.drop.observed %in% c("No", "Did not look for") & !pheno.now$fruit.drop.intensity %in% c("0", NA),]
+
+pheno.now[!pheno.now$fruit.present.observed %in% c("No", "Did not look for") ,]
+pheno.now[!pheno.now$fruit.ripe.intensity %in% c(NA, "0%"),]
 
 pheno.now[! pheno.now$leaf.color.intensity %in% c(NA, "0%"),]
 pheno.now[!pheno.now$flower.pollen.intensity %in% c(NA, "None") & pheno.now$collection=="Quercus",]
