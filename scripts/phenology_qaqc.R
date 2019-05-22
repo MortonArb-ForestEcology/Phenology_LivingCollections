@@ -166,11 +166,11 @@ pheno.now[pheno.now$fruit.present.observed %in% c("No", "Did not look for") & !p
 pheno.now[pheno.now$fruit.ripe.observed %in% c("No", "Did not look for") & !pheno.now$fruit.ripe.intensity %in% c("0%", NA),]
 pheno.now[pheno.now$fruit.drop.observed %in% c("No", "Did not look for") & !pheno.now$fruit.drop.intensity %in% c("0", NA),]
 
-pheno.now[!pheno.now$fruit.present.observed %in% c("No", "Did not look for") ,]
+summary(pheno.now[!pheno.now$fruit.present.observed %in% c("No", "Did not look for") ,])
 pheno.now[!pheno.now$fruit.ripe.intensity %in% c(NA, "0%"),]
 
 pheno.now[! pheno.now$leaf.color.intensity %in% c(NA, "0%"),]
-pheno.now[!pheno.now$flower.pollen.intensity %in% c(NA, "None") & pheno.now$collection=="Quercus",]
+summary(pheno.now[!pheno.now$flower.pollen.intensity %in% c(NA, "None") & pheno.now$collection=="Quercus",])
 
 
 pheno.leaf <- names(pheno.now)[grep("leaf", names(pheno.now))]
