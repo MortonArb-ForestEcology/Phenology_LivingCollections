@@ -150,6 +150,7 @@ summary(pheno.now)
 pheno.now[pheno.now$fruit.ripe.observed=="Yes",]
 # summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
 summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.buds.observed=="Yes" & pheno.now$Status=="Past Week",])
 summary(pheno.now[pheno.now$leaf.buds.observed=="Yes" & pheno.now$collection=="Acer",])
 summary(pheno.now[pheno.now$leaf.present.observed=="No",])
 summary(pheno.now[pheno.now$leaf.present.observed=="No" & pheno.now$Observer=="Bigsby",])
