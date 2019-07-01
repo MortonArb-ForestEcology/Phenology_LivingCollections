@@ -245,6 +245,30 @@ print(
 )
 dev.off()
 
+png(file.path(path.figs, "Observations_All_LeafPresent_by_Species_10_day.png"), width=8.5, height=11, unit="in", res=120)
+print(
+  ggplot(data=dat.agg.spp[,]) +
+    ggtitle("Leaf Present") +
+    facet_grid(Collection~., scales="free") +
+    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.present.observed, alpha=prop.spp), binwidth=10) +
+    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
+    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
+    scale_y_discrete(expand=c(0,0)) +
+    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
+    guides(alpha=F) +
+    theme(legend.position="bottom",
+          # legend.text = element_text(size=rel(1.5)),
+          # legend.title = element_text(size=rel(1.5)),
+          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
+          panel.grid = element_blank(),
+          panel.background=element_rect(fill=NA, color="black"),
+          # axis.text=element_text(size=rel(1.5)),
+          axis.title.x=element_text(size=rel(2), face="bold"),
+          axis.title.y=element_blank(),
+          strip.text=element_text(size=rel(2), face="bold"))
+)
+dev.off()
+
 
 png(file.path(path.figs, "Observations_All_LeafBudBreaking_by_Species_01_day.png"), width=8.5, height=11, unit="in", res=120)
 print(
@@ -294,6 +318,31 @@ print(
           strip.text=element_text(size=rel(2), face="bold"))
 )
 dev.off()
+
+png(file.path(path.figs, "Observations_All_LeafBudBreaking_by_Species_10_day.png"), width=8.5, height=11, unit="in", res=120)
+print(
+  ggplot(data=dat.agg.spp[,]) +
+    ggtitle("Leaf Bud Breaking") +
+    facet_grid(Collection~., scales="free") +
+    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=prop.spp), binwidth=10) +
+    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
+    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
+    scale_y_discrete(expand=c(0,0)) +
+    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
+    guides(alpha=F) +
+    theme(legend.position="bottom",
+          # legend.text = element_text(size=rel(1.5)),
+          # legend.title = element_text(size=rel(1.5)),
+          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
+          panel.grid = element_blank(),
+          panel.background=element_rect(fill=NA, color="black"),
+          # axis.text=element_text(size=rel(1.5)),
+          axis.title.x=element_text(size=rel(2), face="bold"),
+          axis.title.y=element_blank(),
+          strip.text=element_text(size=rel(2), face="bold"))
+)
+dev.off()
+
 
 for(COLLECTION in unique(dat.agg.spp$Collection)){
   png(file.path(path.figs, paste0("Observations_", COLLECTION, "_LeafPresent_by_Species_07_week.png")), width=8.5, height=11, unit="in", res=120)
