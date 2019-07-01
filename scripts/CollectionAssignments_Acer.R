@@ -55,6 +55,9 @@ for(i in 1:nrow(acer)){
 summary(as.factor(acer$species))
 dim(acer)
 
+# Checking for how many species overlap with NPN
+length(which(unique(acer$species) %in% npn))
+
 # Getting rid of a tree that's really far away from everything else 
 # I think I/Christy may monitor this one myself for forecasting based on Matt Lobdell's suggestion
 trees.exclude <- acer[acer$BgLatitude==max(acer$BgLatitude),"PlantNumber"] 

@@ -61,6 +61,7 @@ length(npn)
 length(npn[paste("Quercus", npn) %in% unique(quercus2$Taxon)])
 npn[paste("Quercus", npn) %in% unique(quercus2$Taxon)]
 
+length(which(unique(quercus2$Taxon) %in% paste("Quercus", npn)))
 
 # Possibly prioritize US Red List species over Wild Type origin
 # spp.filter <- quercus2$ProvenanceType!="U" & (quercus2$Taxon %in% paste("Quercus", npn) | quercus2$ProvenanceType=="W")
