@@ -123,6 +123,8 @@ names(acc.check)[which(names(acc.check)=="x")] <- "Observation.Last"
 acc.check <- merge(acc.check, obs.all[,c("group1", "Observer.ID")], all.x=T)
 summary(acc.check)
 acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 8 days
+
+nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8,])/nrow(acc.check)
 #----------------------------
 # -------------------------------------------------------------
 
