@@ -54,9 +54,64 @@ dat.all$Observer <- factor(dat.all$Observer, levels=c(sort(paste(unique(dat.all$
 
 
 #----------------------------
-# Doing some initial attempts at graphing: 
+# Doing some initial graphs and summaries at the collection-level: 
 #  -- simple histograms based on collections & species
 #----------------------------
+# getting some some date of first events
+first.event <- aggregate(dat.all[dat.all$leaf.present.observed=="Yes", "Date.Observed"],
+                             by=dat.all[dat.all$leaf.present.observed=="Yes",c("Collection", "Species", "PlantNumber")],
+                             FUN=min, na.rm=T)
+names(first.event)[names(first.event)=="x"] <- "leaf.present.observed"
+
+for(PHENO in phenophase.obs){
+  if(nrow(dat.all[dat.all[,PHENO]=="Yes",])==0) next
+  
+  # Need to store it as a temporary data frame because some trees won't have particular phenophases
+  dat.tmp <- aggregate(dat.all[dat.all[,PHENO]=="Yes", "Date.Observed"],
+                       by=dat.all[dat.all[,PHENO]=="Yes",c("Collection", "Species", "PlantNumber")],
+                       FUN=min, na.rm=T)
+  names(dat.tmp)[names(dat.tmp)=="x"] <- PHENO
+  
+  first.event <- merge(first.event, dat.tmp, all=T)
+  
+}
+summary(first.event)
+
+# ------------
+# Budburst & Flowering
+# ------------
+# Finding mean day of Bud Burst
+mean(first.event[first.event$Collection=="Acer", "leaf.buds.observed"], na.rm=T); sd(first.event[first.event$Collection=="Acer", "leaf.buds.observed"], na.rm=T)
+mean(first.event[first.event$Collection=="Quercus", "leaf.buds.observed"], na.rm=T); sd(first.event[first.event$Collection=="Quercus", "leaf.buds.observed"], na.rm=T)
+
+# First/last bud burst
+first.event[!is.na(first.event$leaf.buds.observed) & first.event$leaf.buds.observed==min(first.event$leaf.buds.observed, na.rm=T),];  
+first.event[!is.na(first.event$leaf.buds.observed) & first.event$leaf.buds.observed==max(first.event$leaf.buds.observed, na.rm=T),];  
+
+# First/last flower
+first.event[!is.na(first.event$flower.open.observed) & first.event$flower.open.observed==min(first.event$flower.open.observed, na.rm=T),];  
+first.event[!is.na(first.event$flower.open.observed) & first.event$flower.open.observed==max(first.event$flower.open.observed, na.rm=T),];  
+# ------------
+
+# ------------
+# Leaf Out
+# ------------
+# Difference between bud burst & leaf out
+leaf.delay <- as.numeric(first.event$leaf.present.observed - first.event$leaf.buds.observed)
+mean(leaf.delay[leaf.delay>=0], na.rm=T); sd(leaf.delay[leaf.delay>=0], na.rm=T)
+
+# Finding mean day of Bud Burst
+# Note: during this analysis, discovered c("296-2013*5") hadn't really been observed until Brendon subbed in late-June, so it was showing weird data
+mean(first.event[first.event$Collection=="Acer" & !first.event$PlantNumber %in% c("296-2013*5"), "leaf.present.observed"], na.rm=T); sd(first.event[first.event$Collection=="Acer" & !first.event$PlantNumber %in% c("296-2013*5"), "leaf.present.observed"], na.rm=T)
+mean(first.event[first.event$Collection=="Quercus", "leaf.present.observed"], na.rm=T); sd(first.event[first.event$Collection=="Quercus", "leaf.present.observed"], na.rm=T)
+
+
+# First/last leaf
+first.event[!is.na(first.event$leaf.present.observed) & first.event$leaf.present.observed==min(first.event$leaf.present.observed, na.rm=T),];  
+first.event[!is.na(first.event$leaf.present.observed) & first.event$leaf.present.observed==max(first.event$leaf.present.observed[!first.event$PlantNumber %in% c("296-2013*5")], na.rm=T) & !first.event$PlantNumber %in% c("296-2013*5"),];  
+# ------------
+
+
 png(file.path(path.figs, "Histogram_Collection_LeafPresent.png"), height=6, width=8, units="in", res=120)
 ggplot(data=dat.all) +
   facet_grid(Collection~., scales="free_y") +
@@ -470,3 +525,16 @@ dev.off()
 #----------------------------
 
 
+#----------------------------
+# Comparing Quercus in 2018 & 2019
+#----------------------------
+quercus.2018 <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=2018)
+quercus.2018$Collection <- "Quercus"
+# quercus.2018
+names(quercus.2018) <- names(quercus)
+summary(quercus.2018)
+
+quercus.all <- rbind(quercus.2018, quercus)
+summary(quercus.all)
+
+#----------------------------
