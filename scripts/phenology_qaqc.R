@@ -37,7 +37,17 @@ summary(acer)
 dat.all <- rbind(quercus, acer)
 dat.all$fruit.drop.intensity <- as.factor(dat.all$fruit.drop.intensity)
 summary(dat.all)
+
+phenophase.obs <- names(dat.all)[grep(".observed", names(dat.all))] 
+for(PHENO in phenophase.obs){
+  dat.all[is.na(dat.all[,PHENO]),PHENO] <- "Did not look for"
+  dat.all[,PHENO] <- factor(dat.all[,PHENO], levels=c("No", "Yes", "?", "Did not look for"))
+}
+summary(dat.all)
+
 # dim(dat.all)
+
+
 #----------------------------
 # For QAQC, get rid of trees that have been removed
 #----------------------------
@@ -75,6 +85,71 @@ summary(dat.all)
 length(unique(dat.all$Observer))
 length(unique(dat.all$PlantNumber))
 length(unique(dat.all$Species))
+
+# 
+for(PHENO in phenophase.obs){
+  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_Phenophase", paste0("2019_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
+  for(OBS in levels(dat.all$group1)){
+    dat.tmp <- dat.all[dat.all$group1==OBS, ]
+    dat.tmp$Phenophase <- dat.tmp[,PHENO]
+    print(
+      ggplot(data=dat.tmp[,]) +
+        ggtitle(paste0(OBS)) +
+        facet_grid(Species*PlantNumber~., scales="free_y", switch="y") +
+        geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase), binwidth=7) +
+        scale_fill_manual(PHENO, values=c("gray50", "green4", "blue2", "black") ) +
+        scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
+        scale_y_discrete(expand=c(0,0)) +
+        scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
+        theme(legend.position="bottom",
+              legend.text = element_text(size=rel(1)),
+              legend.title = element_text(size=rel(1)),
+              plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
+              panel.grid = element_blank(),
+              panel.background=element_rect(fill=NA, color="black"),
+              panel.spacing=unit(0, "lines"),
+              axis.text.x=element_text(size=rel(1)),
+              axis.title.x=element_text(size=rel(1), face="bold"),
+              axis.title.y=element_blank(),
+              axis.text.y=element_blank(),
+              axis.ticks.y=element_blank(),
+              strip.text.y=element_text(size=rel(1), angle=180))
+    )
+  }
+  dev.off()
+}
+
+for(OBS in levels(dat.all$group1)){
+  dat.tmp <- dat.all[dat.all$group1==OBS, ]
+  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_ObservingList", paste0("2019_Observations_", OBS, "_by_Phenophase_byTree.pdf")), width=11, height=8.5)
+  for(PHENO in phenophase.obs){
+    dat.tmp$Phenophase <- dat.tmp[,PHENO]
+    print(
+      ggplot(data=dat.tmp[,]) +
+        ggtitle(paste0(PHENO)) +
+        facet_grid(Species*PlantNumber~., scales="free_y", switch="y") +
+        geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase), binwidth=7) +
+        scale_fill_manual(PHENO, values=c("gray50", "green4", "blue2", "black") ) +
+        scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
+        scale_y_discrete(expand=c(0,0)) +
+        scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
+        theme(legend.position="bottom",
+              legend.text = element_text(size=rel(1)),
+              legend.title = element_text(size=rel(1)),
+              plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
+              panel.grid = element_blank(),
+              panel.background=element_rect(fill=NA, color="black"),
+              panel.spacing=unit(0, "lines"),
+              axis.text.x=element_text(size=rel(1)),
+              axis.title.x=element_text(size=rel(1), face="bold"),
+              axis.title.y=element_blank(),
+              axis.text.y=element_blank(),
+              axis.ticks.y=element_blank(),
+              strip.text.y=element_text(size=rel(1), angle=180))
+    )
+  }
+  dev.off()
+}
 #----------------------------
 
 
