@@ -535,6 +535,80 @@ names(quercus.2018) <- names(quercus)
 summary(quercus.2018)
 
 quercus.all <- rbind(quercus.2018, quercus)
+quercus.all$Year <- lubridate::year(quercus.all$Date.Observed)
 summary(quercus.all)
 
+
+# getting some some date of first events
+first.event.quer <- aggregate(quercus.all[quercus.all$leaf.present.observed=="Yes", "Date.Observed"],
+                              by=quercus.all[quercus.all$leaf.present.observed=="Yes",c("Year", "Species", "PlantNumber")],
+                         FUN=min, na.rm=T)
+names(first.event.quer)[names(first.event.quer)=="x"] <- "leaf.present.observed"
+summary(first.event.quer)
+for(PHENO in phenophase.obs){
+  if(nrow(quercus.all[quercus.all[,PHENO]=="Yes",])==0) next
+  
+  # Need to store it as a temporary data frame because some trees won't have particular phenophases
+  dat.tmp <- aggregate(quercus.all[quercus.all[,PHENO]=="Yes", "Date.Observed"],
+                       by=quercus.all[quercus.all[,PHENO]=="Yes",c("Year", "Species", "PlantNumber")],
+                       FUN=min, na.rm=T)
+  names(dat.tmp)[names(dat.tmp)=="x"] <- PHENO
+  
+  first.event.quer <- merge(first.event.quer, dat.tmp, all=T)
+  
+}
+summary(first.event.quer)
+
+quer.spp <- aggregate(first.event.quer[,c("leaf.present.observed", "leaf.buds.observed", "flower.buds.observed", "flower.open.observed")],
+                      by=first.event.quer[,c("Year", "Species")],
+                      FUN=mean, na.rm=T)
+summary(quer.spp)
+
+quer.spp$leaf.budburst.first <- lubridate::yday(quer.spp$leaf.buds.observed)
+quer.spp$leaf.emerge.first <- lubridate::yday(quer.spp$leaf.present.observed)
+quer.spp$flower.budburst.first <- lubridate::yday(quer.spp$flower.buds.observed)
+quer.spp$flower.open.first <- lubridate::yday(quer.spp$flower.open.observed)
+summary(quer.spp)
+
+ggplot(quer.spp) +
+  facet_grid(Year~.) +
+  geom_histogram(aes(x=leaf.budburst.first))
+
+ggplot(quer.spp) +
+  facet_grid(Year~.) +
+  geom_histogram(aes(x=leaf.emerge.first))
+
+mean(quer.spp[quer.spp$Year==2018,"leaf.present.observed"]); sd(quer.spp[quer.spp$Year==2018,"leaf.present.observed"])
+mean(quer.spp[quer.spp$Year==2019,"leaf.present.observed"]); sd(quer.spp[quer.spp$Year==2019,"leaf.present.observed"])
+summary(quer.spp[quer.spp$Year==2018,])
+summary(quer.spp[quer.spp$Year==2019,])
+
+for(SPP in unique(quer.spp$Species)){
+  if(length(which(quer.spp$Species==SPP))<2) next
+  ind.19 <- which(quer.spp$Species==SPP & quer.spp$Year==2019)
+  
+  dat.18 <- quer.spp[quer.spp$Species==SPP & quer.spp$Year==2018,]
+  dat.19 <- quer.spp[ind.19,]
+
+  quer.spp[ind.19,"d.leaf.budburst"] <- dat.18$leaf.budburst.first - dat.19$leaf.budburst.first
+  quer.spp[ind.19,"d.leaf.emerge"] <- dat.18$leaf.emerge.first - dat.19$leaf.emerge.first
+  quer.spp[ind.19,"d.flower.budburst"] <- dat.18$flower.budburst.first - dat.19$flower.budburst.first
+  quer.spp[ind.19,"d.flower.open"] <- dat.18$flower.open.first - dat.19$flower.open.first
+  
+}
+summary(quer.spp)
+
+quer.stack <- stack(quer.spp[quer.spp$Year==2019,c("d.leaf.budburst", "d.leaf.emerge", "d.flower.budburst", "d.flower.open")])
+quer.stack$Species <- quer.spp$Species[quer.spp$Year==2019]
+summary(quer.stack)
+
+ggplot(data=quer.stack) +
+  facet_wrap(~ind, scales="free") +
+  geom_histogram(aes(x=values)) +
+  geom_vline(xintercept=0, linetype="dashed", color="red") +
+  scale_x_continuous(name="Difference in Days (2018-2019)") +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_bw()
+
+write.csv(quer.spp, "../data/observations/Quercus_Summary_2018-2019_2019-07-02.csv", row.names=F)
 #----------------------------
