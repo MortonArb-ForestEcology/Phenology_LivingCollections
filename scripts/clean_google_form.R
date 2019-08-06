@@ -56,7 +56,7 @@ clean.google <- function(pheno.title = "Phenology_Observations_GoogleForm", coll
   
   # Get rid of observations that have TEST in them or are before our last phenology training
   rows.remove <- c(which(is.na(dat.clean$Species)), grep("TEST", toupper(dat.clean$NOTES)), grep("TEST", toupper(dat.clean$Observer)) )
-  if(length(rows.remove)>0) dat.clean <- dat.clean[(1:nrow(dat.clean) %in% rows.remove),] # 
+  if(length(rows.remove)>0) dat.clean <- dat.clean[!(1:nrow(dat.clean) %in% rows.remove),] # 
   
   dat.clean <- droplevels(dat.clean) # Get rid of unused levels
   summary(dat.clean)
