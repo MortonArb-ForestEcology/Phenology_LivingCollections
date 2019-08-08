@@ -12,3 +12,5 @@ scripts/.Rhistory
 *.png
 *.pdf
 analyses/.Rhistory
+scripts/CECA_Bloom_Future.csv
+scripts/CECA_Bloom_Past.csv
