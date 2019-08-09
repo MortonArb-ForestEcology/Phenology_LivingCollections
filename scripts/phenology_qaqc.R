@@ -14,6 +14,7 @@ library(lubridate)
 # Source my cleaning function
 source("clean_google_form.R")
 
+# dir.base <- "/Volumes/"
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 
@@ -39,6 +40,11 @@ dat.all$fruit.drop.intensity <- as.factor(dat.all$fruit.drop.intensity)
 summary(dat.all)
 
 phenophase.obs <- names(dat.all)[grep(".observed", names(dat.all))] 
+
+
+summary(dat.all$Observer)
+summary(dat.all[,"Oberserver"])
+
 for(PHENO in phenophase.obs){
   dat.all[is.na(dat.all[,PHENO]),PHENO] <- "Did not look for"
   dat.all[,PHENO] <- factor(dat.all[,PHENO], levels=c("No", "Yes", "?", "Did not look for"))
@@ -59,6 +65,7 @@ sheet.gone # Prints all the metadata
 df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
 summary(df.gone)
 
+dim(dat.all)
 dat.all <- dat.all[!dat.all$PlantNumber %in% df.gone$PlantNumber,]
 summary(dat.all)
 
@@ -72,6 +79,7 @@ acer.list$group1 <- paste(acer.list$collection, acer.list$group1, sep="-")
 
 summary(quercus.list)
 summary(acer.list)
+head(acer.list)
 
 obs.list <- rbind(quercus.list, acer.list)
 summary(obs.list)
@@ -86,7 +94,7 @@ length(unique(dat.all$Observer))
 length(unique(dat.all$PlantNumber))
 length(unique(dat.all$Species))
 
-# 
+# Saving the figures that show observations for each individual
 for(PHENO in phenophase.obs){
   pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_Phenophase", paste0("2019_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
   for(OBS in levels(dat.all$group1)){
@@ -199,7 +207,11 @@ acc.check <- merge(acc.check, obs.all[,c("group1", "Observer.ID")], all.x=T)
 summary(acc.check)
 acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 8 days
 
+# Ignore known "troublemakers"
+acc.check[acc.check$Observation.Last < Sys.Date()-8 & acc.check$Observer.ID!="Populorum" & !(acc.check$Observer.ID=="Buerger" & acc.check$Species=="Acer barbatum"),]
+
 nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8,])/nrow(acc.check)
+nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8 & acc.check$Observer.ID!="Populorum",])/nrow(acc.check)
 #----------------------------
 # -------------------------------------------------------------
 
