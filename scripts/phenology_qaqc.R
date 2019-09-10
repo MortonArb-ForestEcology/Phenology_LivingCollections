@@ -235,6 +235,9 @@ pheno.now$Status <- as.factor(ifelse(pheno.now$Date.Observed < Sys.Date()-7, "OL
 summary(pheno.now$Status)
 summary(pheno.now)
 
+pheno.now[pheno.now$Date.Observed<as.Date("2019-08-01"),]
+
+
 # Checking some oddballs
 pheno.now[pheno.now$fruit.ripe.observed=="Yes",]
 # summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
@@ -256,7 +259,9 @@ pheno.now[pheno.now$leaf.present.observed %in% c("No", "Did not look for") & !ph
 pheno.now[pheno.now$leaf.increasing.observed %in% c("No", "Did not look for") & !pheno.now$leaf.increasing.intensity %in% c("0%", NA),]
 pheno.now[pheno.now$leaf.color.observed %in% c("No", "Did not look for") & !pheno.now$leaf.color.intensity %in% c("0%", NA),]
 pheno.now[!pheno.now$leaf.falling.observed %in% c("No", "Did not look for"),]
-pheno.now[!pheno.now$leaf.color.observed %in% c("No", "Did not look for"),]
+summary(pheno.now[!pheno.now$leaf.color.observed %in% c("No", "Did not look for"),])
+pheno.now[pheno.now$leaf.color.observed %in% c("Yes") & pheno.now$leaf.color.intensity %in% (">95%"),]
+
 
 pheno.now[pheno.now$flower.buds.observed %in% c("No", "Did not look for") & !pheno.now$flower.buds.intensity %in% c("0", NA),]
 pheno.now[pheno.now$flower.open.observed %in% c("No", "Did not look for") & !pheno.now$flower.open.intensity %in% c("0%", NA),]
