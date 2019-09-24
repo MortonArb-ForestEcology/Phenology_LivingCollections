@@ -51,6 +51,8 @@ for(PHENO in phenophase.obs){
 }
 summary(dat.all)
 
+range(dat.all$Date.Observed)
+dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),]
 # dim(dat.all)
 
 
