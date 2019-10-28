@@ -31,6 +31,8 @@ maps.out <- file.path(path.dat)
 # get the data from a particular sheet
 quercus <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=lubridate::year(Sys.Date()))
 summary(quercus)
+quercus[quercus$Date.Observed>Sys.Date(),1:6]
+
 
 acer <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Acer", dat.yr=lubridate::year(Sys.Date()))
 summary(acer)
@@ -43,7 +45,7 @@ phenophase.obs <- names(dat.all)[grep(".observed", names(dat.all))]
 
 
 summary(dat.all$Observer)
-summary(dat.all[,"Oberserver"])
+summary(dat.all[,"Observer"])
 
 for(PHENO in phenophase.obs){
   dat.all[is.na(dat.all[,PHENO]),PHENO] <- "Did not look for"
@@ -52,7 +54,9 @@ for(PHENO in phenophase.obs){
 summary(dat.all)
 
 range(dat.all$Date.Observed)
-dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),]
+dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),1:6]
+dat.all[dat.all$Date.Observed>Sys.Date(),1:6]
+
 # dim(dat.all)
 
 
