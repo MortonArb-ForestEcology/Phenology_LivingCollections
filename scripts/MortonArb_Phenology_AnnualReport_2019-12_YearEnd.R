@@ -150,17 +150,41 @@ dev.off()
 # Access & format the observations
 # -------------------------------------------------------------
 # get the data from a particular sheet
-quercus <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=lubridate::year(Sys.Date()))
-quercus$Collection <- "Quercus"
+quercus <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=2019)
+quercus$Collection <- as.factor("Quercus")
+quercus$Year <- lubridate::year(quercus$Date.Observed)
 summary(quercus)
 
-acer <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Acer", dat.yr=lubridate::year(Sys.Date()))
-acer$Collection <- "Acer"
+acer <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Acer", dat.yr=2019)
+acer$Collection <- as.factor("Acer")
+acer$Year <- lubridate::year(acer$Date.Observed)
 summary(acer)
 
-dat.all <- rbind(quercus, acer)
+dat.2019 <- rbind(quercus, acer)
+summary(dat.2019)
+
+quercus.2018 <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=2018)
+quercus.2018$Collection <- as.factor("Quercus")
+# quercus.2018
+quercus.2018$Year <- lubridate::year(quercus.2018$Date.Observed)
+names(quercus.2018) <- names(quercus)
+summary(quercus.2018)
+
+# quercus.all <- rbind(quercus.2018, quercus)
+# quercus.all$Year <- lubridate::year(quercus.all$Date.Observed)
+# summary(quercus.all)
+
+dat.all <- rbind(dat.2019, quercus.2018)
 dat.all$fruit.drop.intensity <- as.factor(dat.all$fruit.drop.intensity)
+dat.all <- dat.all[dat.all$Observer!="TEST", ]
 summary(dat.all)
+
+dat.all$Date.Observed <- as.Date(dat.all$Date.Observed)
+dat.all$YEAR <- lubridate::year(dat.all$Date.Observed)
+dat.all$MONTH <- lubridate::month(dat.all$Date.Observed)
+dat.all$DAY <- lubridate::day(dat.all$Date.Observed)
+dat.all$DOY <- lubridate::yday(dat.all$Date.Observed)
+
 
 phenophase.obs <- names(dat.all)[grep(".observed", names(dat.all))] 
 for(PHENO in phenophase.obs){
@@ -172,563 +196,139 @@ summary(dat.all)
 dat.all$Observer <- factor(dat.all$Observer, levels=c(sort(paste(unique(dat.all$Observer))[!unique(dat.all$Observer) %in% c("Rollinson", "Reidy")]), "Rollinson", "Reidy"))
 #----------------------------
 
-
 #----------------------------
-# Doing some initial graphs and summaries at the collection-level: 
-#  -- simple histograms based on collections & species
+# Do some density plots 
 #----------------------------
-# getting some some date of first events
-first.event <- aggregate(dat.all[dat.all$leaf.present.observed=="Yes", "Date.Observed"],
-                             by=dat.all[dat.all$leaf.present.observed=="Yes",c("Collection", "Species", "PlantNumber")],
-                             FUN=min, na.rm=T)
-names(first.event)[names(first.event)=="x"] <- "leaf.present.observed"
+mark.spring <- data.frame(Label=c("Mar 1", "Apr 1", "May 1", "Jun 1", "Jul 1"), 
+                       Date=c("2019-03-01", "2019-04-01", "2019-05-01", "2019-06-01", "2019-07-01"))
+mark.spring$mark.yday <- lubridate::yday(mark.spring$Date)
 
-for(PHENO in phenophase.obs){
-  if(nrow(dat.all[dat.all[,PHENO]=="Yes",])==0) next
-  
-  # Need to store it as a temporary data frame because some trees won't have particular phenophases
-  dat.tmp <- aggregate(dat.all[dat.all[,PHENO]=="Yes", "Date.Observed"],
-                       by=dat.all[dat.all[,PHENO]=="Yes",c("Collection", "Species", "PlantNumber")],
-                       FUN=min, na.rm=T)
-  names(dat.tmp)[names(dat.tmp)=="x"] <- PHENO
-  
-  first.event <- merge(first.event, dat.tmp, all=T)
-  
+# Add a weights statement that will scale things based on number of individual trees
+dat.all[dat.all$Collection=="Acer" & dat.all$Year==2019,"wt.tree"] <- length(unique(dat.all[dat.all$Collection=="Acer" & dat.all$Year==2019,"PlantNumber"]))
+dat.all[dat.all$Collection=="Quercus" & dat.all$Year==2019,"wt.tree"] <- length(unique(dat.all[dat.all$Collection=="Quercus" & dat.all$Year==2019,"PlantNumber"]))
+dat.all[dat.all$Collection=="Quercus" & dat.all$Year==2018,"wt.tree"] <- length(unique(dat.all[dat.all$Collection=="Quercus" & dat.all$Year==2018,"PlantNumber"]))
+
+pheno.plot <- data.frame(code=c("leaf.buds.observed", "leaf.present.observed", "leaf.color.observed", "flower.open.observed", "fruit.present.observed", "fruit.ripe.observed"),
+                         label=c("Bud Burst",
+                                 "Leaves Present",
+                                 "Colored Leaves",
+                                 "Open Flowers",
+                                 "Fruit Present", 
+                                 "Ripe Fruit"))
+
+for(i in 1:nrow(pheno.plot)){
+  png(file.path(path.figs, paste0("Phenophases_DensityPlot_", pheno.plot$code[i], "_2018-2019.png")), height=4, width=6, units="in", res=180)
+  print(
+  ggplot(data=dat.all[dat.all[,paste(pheno.plot$code[i])]=="Yes",]) +
+    ggtitle(pheno.plot$label[i]) +
+    facet_grid(Collection~., scales="fixed") +
+    geom_density(aes(x=DOY, fill=as.factor(Year), y=..count..), adjust=1, alpha=0.5) +
+    scale_y_continuous(name="Number of Observations", expand=c(0,0)) +
+    scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=yrs.mark$mark.yday, labels=yrs.mark$Label) +
+    scale_fill_manual(name="Year", values=c("blue2", "green4")) +
+    theme(panel.background=element_rect(fill=NA, color="black", size=0.5),
+          panel.grid = element_blank(),
+          # panel.margin=unit(0, "lines"),
+          axis.text=element_text(size=rel(1.25), color="black"),
+          axis.title=element_text(size=rel(1.25), face="bold"),
+          legend.position="top",
+          legend.title = element_text(face="bold", size=rel(1.25)),
+          legend.text=element_text(size=rel(1.25)),
+          legend.key.size=unit(1.25, "lines"),
+          strip.text=element_text(face="bold", size=rel(1.5)))
+  )
+  dev.off()
 }
-summary(first.event)
-
-# ------------
-# Budburst & Flowering
-# ------------
-# Finding mean day of Bud Burst
-mean(first.event[first.event$Collection=="Acer", "leaf.buds.observed"], na.rm=T); sd(first.event[first.event$Collection=="Acer", "leaf.buds.observed"], na.rm=T)
-mean(first.event[first.event$Collection=="Quercus", "leaf.buds.observed"], na.rm=T); sd(first.event[first.event$Collection=="Quercus", "leaf.buds.observed"], na.rm=T)
-
-# First/last bud burst
-first.event[!is.na(first.event$leaf.buds.observed) & first.event$leaf.buds.observed==min(first.event$leaf.buds.observed, na.rm=T),];  
-first.event[!is.na(first.event$leaf.buds.observed) & first.event$leaf.buds.observed==max(first.event$leaf.buds.observed, na.rm=T),];  
-
-# First/last flower
-first.event[!is.na(first.event$flower.open.observed) & first.event$flower.open.observed==min(first.event$flower.open.observed, na.rm=T),];  
-first.event[!is.na(first.event$flower.open.observed) & first.event$flower.open.observed==max(first.event$flower.open.observed, na.rm=T),];  
-# ------------
-
-# ------------
-# Leaf Out
-# ------------
-# Difference between bud burst & leaf out
-leaf.delay <- as.numeric(first.event$leaf.present.observed - first.event$leaf.buds.observed)
-mean(leaf.delay[leaf.delay>=0], na.rm=T); sd(leaf.delay[leaf.delay>=0], na.rm=T)
-
-# Finding mean day of Bud Burst
-# Note: during this analysis, discovered c("296-2013*5") hadn't really been observed until Brendon subbed in late-June, so it was showing weird data
-mean(first.event[first.event$Collection=="Acer" & !first.event$PlantNumber %in% c("296-2013*5"), "leaf.present.observed"], na.rm=T); sd(first.event[first.event$Collection=="Acer" & !first.event$PlantNumber %in% c("296-2013*5"), "leaf.present.observed"], na.rm=T)
-mean(first.event[first.event$Collection=="Quercus", "leaf.present.observed"], na.rm=T); sd(first.event[first.event$Collection=="Quercus", "leaf.present.observed"], na.rm=T)
 
 
-# First/last leaf
-first.event[!is.na(first.event$leaf.present.observed) & first.event$leaf.present.observed==min(first.event$leaf.present.observed, na.rm=T),];  
-first.event[!is.na(first.event$leaf.present.observed) & first.event$leaf.present.observed==max(first.event$leaf.present.observed[!first.event$PlantNumber %in% c("296-2013*5")], na.rm=T) & !first.event$PlantNumber %in% c("296-2013*5"),];  
-# ------------
+# -----------------------
+# Doing a leaf color *intensity* plot
+# -----------------------
+dat.all$leaf.color.intensity <- car::recode(dat.all$leaf.color.intensity, "'Less than 5%'='<5%'; '50%'='50-74%'; 'NA'='No Data'")
+dat.all$leaf.color.intensity[is.na(dat.all$leaf.color.intensity)] <- "No Data"
+dat.all$leaf.color.intensity <- factor(dat.all$leaf.color.intensity, c("0%", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%", "No Data"))
 
+colors.fall <- c("#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026", "gray50")
 
-png(file.path(path.figs, "Histogram_Collection_LeafPresent.png"), height=6, width=8, units="in", res=120)
-ggplot(data=dat.all) +
-  facet_grid(Collection~., scales="free_y") +
-  geom_histogram(aes(x=Date.Observed, fill=leaf.present.observed), binwidth=7) +
-  scale_x_date(name="Date", expand=c(0,0)) +
-  scale_y_continuous("Observation Count",expand=c(0,0)) +
-  scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-  theme(legend.position="top",
+mark.fall <- data.frame(Label=c("Mar 1", "May 1", "Jul 1", "Sep 1", "Nov 1"), 
+                          Date=c("2019-03-01", "2019-05-01", "2019-07-01", "2019-09-01", "2019-11-01"))
+mark.fall$mark.yday <- lubridate::yday(mark.fall$Date)
+
+png(file.path(path.figs, paste0("Phenophases_DensityPlot_", "leaf.present", "_IntensityColor", "_2018-2019.png")), height=5, width=8, units="in", res=180)
+ggplot(data=dat.all[dat.all$leaf.present.observed=="Yes",]) +
+  # ggtitle("Colored Leaf") +
+  facet_grid(Collection~Year, scales="fixed") +
+  geom_density(aes(x=DOY, fill=leaf.color.intensity, y=..count..), position="stack", adjust=1.25, alpha=1) +
+  scale_y_continuous(name="# Observations: Leaf Present", expand=c(0,0)) +
+  scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=mark.fall$mark.yday, labels=mark.fall$Label) +
+  scale_fill_manual(name="% Canopy\nwith Color", values=colors.fall) +
+  theme(panel.background=element_rect(fill=NA, color="black", size=0.5),
         panel.grid = element_blank(),
-        panel.background=element_rect(fill=NA, color="black"))
+        # panel.margin=unit(0, "lines"),
+        axis.text=element_text(size=rel(1.25), color="black"),
+        axis.title=element_text(size=rel(1.25), face="bold"),
+        legend.position="top",
+        legend.title = element_text(face="bold", size=rel(1.25)),
+        legend.text=element_text(size=rel(1.25)),
+        legend.key.size=unit(1.25, "lines"),
+        strip.text=element_text(face="bold", size=rel(1.5)))
 dev.off()
 
-png(file.path(path.figs, "Histogram_Collection_LeafBudBreaking.png"), height=6, width=8, units="in", res=120)
-ggplot(data=dat.all) +
-  facet_grid(Collection~., scales="free_y") +
-  geom_histogram(aes(x=Date.Observed, fill=leaf.buds.observed), binwidth=7) +
-  scale_x_date(name="Date", expand=c(0,0)) +
-  scale_y_continuous("Observation Count",expand=c(0,0)) +
-  scale_fill_manual("Breaking Leaf Bud", values=c("gray50", "green4", "blue2", "black") ) +
-  theme(legend.position="top",
+png(file.path(path.figs, paste0("Phenophases_DensityPlot_", "leaf.present", "_IntensityColor", "_Quercus", "_2018-2019.png")), height=5, width=8, units="in", res=180)
+ggplot(data=dat.all[dat.all$leaf.present.observed=="Yes" & dat.all$Collection=="Quercus",]) +
+  # ggtitle("Colored Leaf") +
+  facet_grid(Year~Collection, scales="fixed") +
+  geom_density(aes(x=DOY, fill=leaf.color.intensity, y=..count..), position="stack", adjust=1.25, alpha=1) +
+  scale_y_continuous(name="# Observations: Leaf Present", expand=c(0,0)) +
+  scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=mark.fall$mark.yday, labels=mark.fall$Label) +
+  scale_fill_manual(name="% Canopy\nwith Color", values=colors.fall) +
+  theme(panel.background=element_rect(fill=NA, color="black", size=0.5),
         panel.grid = element_blank(),
-        panel.background=element_rect(fill=NA, color="black"))
+        # panel.margin=unit(0, "lines"),
+        axis.text=element_text(size=rel(1.25), color="black"),
+        axis.title=element_text(size=rel(1.25), face="bold"),
+        legend.position="top",
+        legend.title = element_text(face="bold", size=rel(1.25)),
+        legend.text=element_text(size=rel(1.25)),
+        legend.key.size=unit(1.25, "lines"),
+        strip.text=element_text(face="bold", size=rel(1.5)))
+dev.off()
+# -----------------------
+
+# -----------------------
+# Doing a bud burst and/or leaf canopy chart
+# -----------------------
+dat.all$leaf.present.intensity <- as.character(dat.all$leaf.present.intensity)
+dat.all$leaf.present.intensity <- car::recode(dat.all$leaf.present.intensity, "'Less than 5%'='<5%';
+                                              '< 5%'='<5%'; '50%'='50-74%'; 'NA'='No Data'")
+dat.all$leaf.present.intensity[is.na(dat.all$leaf.present.intensity)] <- "No Data"
+dat.all$leaf.present.intensity <- factor(dat.all$leaf.present.intensity, c("0%", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%", "No Data"))
+summary(dat.all$leaf.present.intensity)
+
+colors.leaf <- c("#ffffcc", "#d9f0a3", "#addd8e", "#78c679", "#41ab5d", "#238443", "#005a32", "gray50")
+
+
+png(file.path(path.figs, paste0("Phenophases_DensityPlot_", "leaf.present", "_IntensityCanopy", "_2018-2019.png")), height=5, width=8, units="in", res=180)
+ggplot(data=dat.all[dat.all$leaf.present.observed=="Yes",]) +
+  # ggtitle("Colored Leaf") +
+  facet_grid(Collection~Year, scales="fixed") +
+  geom_density(aes(x=DOY, fill=leaf.present.intensity, y=..count..), position="stack", adjust=1.25, alpha=1) +
+  scale_y_continuous(name="# Observations: Leaf Present", expand=c(0,0)) +
+  scale_x_continuous(name="Day of Year", expand=c(0,0), breaks=mark.fall$mark.yday, labels=mark.fall$Label) +
+  scale_fill_manual(name="% Canopy\nwith Leaves", values=colors.leaf) +
+  theme(panel.background=element_rect(fill=NA, color="black", size=0.5),
+        panel.grid = element_blank(),
+        # panel.margin=unit(0, "lines"),
+        axis.text=element_text(size=rel(1.25), color="black"),
+        axis.title=element_text(size=rel(1.25), face="bold"),
+        legend.position="top",
+        legend.title = element_text(face="bold", size=rel(1.25)),
+        legend.text=element_text(size=rel(1.25)),
+        legend.key.size=unit(1.25, "lines"),
+        strip.text=element_text(face="bold", size=rel(1.5)))
 dev.off()
 
-for(COLLECTION in unique(dat.all$Collection) ){
-  png(file.path(path.figs, paste0("Histogram_", COLLECTION, "_LeafPresent.png")), height=10, width=8, units="in", res=120)
-  print(
-  ggplot(data=dat.all[dat.all$Collection==COLLECTION,]) +
-    facet_grid(Species~., scales="free_y") +
-    geom_histogram(aes(x=Date.Observed, fill=leaf.present.observed), binwidth=7) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_continuous("Observation Count",expand=c(0,0)) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    theme(legend.position="top",
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          panel.spacing=unit(0, "lines"),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          strip.text.y = element_text(angle=0))
-  )
-  dev.off()
-  
-  png(file.path(path.figs, paste0("Histogram_", COLLECTION, "_LeafBudBreaking.png")), height=10, width=8, units="in", res=120)
-  print(
-  ggplot(data=dat.all[dat.all$Collection==COLLECTION,]) +
-    facet_grid(Species~., scales="free_y") +
-    geom_histogram(aes(x=Date.Observed, fill=leaf.buds.observed), binwidth=7) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_continuous("Observation Count",expand=c(0,0)) +
-    scale_fill_manual("Breaking Leaf Bud", values=c("gray50", "green4", "blue2", "black") ) +
-    theme(legend.position="top",
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          panel.spacing=unit(0, "lines"),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          strip.text.y = element_text(angle=0))
-  )
-  dev.off()
-  
-}
-
-pdf(file.path(path.figs, "Observations_LeafPresent_by_Observer_by_Tree.pdf"), width=8.5, height=11)
-for(OBS in levels(dat.all$Observer)){
-  print(
-    ggplot(data=dat.all[dat.all$Observer==OBS ,]) +
-      ggtitle(paste("Observer:", OBS)) +
-      facet_grid(Species~., scales="free_y") +
-      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed), binwidth=7) +
-      scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-      scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-      theme(legend.position="bottom",
-            legend.text = element_text(size=rel(1.5)),
-            legend.title = element_text(size=rel(1.5)),
-            plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-            panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"),
-            panel.spacing=unit(0, "lines"),
-            axis.text.x=element_text(size=rel(1.5)),
-            axis.title.x=element_text(size=rel(2), face="bold"),
-            axis.title.y=element_blank(),
-            axis.text.y=element_blank(),
-            axis.ticks.y=element_blank(),
-            strip.text.y=element_text(size=rel(1.5), angle=0))
-  )
-}
-dev.off()
-
-pdf(file.path(path.figs, "Observations_LeafBudBreaking_by_Observer_by_Tree.pdf"), width=8.5, height=11)
-for(OBS in levels(dat.all$Observer)){
-  print(
-    ggplot(data=dat.all[dat.all$Observer==OBS ,]) +
-      ggtitle(paste("Observer:", OBS)) +
-      facet_grid(Species~., scales="free_y") +
-      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.buds.observed), binwidth=7) +
-      scale_fill_manual("Leaf Bud Breaking", values=c("gray50", "green4", "blue2", "black") ) +
-      scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-      theme(legend.position="bottom",
-            legend.text = element_text(size=rel(1.5)),
-            legend.title = element_text(size=rel(1.5)),
-            plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-            panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"),
-            panel.spacing=unit(0, "lines"),
-            axis.text.x=element_text(size=rel(1.5)),
-            axis.title.x=element_text(size=rel(2), face="bold"),
-            axis.title.y=element_blank(),
-            axis.text.y=element_blank(),
-            axis.ticks.y=element_blank(),
-            strip.text.y=element_text(size=rel(1.5), angle=0))
-  )
-}
-dev.off()
+# -----------------------
 
 #----------------------------
 
-#----------------------------
-# Aggregating the data by species so we can show what's going on at the arb
-#----------------------------
-# Aggregating by each observer to get the fraction in each phenophase at each dates
-obs.n.date.spp <- aggregate(dat.all[,c("PlantNumber")],
-                            by=dat.all[,c("Date.Observed", "Collection", "Species")],
-                            FUN=length)
-names(obs.n.date.spp)[names(obs.n.date.spp)=="x"] <- "Trees.List"
-dat.agg.spp <- aggregate(dat.all[,"PlantNumber"], 
-                         by=dat.all[,c("Date.Observed", "Collection", "Species", phenophase.obs)],
-                         FUN=length)
-names(dat.agg.spp)[names(dat.agg.spp)=="x"] <- "Trees.Obs"
-dat.agg.spp <- merge(dat.agg.spp, obs.n.date, all.x=T)
-dat.agg.spp$prop.spp <- dat.agg.spp$Trees.Obs/dat.agg.spp$Trees.List
-
-# summary(dat.all[dat.all$Observer=="Dock_Marsha",c("Date.Observed", "Observer", "Collection", "Species", phenophase.spp)])
-# unique(dat.all[dat.all$Observer=="Dock_Marsha","PlantNumber"])
-
-# summary(dat.agg.spp[dat.agg.spp$Observer=="Dock_Marsha",])
-
-png(file.path(path.figs, "Observations_All_LeafPresent_by_Species_01_day.png"), width=8.5, height=11, unit="in", res=120)
-print(
-  ggplot(data=dat.agg.spp[,]) +
-    ggtitle("Leaf Present") +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.present.observed, alpha=prop.spp), binwidth=1) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    theme(legend.position="bottom",
-          # legend.text = element_text(size=rel(1.5)),
-          # legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          # axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-)
-dev.off()
-
-png(file.path(path.figs, "Observations_All_LeafPresent_by_Species_07_week.png"), width=8.5, height=11, unit="in", res=120)
-print(
-  ggplot(data=dat.agg.spp[,]) +
-    ggtitle("Leaf Present") +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.present.observed, alpha=prop.spp), binwidth=7) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    guides(alpha=F) +
-    theme(legend.position="bottom",
-          # legend.text = element_text(size=rel(1.5)),
-          # legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          # axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-)
-dev.off()
-
-png(file.path(path.figs, "Observations_All_LeafPresent_by_Species_10_day.png"), width=8.5, height=11, unit="in", res=120)
-print(
-  ggplot(data=dat.agg.spp[,]) +
-    ggtitle("Leaf Present") +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.present.observed, alpha=prop.spp), binwidth=10) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    guides(alpha=F) +
-    theme(legend.position="bottom",
-          # legend.text = element_text(size=rel(1.5)),
-          # legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          # axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-)
-dev.off()
-
-
-png(file.path(path.figs, "Observations_All_LeafBudBreaking_by_Species_01_day.png"), width=8.5, height=11, unit="in", res=120)
-print(
-  ggplot(data=dat.agg.spp[,]) +
-    ggtitle("Leaf Bud Breaking") +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=prop.spp), binwidth=1) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    guides(alpha=F) +
-    theme(legend.position="bottom",
-          # legend.text = element_text(size=rel(1.5)),
-          # legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          # axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-)
-dev.off()
-
-
-png(file.path(path.figs, "Observations_All_LeafBudBreaking_by_Species_07_week.png"), width=8.5, height=11, unit="in", res=120)
-print(
-  ggplot(data=dat.agg.spp[,]) +
-    ggtitle("Leaf Bud Breaking") +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=prop.spp), binwidth=7) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    guides(alpha=F) +
-    theme(legend.position="bottom",
-          # legend.text = element_text(size=rel(1.5)),
-          # legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          # axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-)
-dev.off()
-
-png(file.path(path.figs, "Observations_All_LeafBudBreaking_by_Species_10_day.png"), width=8.5, height=11, unit="in", res=120)
-print(
-  ggplot(data=dat.agg.spp[,]) +
-    ggtitle("Leaf Bud Breaking") +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=prop.spp), binwidth=10) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    guides(alpha=F) +
-    theme(legend.position="bottom",
-          # legend.text = element_text(size=rel(1.5)),
-          # legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          # axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-)
-dev.off()
-
-
-for(COLLECTION in unique(dat.agg.spp$Collection)){
-  png(file.path(path.figs, paste0("Observations_", COLLECTION, "_LeafPresent_by_Species_07_week.png")), width=8.5, height=11, unit="in", res=120)
-  print(
-    ggplot(data=dat.agg.spp[dat.agg.spp$Collection==COLLECTION,]) +
-      ggtitle("Leaf Present") +
-      # facet_grid(Collection~., scales="free") +
-      geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.present.observed, alpha=prop.spp), binwidth=7) +
-      scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-      scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-      guides(alpha=F) +
-      theme(legend.position="bottom",
-            legend.text = element_text(size=rel(1.5)),
-            legend.title = element_text(size=rel(1.5)),
-            plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-            panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"),
-            axis.text=element_text(size=rel(1.5)),
-            axis.title.x=element_text(size=rel(2), face="bold"),
-            axis.title.y=element_blank(),
-            strip.text=element_text(size=rel(2), face="bold"))
-  )
-  dev.off()
-  
-  png(file.path(path.figs, paste0("Observations_", COLLECTION, "_LeafBudBreaking_by_Species_07_week.png")), width=8.5, height=11, unit="in", res=120)
-  print(
-    ggplot(data=dat.agg.spp[dat.agg.spp$Collection==COLLECTION,]) +
-      ggtitle("Leaf Bud Breaking") +
-      # facet_grid(Collection~., scales="free") +
-      geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=prop.spp), binwidth=7) +
-      # stat_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=stat("density")), binwidth=7) +
-      scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-      scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      # scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-      guides(alpha=F) +
-      theme(legend.position="bottom",
-            legend.text = element_text(size=rel(1.5)),
-            legend.title = element_text(size=rel(1.5)),
-            plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-            panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"),
-            axis.text=element_text(size=rel(1.5)),
-            axis.title.x=element_text(size=rel(2), face="bold"),
-            axis.title.y=element_blank(),
-            strip.text=element_text(size=rel(2), face="bold"))
-  )
-  dev.off()
-  
-}
-#----------------------------
-
-
-#----------------------------
-# Aggregating the data by observer so we can show each person what they're doing
-#----------------------------
-# Aggregating by each observer to get the fraction in each phenophase at each dates
-obs.n.date <- aggregate(dat.all[,c("PlantNumber")],
-                        by=dat.all[,c("Date.Observed", "Observer", "Collection", "Species")],
-                        FUN=length)
-names(obs.n.date)[names(obs.n.date)=="x"] <- "Trees.List"
-dat.agg.obs <- aggregate(dat.all[,"PlantNumber"], 
-                         by=dat.all[,c("Date.Observed", "Observer", "Collection", "Species", phenophase.obs)],
-                         FUN=length)
-names(dat.agg.obs)[names(dat.agg.obs)=="x"] <- "Trees.Obs"
-dat.agg.obs <- merge(dat.agg.obs, obs.n.date, all.x=T)
-dat.agg.obs$prop.obs <- dat.agg.obs$Trees.Obs/dat.agg.obs$Trees.List
-
-# summary(dat.all[dat.all$Observer=="Dock_Marsha",c("Date.Observed", "Observer", "Collection", "Species", phenophase.obs)])
-# unique(dat.all[dat.all$Observer=="Dock_Marsha","PlantNumber"])
-
-# summary(dat.agg.obs[dat.agg.obs$Observer=="Dock_Marsha",])
-
-pdf(file.path(path.figs, "Observations_LeafPresent_by_Observer_by_Species.pdf"), width=8.5, height=11)
-for(OBS in levels(dat.agg.obs$Observer)){
-  print(
-  ggplot(data=dat.agg.obs[dat.agg.obs$Observer==OBS ,]) +
-    ggtitle(paste("Observer:", OBS)) +
-    facet_grid(Collection~., scales="free") +
-    geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.present.observed, alpha=prop.obs), binwidth=7) +
-    scale_fill_manual("Leaf Present", values=c("gray50", "green4", "blue2", "black") ) +
-    scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-    theme(legend.position="bottom",
-          legend.text = element_text(size=rel(1.5)),
-          legend.title = element_text(size=rel(1.5)),
-          plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-          panel.grid = element_blank(),
-          panel.background=element_rect(fill=NA, color="black"),
-          axis.text=element_text(size=rel(1.5)),
-          axis.title.x=element_text(size=rel(2), face="bold"),
-          axis.title.y=element_blank(),
-          strip.text=element_text(size=rel(2), face="bold"))
-  )
-}
-dev.off()
-
-pdf(file.path(path.figs, "Observations_LeafBudBreaking_by_Observer_by_Species.pdf"), width=8.5, height=11)
-for(OBS in levels(dat.agg.obs$Observer)){
-  print(
-    ggplot(data=dat.agg.obs[dat.agg.obs$Observer==OBS ,]) +
-      ggtitle(paste("Observer:", OBS)) +
-      facet_grid(Collection~., scales="free") +
-      geom_bin2d(aes(x=Date.Observed, y=Species, fill=leaf.buds.observed, alpha=prop.obs), binwidth=7) +
-      scale_fill_manual("Leaf Bud Breaking", values=c("gray50", "green4", "blue2", "black") ) +
-      scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-      theme(legend.position="bottom",
-            legend.text = element_text(size=rel(1.5)),
-            legend.title = element_text(size=rel(1.5)),
-            plot.title = element_text(size=rel(3), face="bold", hjust=0.5),
-            panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"),
-            axis.text=element_text(size=rel(1.5)),
-            axis.title.x=element_text(size=rel(2), face="bold"),
-            axis.title.y=element_blank(),
-            strip.text=element_text(size=rel(2), face="bold"))
-  )
-}
-dev.off()
-#----------------------------
-
-
-#----------------------------
-# Comparing Quercus in 2018 & 2019
-#----------------------------
-quercus.2018 <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=2018)
-quercus.2018$Collection <- "Quercus"
-# quercus.2018
-names(quercus.2018) <- names(quercus)
-summary(quercus.2018)
-
-quercus.all <- rbind(quercus.2018, quercus)
-quercus.all$Year <- lubridate::year(quercus.all$Date.Observed)
-summary(quercus.all)
-
-
-# getting some some date of first events
-first.event.quer <- aggregate(quercus.all[quercus.all$leaf.present.observed=="Yes", "Date.Observed"],
-                              by=quercus.all[quercus.all$leaf.present.observed=="Yes",c("Year", "Species", "PlantNumber")],
-                         FUN=min, na.rm=T)
-names(first.event.quer)[names(first.event.quer)=="x"] <- "leaf.present.observed"
-summary(first.event.quer)
-for(PHENO in phenophase.obs){
-  if(nrow(quercus.all[quercus.all[,PHENO]=="Yes",])==0) next
-  
-  # Need to store it as a temporary data frame because some trees won't have particular phenophases
-  dat.tmp <- aggregate(quercus.all[quercus.all[,PHENO]=="Yes", "Date.Observed"],
-                       by=quercus.all[quercus.all[,PHENO]=="Yes",c("Year", "Species", "PlantNumber")],
-                       FUN=min, na.rm=T)
-  names(dat.tmp)[names(dat.tmp)=="x"] <- PHENO
-  
-  first.event.quer <- merge(first.event.quer, dat.tmp, all=T)
-  
-}
-summary(first.event.quer)
-
-quer.spp <- aggregate(first.event.quer[,c("leaf.present.observed", "leaf.buds.observed", "flower.buds.observed", "flower.open.observed")],
-                      by=first.event.quer[,c("Year", "Species")],
-                      FUN=mean, na.rm=T)
-summary(quer.spp)
-
-quer.spp$leaf.budburst.first <- lubridate::yday(quer.spp$leaf.buds.observed)
-quer.spp$leaf.emerge.first <- lubridate::yday(quer.spp$leaf.present.observed)
-quer.spp$flower.budburst.first <- lubridate::yday(quer.spp$flower.buds.observed)
-quer.spp$flower.open.first <- lubridate::yday(quer.spp$flower.open.observed)
-summary(quer.spp)
-
-ggplot(quer.spp) +
-  facet_grid(Year~.) +
-  geom_histogram(aes(x=leaf.budburst.first))
-
-ggplot(quer.spp) +
-  facet_grid(Year~.) +
-  geom_histogram(aes(x=leaf.emerge.first))
-
-mean(quer.spp[quer.spp$Year==2018,"leaf.present.observed"]); sd(quer.spp[quer.spp$Year==2018,"leaf.present.observed"])
-mean(quer.spp[quer.spp$Year==2019,"leaf.present.observed"]); sd(quer.spp[quer.spp$Year==2019,"leaf.present.observed"])
-summary(quer.spp[quer.spp$Year==2018,])
-summary(quer.spp[quer.spp$Year==2019,])
-
-for(SPP in unique(quer.spp$Species)){
-  if(length(which(quer.spp$Species==SPP))<2) next
-  ind.19 <- which(quer.spp$Species==SPP & quer.spp$Year==2019)
-  
-  dat.18 <- quer.spp[quer.spp$Species==SPP & quer.spp$Year==2018,]
-  dat.19 <- quer.spp[ind.19,]
-
-  quer.spp[ind.19,"d.leaf.budburst"] <- dat.18$leaf.budburst.first - dat.19$leaf.budburst.first
-  quer.spp[ind.19,"d.leaf.emerge"] <- dat.18$leaf.emerge.first - dat.19$leaf.emerge.first
-  quer.spp[ind.19,"d.flower.budburst"] <- dat.18$flower.budburst.first - dat.19$flower.budburst.first
-  quer.spp[ind.19,"d.flower.open"] <- dat.18$flower.open.first - dat.19$flower.open.first
-  
-}
-summary(quer.spp)
-
-quer.stack <- stack(quer.spp[quer.spp$Year==2019,c("d.leaf.budburst", "d.leaf.emerge", "d.flower.budburst", "d.flower.open")])
-quer.stack$Species <- quer.spp$Species[quer.spp$Year==2019]
-summary(quer.stack)
-
-ggplot(data=quer.stack) +
-  facet_wrap(~ind, scales="free") +
-  geom_histogram(aes(x=values)) +
-  geom_vline(xintercept=0, linetype="dashed", color="red") +
-  scale_x_continuous(name="Difference in Days (2018-2019)") +
-  scale_y_continuous(expand=c(0,0)) +
-  theme_bw()
-
-write.csv(quer.spp, "../data/observations/Quercus_Summary_2018-2019_2019-07-02.csv", row.names=F)
-#----------------------------
