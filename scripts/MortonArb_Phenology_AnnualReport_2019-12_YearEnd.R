@@ -144,6 +144,23 @@ ggplot(data=met.all, aes(x=DOY, y=GDD5.cum, group=YEAR)) +
 dev.off()
 # ----------------
 
+# ----------------
+# Doing some quick summary stats
+# ----------------
+# Finding some low stats
+met.all[met.all$YEAR==2019 & !is.na(met.all$TMIN) & met.all$TMIN==min(met.all[met.all$YEAR==2019, "TMIN"], na.rm=T), c("DATE", "TMIN")]
+met.all[met.all$YEAR==2019 & met.all$DOY>180 & !is.na(met.all$TMIN) & met.all$TMIN==min(met.all[met.all$YEAR==2019 & met.all$DOY>180, "TMIN"], na.rm=T), c("DATE", "TMIN")]
+
+# Finding day of first/last hard freeze: 28 F; source: https://www.weather.gov/iwx/fallfrostinfo  
+met.all[met.all$DATE==max(met.all[met.all$YEAR==2019 & met.all$DOY<180 & !is.na(met.all$TMIN) & met.all$TMIN < -2.22, c("DATE")]),]
+
+met.all[met.all$DATE==min(met.all[met.all$YEAR==2019 & met.all$DOY>180 & !is.na(met.all$TMIN) & met.all$TMIN < -2.22, c("DATE")]),]
+
+met.all[met.all$YEAR==2019 & !is.na(met.all$TMAX) & met.all$TMAX==max(met.all[met.all$YEAR==2019, "TMAX"], na.rm=T), c("DATE", "TMAX")]
+
+# ----------------
+
+
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -329,6 +346,72 @@ ggplot(data=dat.all[dat.all$leaf.present.observed=="Yes",]) +
 dev.off()
 
 # -----------------------
+
+
+
+#----------------------------
+# Summarizing the first events
+#----------------------------
+# getting some some date of first events
+first.event <- aggregate(dat.all[dat.all$leaf.present.observed=="Yes", "Date.Observed"],
+                         by=dat.all[dat.all$leaf.present.observed=="Yes",c("Year", "Collection", "Species", "PlantNumber")],
+                         FUN=min, na.rm=T)
+first.event$x <- lubridate::yday(first.event$x)
+names(first.event)[names(first.event)=="x"] <- "leaf.present.observed"
+summary(first.event)
+for(PHENO in phenophase.obs){
+  if(nrow(dat.all[dat.all[,PHENO]=="Yes",])==0) next
+  
+  # Need to store it as a temporary data frame because some trees won't have particular phenophases
+  dat.tmp <- aggregate(dat.all[dat.all[,PHENO]=="Yes", "Date.Observed"],
+                       by=dat.all[dat.all[,PHENO]=="Yes",c("Year", "Collection", "Species", "PlantNumber")],
+                       FUN=min, na.rm=T)
+  dat.tmp$x <- lubridate::yday(dat.tmp$x)
+  names(dat.tmp)[names(dat.tmp)=="x"] <- PHENO
+  
+  first.event <- merge(first.event, dat.tmp, all=T)
+  
+}
+first.event$Collection <- as.factor(first.event$Collection)
+summary(first.event)
+
+first.event$diff.leaf.bud <- first.event$leaf.present.observed - first.event$leaf.buds.observed
+first.event[!is.na(first.event$diff.leaf.bud) & first.event$diff.leaf.bud<0,]
+summary(first.event)
+
+mean(first.event$diff.leaf.bud[first.event$Year==2019 & first.event$diff.leaf.bud>=0], na.rm=T)
+sd(first.event$diff.leaf.bud[first.event$Year==2019 & first.event$diff.leaf.bud>=0], na.rm=T)
+
+hist(first.event$diff.leaf.bud[first.event$Year==2019 & first.event$diff.leaf.bud>=0])
+
+
+# Leaf color
+chron::month.day.year(jul=range(first.event[first.event$Year == 2019 & first.event$Collection=="Acer", "leaf.color.observed"], na.rm=T), origin=c(month=1, day=1, year=2019))
+#----------------------------
+
+
+#----------------------------
+# Summarizing Peak Color
+#----------------------------
+summary(dat.all)
+
+# Observations of color intensity ">95%" by collection in eyar
+range(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Acer" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+
+median(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Acer" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+mean(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Acer" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+sd(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Acer" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+
+median(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Quercus" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+mean(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Quercus" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+sd(dat.all[dat.all$YEAR==2019 & dat.all$Collection=="Quercus" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+
+median(dat.all[dat.all$YEAR==2018 & dat.all$Collection=="Quercus" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+mean(dat.all[dat.all$YEAR==2018 & dat.all$Collection=="Quercus" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+sd(dat.all[dat.all$YEAR==2018 & dat.all$Collection=="Quercus" & !is.na(dat.all$leaf.color.intensity) & dat.all$leaf.color.intensity==">95%","Date.Observed"])
+
+
+#----------------------------
 
 #----------------------------
 
