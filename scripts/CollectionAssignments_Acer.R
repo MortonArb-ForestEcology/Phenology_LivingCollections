@@ -97,7 +97,8 @@ n.groups <- round(nrow(acer2)/mean(max.trees, min.trees))
 # k-means clustering
 # nrow(acer2)/18
 # set.seed(30141038)
-set.seed(30141103)
+# set.seed(30141103)
+set.seed(201901) # Good, but we'll cut group
 
 acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=n.groups*3) # Starting with our desired end point x ~5 so we have small clusters that get added
 # acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=12) # Starting with an average of paired trees
@@ -128,6 +129,7 @@ clust.new = 1
 acer.groups[1, "clust2"] <- clust.new
 
 # Loop through and combine groups
+set.seed(201901)
 pb <- txtProgressBar(min=0, max=nrow(acer.groups), style=3)
 for(i in 1:nrow(acer.groups)){
   
@@ -210,6 +212,26 @@ for(i in 1:nrow(acer2)){
 }
 acer2$group1 <- as.factor(acer2$group1)
 summary(acer2$group1)
+
+groups.n <- aggregate(acer2$BgLatitude, by=list(acer2$group1), FUN=length)
+names(groups.n) <- c("group1", "n.trees")
+
+# Getting rid of group 10 because we can't make it cooperate
+acer2 <- acer2[acer2$group1!=10,]
+
+acer2$priority <- as.factor(ifelse(acer2$species %in% npn, "NPN", NA))
+summary(acer2)
+
+acer.prior <- aggregate(acer2$priority, by=list(acer2$group1), FUN=function(x){length(which(!is.na(x)))})
+names(acer.prior) <- c("group1", "n.trees")
+
+# re-assign numbers to align with priority
+acer.prior[order(acer.prior$n.trees, decreasing=T),"Priority"] <- 1:nrow(acer.prior)
+
+# Merge priority assignments back into master list
+acer2 <- merge(acer2, acer.prior[,c("group1", "Priority")], all.x=T)
+summary(acer2)
+
 # ---------
 
 # acer.clust <- hclust(acer.dist) # Perform hierarchical clustering with the distance matrix
@@ -226,23 +248,25 @@ acer.groups$group.kmean = acer.groups$clust1
 acer[acer$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 acer2[acer2$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 acer2 <- acer2[!is.na(acer2$BgLatitude),]
+
 summary(acer2)
 dim(acer2)
 
-groups.n <- aggregate(acer2$BgLatitude, by=list(acer2$group1), FUN=length)
-names(groups.n) <- c("group1", "n.trees")
+
+groups.n <- aggregate(acer2$BgLatitude, by=list(acer2$Priority), FUN=length)
+names(groups.n) <- c("Priority", "n.trees")
 
 
 library(ggplot2)
 png(file.path(path.dat, "CollectionAssignments_Acer.png"), height=8, width=12, units="in", res=320)
-ggplot(data=acer2) +
+ggplot(data=acer2[,]) +
   ggtitle("Phenology Monitoring Lists:\nAcer Collection") +
   labs(x="Longitude", y="Latitude") +
   coord_equal() +
-  facet_wrap(~group1) +
+  facet_wrap(~Priority) +
   geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
   geom_point(data=acer2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(Priority))) + 
   # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
   geom_text(data=groups.n, x=quantile(acer$BgLongitude, 0.95, na.rm=T), y=max(acer$BgLatitude, 0.995, na.rm=T), aes(label=paste0("n = ", n.trees)), fontface="bold") +
   guides(color=F) +
@@ -282,8 +306,8 @@ dev.off()
 
 summary(acer2)
 
-acer.list <- acer2[,c("group1", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
-acer.list <- acer.list[order(acer.list$group1, acer.list$Taxon, acer.list$PlantNumber),]
+acer.list <- acer2[,c("Priority", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
+acer.list <- acer.list[order(acer.list$Priority, acer.list$Taxon, acer.list$PlantNumber),]
 summary(acer.list)
 head(acer.list)
 write.csv(acer.list[!is.na(acer.list$BgLatitude),], file.path(path.dat, "ObservingLists_Acer.csv"), row.names=F)
@@ -312,7 +336,7 @@ acers.all <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlin
 summary(acers.all)
 
 acer.list <- read.csv(file.path(path.dat, "ObservingLists_Acer.csv"))
-acer.list$group1 <- as.factor(acer.list$group1)
+acer.list$Priority <- as.factor(acer.list$Priority)
 summary(acer.list); 
 dim(acer.list)
 
@@ -377,8 +401,8 @@ grid.crop <- crop(morton.grid, extent.map)
 
 # cols.save <- c("observer", "Taxon", "")
 
-for(ID in unique(acer.list$group1) ){
-  dat.tmp <- acer.list[acer.list$group1==ID & !is.na(acer.list$BgLatitude), !names(acer.list)=="observer"]
+for(ID in unique(acer.list$Priority) ){
+  dat.tmp <- acer.list[acer.list$Priority==ID & !is.na(acer.list$BgLatitude), !names(acer.list)=="observer"]
   
   png(file.path(path.dat, paste0("ObservingList_Acer_", stringr::str_pad(ID, 2, side="left", "0"), ".png")), height=8, width=10, units="in", res=120)
   print(

@@ -131,6 +131,7 @@ clust.new = 1
 oak.groups[1, "clust2"] <- clust.new
 
 pb <- txtProgressBar(min=0, max=nrow(oak.groups), style=3)
+set.seed(12040302)
 for(i in 1:nrow(oak.groups)){
   
   setTxtProgressBar(pb, i)
@@ -202,8 +203,24 @@ summary(quercus2$group1)
 # Fixing a weird accession number; change from *1 to *2
 quercus2[quercus2$Accession=="326-99",]
 
-# ---------
 
+# Redoing group numbers so they get assigned in order of priority based on our priority species:
+# Kim gets first dibs followed by npn
+quercus2$priority <- as.factor(ifelse(quercus2$Taxon %in% paste("Quercus", npn), "NPN", NA))
+summary(quercus2)
+
+quercus.prior <- aggregate(quercus2$priority, by=list(quercus2$group1), FUN=function(x){length(which(!is.na(x)))})
+names(quercus.prior) <- c("group1", "n.trees")
+
+# re-assign numbers to align with priority
+quercus.prior[order(quercus.prior$n.trees, decreasing=T),"Priority"] <- 1:nrow(quercus.prior)
+
+# Merge priority assignments back into master list
+quercus2 <- merge(quercus2, quercus.prior[,c("group1", "Priority")], all.x=T)
+summary(quercus2)
+
+
+# ---------
 # oak.clust <- hclust(oak.dist) # Perform hierarchical clustering with the distance matrix
 # quercus2$group <- as.factor(cutree(oak.clust, k=18))
 # ---------
@@ -222,8 +239,9 @@ quercus[quercus$PlantNumber %in% df.gone$PlantNumber,c("BgLatitude", "BgLongitud
 quercus2[quercus2$PlantNumber %in% df.gone$PlantNumber,c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
 quercus2 <- quercus2[!is.na(quercus2$BgLatitude),]
 
-groups.n <- aggregate(quercus2$BgLatitude, by=list(quercus2$group1), FUN=length)
-names(groups.n) <- c("group1", "n.trees")
+
+groups.n <- aggregate(quercus2$BgLatitude, by=list(quercus2$Priority), FUN=length)
+names(groups.n) <- c("Priority", "n.trees")
 
 # Fixing a weird accession number; change from *1 to *2
 quercus2[quercus2$Accession=="326-99",]
@@ -235,10 +253,10 @@ ggplot(data=quercus2) +
   ggtitle("Phenology Monitoring Lists:\nQuercus Collection") +
   labs(x="Longitude", y="Latitude") +
   coord_equal() +
-  facet_wrap(~group1) +
+  facet_wrap(~Priority) +
   geom_point(data=quercus[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
   geom_point(data=quercus2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=group1)) + 
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(Priority))) + 
   # geom_text(data=oak.groups, x=quantile(quercus2$BgLongitude, 0.05), y=quantile(quercus2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
   geom_text(data=groups.n, x=quantile(quercus2$BgLongitude, 0.05, na.rm=T), y=quantile(quercus2$BgLatitude, 0.005, na.rm=T), aes(label=paste0("n = ", n.trees)), fontface="bold") +
   guides(color=F) +
@@ -278,8 +296,9 @@ dev.off()
 
 summary(quercus2)
 
-quercus.list <- quercus2[,c("group1", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
-quercus.list <- quercus.list[order(quercus.list$group1, quercus.list$Taxon, quercus.list$PlantNumber),]
+quercus.list <- quercus2[,c("Priority", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
+quercus.list <- quercus.list[order(quercus.list$Priority, quercus.list$Taxon, quercus.list$PlantNumber),]
+names(quercus.list)[1] <- "Obs.List" # Renaming the first column to be consistent across lists
 summary(quercus.list)
 head(quercus.list)
 write.csv(quercus.list[!is.na(quercus.list$BgLatitude),], file.path(path.dat, "ObservingLists_Quercus.csv"), row.names=F)
@@ -316,7 +335,7 @@ oaks.all <- read.csv("../data/collections/Quercus_2018-03-19_161744393-BRAHMSOnl
 summary(oaks.all)
 
 quercus.list <- read.csv(file.path(path.dat, "ObservingLists_Quercus.csv"))
-quercus.list$group1 <- as.factor(quercus.list$group1)
+quercus.list$Obs.List <- as.factor(quercus.list$Obs.List)
 summary(quercus.list); 
 dim(quercus.list)
 
@@ -381,8 +400,8 @@ grid.crop <- crop(morton.grid, extent.map)
 
 # cols.save <- c("observer", "Taxon", "")
 
-for(ID in unique(quercus.list$group1) ){
-  dat.tmp <- quercus.list[quercus.list$group1==ID & !is.na(quercus.list$BgLatitude), !names(quercus.list)=="observer"]
+for(ID in unique(quercus.list$Obs.List) ){
+  dat.tmp <- quercus.list[quercus.list$Obs.List==ID & !is.na(quercus.list$BgLatitude), !names(quercus.list)=="observer"]
   
   png(file.path(path.dat, paste0("ObservingList_Quercus_", stringr::str_pad(ID, 2, side="left", "0"), ".png")), height=8, width=10, units="in", res=120)
   print(

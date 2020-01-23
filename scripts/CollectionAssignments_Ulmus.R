@@ -295,6 +295,7 @@ ggplot(data=ulmus2) +
   theme(plot.title=element_text(hjust=0.5, face="bold"))
 dev.off()
 
+nrow(ulmus2[ulmus2$species %in% npn,])
 
 png(file.path(path.dat, "Ulmus_NPN.png"), height=8, width=12, units="in", res=320)
 ggplot(data=ulmus2) +
