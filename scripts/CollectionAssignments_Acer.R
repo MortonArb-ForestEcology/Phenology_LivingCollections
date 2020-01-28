@@ -308,6 +308,7 @@ summary(acer2)
 
 acer.list <- acer2[,c("Priority", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
 acer.list <- acer.list[order(acer.list$Priority, acer.list$Taxon, acer.list$PlantNumber),]
+names(acer.list)[1] <- "Obs.List"
 summary(acer.list)
 head(acer.list)
 write.csv(acer.list[!is.na(acer.list$BgLatitude),], file.path(path.dat, "ObservingLists_Acer.csv"), row.names=F)
@@ -336,7 +337,7 @@ acers.all <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlin
 summary(acers.all)
 
 acer.list <- read.csv(file.path(path.dat, "ObservingLists_Acer.csv"))
-acer.list$Priority <- as.factor(acer.list$Priority)
+acer.list$Obs.List <- as.factor(acer.list$Obs.List)
 summary(acer.list); 
 dim(acer.list)
 
@@ -401,8 +402,8 @@ grid.crop <- crop(morton.grid, extent.map)
 
 # cols.save <- c("observer", "Taxon", "")
 
-for(ID in unique(acer.list$Priority) ){
-  dat.tmp <- acer.list[acer.list$Priority==ID & !is.na(acer.list$BgLatitude), !names(acer.list)=="observer"]
+for(ID in unique(acer.list$Obs.List) ){
+  dat.tmp <- acer.list[acer.list$Obs.List==ID & !is.na(acer.list$BgLatitude), !names(acer.list)=="observer"]
   
   png(file.path(path.dat, paste0("ObservingList_Acer_", stringr::str_pad(ID, 2, side="left", "0"), ".png")), height=8, width=10, units="in", res=120)
   print(
