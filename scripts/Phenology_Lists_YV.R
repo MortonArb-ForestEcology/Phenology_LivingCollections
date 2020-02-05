@@ -35,7 +35,8 @@ YV.org <- YV.org[(YV.org$Genus %in% taxalist),]
 #Ordering my alphabetical order of column
 YV.org <- arrange(YV.org, GardenLocation)
 
+YV.final <- YV.org[(is.na(YV.org$Latitude) == FALSE),]
 
-write.csv(YV.org, file.path(path.out, file = "Full_Species_List.csv"), row.names=FALSE)
+write.csv(YV.final, file.path(path.out, file = "Full_Species_List.csv"), row.names=FALSE)
 
 View(YV.org)
