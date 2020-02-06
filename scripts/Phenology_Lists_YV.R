@@ -25,7 +25,7 @@ gardenlist <- list("Childrens Garden", "Meadow Lake", "Firefly Pond", "Administr
                    "Arbor Court", "Ground Cover Garden", "Hedge Garden", "Maze Garden", "Visitor Center")
 
 #Creating a list of taxa we want to pull out of the larger data frame
-taxalist <- list("Acer", "Ceris", "Fagus","Ginkgo", "Larix", "Liriodendron","Pinus","Quercus", "Ulmus")
+taxalist <- list("Acer", "Capinus", "Ceris", "Fagus","Ginkgo", "Pinus","Quercus", "Syringa", "Ulmus")
 
 
 #Comparing the full list to our gardenlist to pull out what we want
