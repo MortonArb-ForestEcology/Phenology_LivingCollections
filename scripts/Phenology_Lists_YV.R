@@ -25,7 +25,7 @@ gardenlist <- list("Childrens Garden", "Meadow Lake", "Firefly Pond", "Administr
                    "Arbor Court", "Ground Cover Garden", "Hedge Garden", "Maze Garden", "Visitor Center")
 
 #Creating a list of taxa we want to pull out of the larger data frame
-taxalist <- list("Acer", "Capinus", "Ceris", "Fagus","Ginkgo", "Pinus","Quercus", "Syringa", "Ulmus")
+taxalist <- list("Acer", "Carpinus", "Cercis", "Fagus","Ginkgo", "Pinus","Quercus", "Syringa", "Ulmus")
 
 
 #Comparing the full list to our gardenlist to pull out what we want
@@ -39,4 +39,4 @@ YV.final <- YV.org[(is.na(YV.org$Latitude) == FALSE),]
 
 write.csv(YV.final, file.path(path.out, file = "Full_Species_List.csv"), row.names=FALSE)
 
-View(YV.org)
+View(YV.final)
