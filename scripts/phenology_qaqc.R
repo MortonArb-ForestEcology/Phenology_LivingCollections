@@ -18,7 +18,7 @@ source("clean_google_form.R")
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 
-path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
+# path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
 maps.out <- file.path(path.dat)
 # path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
 # path.gis <- "Y:/Collections" # Path on a PC
@@ -80,8 +80,8 @@ quercus.list <- read.csv(file.path(dir.base, "Observing Lists/Quercus", "Observi
 acer.list <- read.csv(file.path(dir.base, "Observing Lists/Acer", "ObservingLists_Acer.csv"))
 quercus.list$collection <- "Quercus"
 acer.list$collection <- "Acer"
-quercus.list$group1 <- paste(quercus.list$collection, quercus.list$group1, sep="-")
-acer.list$group1 <- paste(acer.list$collection, acer.list$group1, sep="-")
+quercus.list$Obs.List <- paste(quercus.list$collection, quercus.list$Obs.List, sep="-")
+acer.list$Obs.List <- paste(acer.list$collection, acer.list$Obs.List, sep="-")
 
 summary(quercus.list)
 summary(acer.list)
@@ -90,8 +90,8 @@ head(acer.list)
 obs.list <- rbind(quercus.list, acer.list)
 summary(obs.list)
 
-dat.all <- merge(dat.all, obs.list[,c("group1", "collection", "PlantNumber")])
-dat.all$group1 <- as.factor(dat.all$group1)
+dat.all <- merge(dat.all, obs.list[,c("Obs.List", "collection", "PlantNumber")])
+dat.all$Obs.List <- as.factor(dat.all$Obs.List)
 dat.all$collection <- as.factor(dat.all$collection)
 summary(dat.all)
 
@@ -103,8 +103,8 @@ length(unique(dat.all$Species))
 # Saving the figures that show observations for each individual
 for(PHENO in phenophase.obs){
   pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_Phenophase", paste0("2019_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
-  for(OBS in levels(dat.all$group1)){
-    dat.tmp <- dat.all[dat.all$group1==OBS, ]
+  for(OBS in levels(dat.all$Obs.List)){
+    dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
     dat.tmp$Phenophase <- dat.tmp[,PHENO]
     print(
       ggplot(data=dat.tmp[,]) +
@@ -133,8 +133,8 @@ for(PHENO in phenophase.obs){
   dev.off()
 }
 
-for(OBS in levels(dat.all$group1)){
-  dat.tmp <- dat.all[dat.all$group1==OBS, ]
+for(OBS in levels(dat.all$Obs.List)){
+  dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
   pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_ObservingList", paste0("2019_Observations_", OBS, "_by_Phenophase_byTree.pdf")), width=11, height=8.5)
   for(PHENO in phenophase.obs){
     dat.tmp$Phenophase <- dat.tmp[,PHENO]
@@ -194,7 +194,7 @@ summary(dat.all)
 # Checking to make sure everybody has made observations in the past week
 obs.gs <- gs_title("VolunteerAssignments_Phenology")
 obs.all <- data.frame(gs_read(obs.gs, ws="2019"))[1:5]
-obs.all$group1 <- paste(obs.all$Collection, obs.all$List, sep="-")
+obs.all$Obs.List <- paste(obs.all$Collection, obs.all$List, sep="-")
 obs.all
 
 
@@ -207,9 +207,9 @@ obs.check[obs.check$Observation.Last < Sys.Date()-8,] # Return anybody that's mo
 obs.all[!obs.all$Observer.ID %in% obs.check$Observer,]
 
 # Checking to make sure all trees have observations for the past week
-acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Species", "group1")], FUN=max)
+acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Species", "Obs.List")], FUN=max)
 names(acc.check)[which(names(acc.check)=="x")] <- "Observation.Last"
-acc.check <- merge(acc.check, obs.all[,c("group1", "Observer.ID")], all.x=T)
+acc.check <- merge(acc.check, obs.all[,c("Obs.List", "Observer.ID")], all.x=T)
 summary(acc.check)
 acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 8 days
 
