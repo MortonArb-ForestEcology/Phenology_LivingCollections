@@ -53,12 +53,12 @@ phenophase.obs <- names(dat.all)[grep(".observed", names(dat.all))]
 summary(dat.all$Observer)
 summary(dat.all[,"Observer"])
 
-for(PHENO in phenophase.obs){
-  dat.all[is.na(dat.all[,PHENO]),PHENO] <- "No Observation"
-  # dat.all[,PHENO] <- factor(dat.all[,PHENO], levels=c("No", "Yes", "Unsure", "Did not look for"))
-}
-summary(dat.all)
-summary
+# Shoudln't need this anymore
+# for(PHENO in phenophase.obs){
+#   dat.all[is.na(dat.all[,PHENO]),PHENO] <- "No Observation"
+#   # dat.all[,PHENO] <- factor(dat.all[,PHENO], levels=c("No", "Yes", "Unsure", "Did not look for"))
+# }
+# summary(dat.all)
 
 range(dat.all$Date.Observed)
 dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),1:6]
@@ -70,31 +70,36 @@ dat.all[dat.all$Date.Observed>Sys.Date(),1:6]
 #----------------------------
 # For QAQC, get rid of trees that have been removed
 #----------------------------
-# Querying the googlesheet for missing trees up front to make it easier
-sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
-sheet.gone # Prints all the metadata
-
-# Get the particular sheet & coerce it into a data frame rather than something special
-df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
-summary(df.gone)
-
-dim(dat.all)
-dat.all <- dat.all[!dat.all$PlantNumber %in% df.gone$PlantNumber,]
-summary(dat.all)
+# NOTE: This is broken and needs to be updated to GoogleSheets4!
+# # Querying the googlesheet for missing trees up front to make it easier
+# sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
+# sheet.gone # Prints all the metadata
+# 
+# # Get the particular sheet & coerce it into a data frame rather than something special
+# df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
+# summary(df.gone)
+# 
+# dim(dat.all)
+# dat.all <- dat.all[!dat.all$PlantNumber %in% df.gone$PlantNumber,]
+# summary(dat.all)
 
 # Also merge in the observing lists and volunteer assignments
 quercus.list <- read.csv(file.path(dir.base, "Observing Lists/Quercus", "ObservingLists_Quercus.csv"))
 acer.list <- read.csv(file.path(dir.base, "Observing Lists/Acer", "ObservingLists_Acer.csv"))
+ulmus.list <- read.csv(file.path(dir.base, "Observing Lists/Ulmus", "ObservingLists_Ulmus.csv"))
 quercus.list$collection <- "Quercus"
 acer.list$collection <- "Acer"
+ulmus.list$collection <- "Ulmus"
 quercus.list$Obs.List <- paste(quercus.list$collection, quercus.list$Obs.List, sep="-")
 acer.list$Obs.List <- paste(acer.list$collection, acer.list$Obs.List, sep="-")
+ulmus.list$Obs.List <- paste(ulmus.list$collection, ulmus.list$Obs.List, sep="-")
 
 summary(quercus.list)
 summary(acer.list)
+summary(ulmus.list)
 head(acer.list)
 
-obs.list <- rbind(quercus.list, acer.list)
+obs.list <- rbind(quercus.list, acer.list, ulmus.list)
 summary(obs.list)
 
 dat.all <- merge(dat.all, obs.list[,c("Obs.List", "collection", "PlantNumber")])

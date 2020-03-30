@@ -37,6 +37,7 @@ clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyI
   pheno.leaf <- names(dat.raw)[grep("leaf", tolower(names(dat.raw)))]
   pheno.flower <- names(dat.raw)[grep("flower", tolower(names(dat.raw)))]
   pheno.fruit <- names(dat.raw)[grep("fruit", tolower(names(dat.raw)))]
+  pheno.abund <- c("leaf.buds.intensity", "flower.buds.intensity", "fruit.present.intensity", "fruit.drop.intensity")
   
   # Setting things to factors
   # for(i in 1:ncol(dat.raw)){
@@ -58,13 +59,15 @@ clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyI
     dat.clean[,COL] <- as.factor(dat.clean[,COL])
     
     # Now do the ordering based on the levels
-    if("Yes" %in% unique(dat.clean[,COL])){
+    if(grepl("observed", COL)){
       dat.clean[,COL] <- car::recode(dat.clean[,COL], "'?'='Unsure'; 'Didnotlookfor'='No Observation'")
       dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("No", "Yes", "Unsure", "No Observation"))
-    } else if(any(grepl("%", dat.clean[,COL]))){
-      dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("0%", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%"))
-    } else {
+    } else if(COL == "flower.pollen.intensity") {
+      dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("None", "Little", "Some", "Lots"))
+    } else if(COL %in% pheno.abund){
       dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("0", "<3", "3-10", "11-100", "101-1,000", "1,001-10,000", ">10,000"))
+    } else {
+      dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("0%", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%"))
     }
   }
   
