@@ -18,7 +18,7 @@ source("clean_google_form.R")
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 
-# path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
+path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
 maps.out <- file.path(path.dat)
 # path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
 # path.gis <- "Y:/Collections" # Path on a PC
@@ -28,18 +28,24 @@ maps.out <- file.path(path.dat)
 # -------------------------------------------------------------
 # Access & format the observations
 # -------------------------------------------------------------
-# get the data from a particular sheet
-quercus <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Quercus", dat.yr=lubridate::year(Sys.Date()))
+# ----------------
+# get the data from each collection
+# ----------------
+quercus <- clean.google(collection="Quercus", dat.yr=lubridate::year(Sys.Date()))
 summary(quercus)
-quercus[quercus$Date.Observed>Sys.Date(),1:6]
+# quercus[quercus$Date.Observed>Sys.Date(),1:6]
 
-
-acer <- clean.google(pheno.title = "Phenology_Observations_GoogleForm", collection="Acer", dat.yr=lubridate::year(Sys.Date()))
+acer <- clean.google(collection="Acer", dat.yr=lubridate::year(Sys.Date()))
 summary(acer)
 
-dat.all <- rbind(quercus, acer)
-dat.all$fruit.drop.intensity <- as.factor(dat.all$fruit.drop.intensity)
+ulmus <- clean.google(collection="Ulmus", dat.yr=lubridate::year(Sys.Date()))
+summary(ulmus)
+# ----------------
+
+# Put the data together
+dat.all <- rbind(quercus, acer, ulmus)
 summary(dat.all)
+summary(dat.all[is.na(dat.all$leaf.buds.observed),])
 
 phenophase.obs <- names(dat.all)[grep(".observed", names(dat.all))] 
 
@@ -48,10 +54,11 @@ summary(dat.all$Observer)
 summary(dat.all[,"Observer"])
 
 for(PHENO in phenophase.obs){
-  dat.all[is.na(dat.all[,PHENO]),PHENO] <- "Did not look for"
-  dat.all[,PHENO] <- factor(dat.all[,PHENO], levels=c("No", "Yes", "?", "Did not look for"))
+  dat.all[is.na(dat.all[,PHENO]),PHENO] <- "No Observation"
+  # dat.all[,PHENO] <- factor(dat.all[,PHENO], levels=c("No", "Yes", "Unsure", "Did not look for"))
 }
 summary(dat.all)
+summary
 
 range(dat.all$Date.Observed)
 dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),1:6]
