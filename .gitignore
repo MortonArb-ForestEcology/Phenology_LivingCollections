@@ -17,3 +17,5 @@ scripts/CECA_Bloom_Past.csv
 data/QUMA_fruits_2019.csv
 data/NPN/groupRoster_The_Morton_Arboretum.csv
 data/NPN/NPN_Chicago_Observations_all.csv
+data/.DS_Store
+.DS_Store

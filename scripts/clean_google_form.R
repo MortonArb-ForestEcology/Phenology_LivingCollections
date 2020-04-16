@@ -7,30 +7,33 @@ clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyI
   # Renaming some columns
   names(dat.raw)[grep("OPTIONAL", names(dat.raw))] <- "Notes"
   names(dat.raw)[grep("species", names(dat.raw))] <- "Species"
+  names(dat.raw) <- gsub("..Intensity.", "", names(dat.raw))
+  names(dat.raw) <- gsub("..Observed.", "", names(dat.raw))
   
   # Recoding for easier names -- there must be a better way to do this, but I can't figure it out right now
   names(dat.raw) <- car::recode(names(dat.raw),
-                                  "'Breaking.leaf.buds..Observed.'='leaf.buds.observed';
-                                  'Leaf.breaking.bud.intensity..Intensity.'='leaf.buds.intensity';
-                                  'Leaf.observed..Observed.'='leaf.present.observed';
-                                  'Leaf.intensity..Intensity.'='leaf.present.intensity';
-                                  'Leaf.increasing.in.size..Observed.'='leaf.increasing.observed';
-                                  'Leaf.increasing.in.size.intensity..Intensity.'='leaf.increasing.intensity';
-                                  'Leaf.color.observed..Observed.'='leaf.color.observed';
-                                  'Leaf.color.intensity..Intensity.'='leaf.color.intensity';
-                                  'Leaf.falling.observed..Observed.'='leaf.falling.observed';
-                                  'Flower.buds.observed..Observed.'='flower.buds.observed';
-                                  'Flower.buds.intensity..Intensity.'='flower.buds.intensity';
-                                  'Flower.open.observed..Observed.'='flower.open.observed';
-                                  'Flower.open.intensity..Intensity.'='flower.open.intensity';
-                                  'Flower.pollen.release.observed..Observed.'='flower.pollen.observed';
-                                  'Flower.pollen.release.intensity..Intensity.'='flower.pollen.intensity';
-                                  'Fruit.observed..Observed.'='fruit.present.observed';
-                                  'Fruit.intensity..Intensity.'='fruit.present.intensity';
-                                  'Fruit.ripe.observed..Observed.'='fruit.ripe.observed';
-                                  'Fruit.ripe.intensity..Intensity.'='fruit.ripe.intensity';
-                                  'Fruit.drop.observed..Observed.'='fruit.drop.observed';
-                                  'Fruit.drop.intensity..Intensity.'='fruit.drop.intensity'")
+                                  "'Breaking.leaf.buds'='leaf.breaking.buds.observed';
+                                  'Leaf.breaking.buds'='leaf.breaking.buds.observed';
+                                  'Leaf.breaking.bud.intensity'='leaf.breaking.buds.intensity';
+                                  'Leaf.observed'='leaf.present.observed';
+                                  'Leaf.intensity'='leaf.present.intensity';
+                                  'Leaf.increasing.in.size'='leaf.increasing.observed';
+                                  'Leaf.increasing.in.size.intensity'='leaf.increasing.intensity';
+                                  'Leaf.color.observed'='leaf.color.observed';
+                                  'Leaf.color.intensity'='leaf.color.intensity';
+                                  'Leaf.falling.observed'='leaf.falling.observed';
+                                  'Flower.buds.observed'='flower.buds.observed';
+                                  'Flower.buds.intensity'='flower.buds.intensity';
+                                  'Flower.open.observed'='flower.open.observed';
+                                  'Flower.open.intensity'='flower.open.intensity';
+                                  'Flower.pollen.release.observed'='flower.pollen.observed';
+                                  'Flower.pollen.release.intensity'='flower.pollen.intensity';
+                                  'Fruit.observed'='fruit.present.observed';
+                                  'Fruit.intensity'='fruit.present.intensity';
+                                  'Fruit.ripe.observed'='fruit.ripe.observed';
+                                  'Fruit.ripe.intensity'='fruit.ripe.intensity';
+                                  'Fruit.drop.observed'='fruit.drop.observed';
+                                  'Fruit.drop.intensity'='fruit.drop.intensity'")
 
   # Coming up with handy groups for our columns
   cols.meta <- c("Timestamp", "Observer", "Date.Observed", "Species", "PlantNumber", "Notes")
@@ -60,7 +63,7 @@ clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyI
     
     # Now do the ordering based on the levels
     if(grepl("observed", COL)){
-      dat.clean[,COL] <- car::recode(dat.clean[,COL], "'?'='Unsure'; 'Didnotlookfor'='No Observation'")
+      dat.clean[,COL] <- car::recode(dat.clean[,COL], "'?'='Unsure'; 'Didnotlookfor'='No Observation'; 'Did not look for'='No Observation'")
       dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("No", "Yes", "Unsure", "No Observation"))
     } else if(COL == "flower.pollen.intensity") {
       dat.clean[,COL] <- factor(dat.clean[,COL], levels=c("None", "Little", "Some", "Lots"))
