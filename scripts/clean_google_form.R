@@ -40,7 +40,7 @@ clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyI
   pheno.leaf <- names(dat.raw)[grep("leaf", tolower(names(dat.raw)))]
   pheno.flower <- names(dat.raw)[grep("flower", tolower(names(dat.raw)))]
   pheno.fruit <- names(dat.raw)[grep("fruit", tolower(names(dat.raw)))]
-  pheno.abund <- c("leaf.buds.intensity", "flower.buds.intensity", "fruit.present.intensity", "fruit.drop.intensity")
+  pheno.abund <- c("leaf.breaking.buds.intensity", "flower.buds.intensity", "fruit.present.intensity", "fruit.drop.intensity")
   
   # Setting things to factors
   # for(i in 1:ncol(dat.raw)){
