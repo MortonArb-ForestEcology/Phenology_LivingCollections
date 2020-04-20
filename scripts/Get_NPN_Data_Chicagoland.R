@@ -44,9 +44,12 @@ source("../../NPN_Data_Utils/R/npn_get_obs.R")
 
 # Read in what data we already have
 obs.all <- read.csv("../data/NPN/NPN_Chicago_Observations_all.csv")
+obs.all$observation_date <- as.Date(obs.all$observation_date)
+summary(obs.all)
 
 # If our data is potentially out of date, update it
-if(max(obs.all$observation_date)>Sys.Date()-1){
+# Go back ~1 month to see if anybody has been updating info on a lag
+if(max(obs.all$observation_date)<Sys.Date()-1){
   # Note this step can be quite slow!
   # Note: if you get errors, what you're trying to do is too large
   # 1. Go by County
@@ -69,13 +72,13 @@ if(max(obs.all$observation_date)>Sys.Date()-1){
       
       obs.co <- data.frame() 
       for(i in 1:length(cook.split)){
-        dat.tmp <- npn.getObs(region=cook.split[[i]], start_date = max(obs.all$observation_date))
+        dat.tmp <- npn.getObs(region=cook.split[[i]], start_date = max(obs.all$observation_date)-30)
         if(nrow(dat.tmp)==0) next
         obs.co <- rbind(obs.co, dat.tmp)
       }
       
     } else {
-      obs.co <- npn.getObs(region=chicagoland[chicagoland$COUNTY_NAM == CO,], start_date = max(obs.all$observation_date))
+      obs.co <- npn.getObs(region=chicagoland[chicagoland$COUNTY_NAM == CO,], start_date = max(obs.all$observation_date)-30)
       # summary(obs.co)
       
     }
@@ -93,11 +96,32 @@ if(max(obs.all$observation_date)>Sys.Date()-1){
   
   # Make sure we're not adding duplicates
   obs.new <- obs.new[!obs.new$observation_id %in% obs.all$observation_id,]
+  dim(obs.new)
   
-  obs.all <- rbind(obs.all, obs.new)
-  
-  write.csv(obs.all, "../data/NPN/NPN_Chicago_Observations_all.csv", row.names=F)
+  if(nrow(obs.all)>0){
+    # Having trouble with adding new variables because of new levels, so lets temporarily convert everything to a character string
+    for(i in 1:ncol(obs.all)){
+      obs.all[,i] <- as.character(obs.all[,i])
+      obs.new[,i] <- as.character(obs.new[,i])
+    }
+    obs.all <- rbind(obs.all, obs.new)
+    for(i in 1:ncol(obs.all)){
+      obs.all[,i] <- as.factor(obs.all[,i])
+    }
+    obs.all$update_datetime <- strptime(obs.all$update_datetime, format="%Y-%m-%d %H:%M:%S")
+    obs.all$latitude <- as.numeric(paste(obs.all$latitude))
+    obs.all$longitude <- as.numeric(paste(obs.all$longitude))
+    obs.all$elevation_in_meters <- as.numeric(paste(obs.all$elevation_in_meters))
+    obs.all$observation_date <- as.Date(obs.all$observation_date)
+    obs.all$day_of_year <- as.numeric(paste(obs.all$day_of_year))
+    obs.all$abundance_value <- as.numeric(paste(obs.all$abundance_value))
+    # summary(obs.all$update_datetime)
+    summary(obs.all)
+    
+    write.csv(obs.all, "../data/NPN/NPN_Chicago_Observations_all.csv", row.names=F)
+  }  
 }
+
 # -----------------------------------
 
 
@@ -112,7 +136,7 @@ obs.sites <- aggregate(obs.all[,c("latitude", "longitude")],
 summary(obs.sites)
 
 
-png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Sites.png"), height=6, width=6, units="in", res=180)
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Map_Sites_All.png"), height=6, width=6, units="in", res=180)
 ggplot(data=obs.sites)+
   coord_equal() +
   geom_polygon(data=chicagoland, aes(x=long, y=lat, group=group), fill=NA, color="black") +
@@ -135,7 +159,7 @@ oak <- grep("oak", obs.spp$common_name)
 maple <- grep("maple", obs.spp$common_name)
 elm <- grep("elm", obs.spp$common_name)
 
-png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_OaksMaplesElms.png"), height=6, width=6, units="in", res=180)
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Map_Sites_OaksMaplesElms.png"), height=6, width=6, units="in", res=180)
 ggplot(data=obs.spp[c(oak, maple, elm),])+
   coord_equal() +
   geom_polygon(data=chicagoland, aes(x=long, y=lat, group=group), fill=NA, color="black") +
@@ -153,6 +177,7 @@ dev.off()
 # Looking at phenology status
 # -----------------------------------
 obs.plant <- obs.all[obs.all$kingdom=="Plantae",]
+obs.plant$phenophase_status <- factor(obs.plant$phenophase_status, levels=c("no", "yes", "uncertain"))
 summary(obs.plant)
 
 obs.plant$phenophase_category <- as.factor(ifelse(grepl("leaf", obs.plant$phenophase_description) | grepl("leave", obs.plant$phenophase_description), "leaf", "flower"))
@@ -161,12 +186,27 @@ pheno.spring <- c("Breaking leaf buds", "Increasing leaf size", "Flowers or flow
 
 
 
-png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Status_QuercusAcer.png"), height=6, width=8, units="in", res=180)
-ggplot(data=obs.plant[obs.plant$genus %in% c("Acer", "Quercus") & obs.plant$phenophase_description %in% pheno.spring,]) +
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Status_Acer.png"), height=6, width=8, units="in", res=180)
+ggplot(data=obs.plant[obs.plant$genus %in% c("Acer") & obs.plant$phenophase_description %in% pheno.spring,]) +
   facet_grid(genus + species ~ phenophase_category + phenophase_description, scales="free") +
   geom_point(aes(x=observation_date, y=individual_id, color=phenophase_status), pch="|", size=5) +
   scale_color_manual(name="status", values=c("gray50", "green4", "lightblue")) +
-  labs(title="Chicago Oak and Maple Phenology", x="Date") +
+  labs(title=paste0("Chicago Maple Phenology (updated ", Sys.Date(), ")"), x="Date") +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust=0.5, face="bold"),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.x=element_text(angle=-30, hjust=0),
+        strip.text.y=element_text(face="italic", margin=unit(c(0,0,0.5,0), "lines")),
+        legend.position="bottom")
+dev.off()
+
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Status_Quercus.png"), height=6, width=8, units="in", res=180)
+ggplot(data=obs.plant[obs.plant$genus %in% c("Quercus") & obs.plant$phenophase_description %in% pheno.spring,]) +
+  facet_grid(genus + species ~ phenophase_category + phenophase_description, scales="free") +
+  geom_point(aes(x=observation_date, y=individual_id, color=phenophase_status), pch="|", size=5) +
+  scale_color_manual(name="status", values=c("gray50", "green4", "lightblue")) +
+  labs(title=paste0("Chicago Oak Phenology (updated ", Sys.Date(), ")"), x="Date") +
   theme_minimal() + 
   theme(plot.title = element_text(hjust=0.5, face="bold"),
         axis.text.y=element_blank(),
@@ -191,15 +231,15 @@ for(IND in unique(obs.last$individual_id)){
 obs.last$phenophase_status <- factor(obs.last$phenophase_status, levels=c("no", "yes", "uncertain"))
 summary(obs.last)
 
-
-png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Status_QuercusAcer_Map_latest.png"), height=6, width=8, units="in", res=180)
-ggplot(data=obs.last[obs.last$genus %in% c("Acer", "Quercus") & obs.last$phenophase_description %in% pheno.spring,]) + 
+# spp.plot <- c(c("macrocarpa", "alba", "rubrum", "saccharum"))
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Map_Status_Acer_latest.png"), height=6, width=8, units="in", res=180)
+ggplot(data=obs.last[obs.last$genus %in% c("Acer") & obs.last$phenophase_description %in% pheno.spring,]) + 
   facet_grid(genus + species ~ phenophase_category + phenophase_description) +
   coord_equal() +
   geom_polygon(data=chicagoland, aes(x=long, y=lat, group=group), fill=NA, color="black") +
   geom_jitter(aes(x=longitude, y=latitude, color=phenophase_status), size=3, height=0.03, width=0.03, alpha=0.5) +
   scale_x_continuous(expand=c(0.25,0.25)) +
-  labs(title="Chicago Oak and Maple Phenology (latest observation)") +
+  labs(title=paste0("Chicago Maple Status (updated ", Sys.Date(), ")"), x="Date") +
   scale_color_manual(name="status", values=c("gray50", "green4", "lightblue")) +
   theme_minimal() + 
   theme(plot.title = element_text(hjust=0.5, face="bold"),
@@ -213,5 +253,27 @@ ggplot(data=obs.last[obs.last$genus %in% c("Acer", "Quercus") & obs.last$phenoph
         panel.background = element_blank(),
         strip.background = element_blank())
 dev.off()
-  
+
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Map_Status_Quercus_latest.png"), height=6, width=8, units="in", res=180)
+ggplot(data=obs.last[obs.last$genus %in% c("Quercus") & obs.last$phenophase_description %in% pheno.spring,]) + 
+  facet_grid(genus + species ~ phenophase_category + phenophase_description) +
+  coord_equal() +
+  geom_polygon(data=chicagoland, aes(x=long, y=lat, group=group), fill=NA, color="black") +
+  geom_jitter(aes(x=longitude, y=latitude, color=phenophase_status), size=3, height=0.03, width=0.03, alpha=0.5) +
+  scale_x_continuous(expand=c(0.25,0.25)) +
+  labs(title=paste0("Chicago Oak Status (updated ", Sys.Date(), ")"), x="Date") +
+  scale_color_manual(name="status", values=c("gray50", "green4", "lightblue")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust=0.5, face="bold"),
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        strip.text.y=element_text(face="italic", margin=unit(c(0,0,0.5,0), "lines")),
+        legend.position="right",
+        # panel.spacing.x = unit(4, "lines"),
+        panel.grid = element_blank(),
+        plot.background = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank())
+dev.off()
+
 # -----------------------------------
