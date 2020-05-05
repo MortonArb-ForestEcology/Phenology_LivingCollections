@@ -9,12 +9,21 @@
 # 5. push by individual observation set
 # ------------------------------------------
 
+# ------------------------------------------
+# May need to move this up!
+# Pull Morton Arb data (network ID = 720) & get rid of anything already there
+# ------------------------------------------
+source("../../NPN_Data_Utils/R/npn_get_obs.R")
+dat.npn <- npn.getObs(station_id = 26202)
+summary(dat.npn)
+# ------------------------------------------
+
 
 # ------------------------------------------
 # 1. download our observations from Google
 # ------------------------------------------
 source("clean_google_form.R")
-dat.test <- clean.google(dat.yr = 2019)
+dat.test <- clean.google(dat.yr = 2020)
 summary(dat.test)
 
 names(dat.test)
@@ -106,21 +115,16 @@ dat.arb <- data.frame(phenophase_id=dat.long$NPN.Code,
                       observation_extent=dat.long$phenophase_status,
                       observation_comment=paste0(gsub(" " , "_", dat.long$Notes), "__Uploaded_via_R_by_CR"),
                       observation_value_id=dat.long$intensity_id)
-dat.arb <- dat.arb[!is.na(dat.npn$observation_extent),]
+dat.arb <- dat.arb[!is.na(dat.arb$observation_extent),]
 summary(dat.arb)
 # ------------------------------------------
 
-# ------------------------------------------
-# May need to move this up!
-# Pull Morton Arb data (network ID = 720) & get rid of anything already there
-# ------------------------------------------
-source("../../NPN_Data_Utils/R/npn_get_obs.R")
-dat.npn <- npn.getObs(station_id = 26202)
-summary(dat.npn)
-# ------------------------------------------
 
 
 # ------------------------------------------
 # Loop through and upload
 # ------------------------------------------
+dat.now <- dat.arb[dat.arb$individual_id==dat.arb$individual_id[1] & dat.arb$observation_date==dat.arb$observation_date[1],]
+
+newdata=dat.now
 # ------------------------------------------
