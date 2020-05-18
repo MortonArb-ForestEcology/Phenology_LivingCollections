@@ -209,23 +209,3 @@ for(SITE in sites.push){
 names(dat.now)
 # ------------------------------------------
 
-# ------------------------------------------
-# 2. Format to match NPN data set
-# Station IDs
-# Oak Collection
-# Maple Collection
-# Schulenberg Prairie = 
-# ------------------------------------------
-
-
-# ------------------------------------------
-
-
-
-# ------------------------------------------
-# Loop through and upload
-# ------------------------------------------
-dat.now <- dat.arb[dat.arb$individual_id==dat.arb$individual_id[1] & dat.arb$observation_date==dat.arb$observation_date[1],]
-
-newdata=dat.now
-# ------------------------------------------
