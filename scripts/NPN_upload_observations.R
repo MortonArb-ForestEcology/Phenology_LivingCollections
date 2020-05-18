@@ -96,17 +96,6 @@ for(SITE in sites.push){
     dat.now <- dat.now[dat.now$PlantNumber %in% arb.inds$individual_name, ]
     dim(dat.now)
     
-    # Check to see if data has already been pushed
-    # NOTE: NOT IMPLEMENTED YET!!!
-    if(overwrite==F){
-      # Download data for the station starting at Jan 1 for the year
-      dat.npn <- npn.getObs(station_id = station_id, start_date=paste0(YR, "-01-01"), end_date=paste0(YR, "-12-31"))
-      summary(dat.npn)
-      
-      # Check to remove data from dat.now where the dates line up
-      # (this is the part that needs to be implemented)
-      
-    }
     if(nrow(dat.now)==0) next
     
     names(dat.now)[names(dat.now) %in% paste0(xwalk$MortonArb.Description, ".observed")]
@@ -151,6 +140,7 @@ for(SITE in sites.push){
                                       'Little'='44';
                                       'Some'='45';
                                       'Lots'='46'")
+    dat.long[is.na(dat.long)] <- -9999
     summary(dat.long)
     
     # for(COL in names(dat.long)){
@@ -166,15 +156,56 @@ for(SITE in sites.push){
                           individual_id=dat.long$individual_id,
                           observation_date=dat.long$Date.Observed,
                           observation_extent=dat.long$phenophase_status,
-                          observation_comment=paste0(gsub(" " , "_", dat.long$Notes), "__Uploaded_via_R_by_CR"),
+                          observation_comment=gsub(" " , "_", dat.long$Notes),
                           observation_value_id=dat.long$intensity_id)
-    dat.arb <- dat.arb[!is.na(dat.arb$observation_extent),]
+    dat.arb <- dat.arb[!is.na(dat.arb$observation_extent) | dat.arb$observation_extent==-9999,] # Get rid of no obs
     summary(dat.arb)
     dim(dat.arb)
     
-    # hist(dat.npn$observation_id)
+    # Check to see if data has already been pushed
+    if(overwrite==F){
+      # Download data for the station starting at Jan 1 for the year
+      dat.npn <- rnpn::npn_download_status_data(station_ids=station_id, years=YR, request_source="C. Rollinson, Morton Arb")
+      dat.npn$observation_date <- as.Date(dat.npn$observation_date)
+      summary(dat.npn)
+      
+      # Check to remove data from dat.now where the dates line up
+      # 1. Go by Individual and Date
+      # 2. Check to see if all of the data agrees with what is in our database.  
+      # 3.a. If data agrees, remove it from the data to be pushed
+      # 3.b. If data does not agree, push what we have at the Arb to overwrite NPN's data
+      for(IND in unique(dat.arb$individual_id)){
+        if(!IND %in% unique(dat.npn$individual_id)) next # data for a new individual
+        
+        # Subset to just data for this individual to make life easier
+        npn.ind <- dat.npn[dat.npn$individual_id==IND,]
+        
+        # Now check and see if this date is in our data
+        for(OBS in unique(dat.arb$Date.Observed[dat.arb$individual_id==IND])){
+          
+          if(!OBS %in% unique(npn.ind$observation_date)) next # data for a new data
+          npn.obs <- dat.ind[dat.ind$observation_date==OBS,]
+          
+          # Check each observation
+          rows.check <- which(dat.arb$individual_id==IND & dat.arb$Date.Observed==OBS)
+          for(i in rows.check){
+            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$NPN.Code[rows.check[i]], ]
+            stat.now <- dat.arb$phenophase_status[rows.check[i]]==npn.chk$phenophase_status
+            int.now  <- dat.arb$intensity_id[rows.check[i]]==npn.chk$intensity_category_id
+            
+            # If all of the data matches, get rid of that from dat.arb
+            if(all(stat.now, int.now)){
+              dat.arb <- dat.arb[row.names(dat.arb)!=rows.check[i],]
+            } # End removal
+          } # End loop through phenophases
+        } # End loop through observation dates
+      } # End loop through individuals
+      
+    } # End overwrite check
     
-    # Push data individual by individual and date by date
+    
+    
+    # Push new or updated data individual by individual and date by date
     print(paste0("Pushing data for ", SITE, ", ", YR, " (", nrow(dat.arb), " data points for ", nrow(dat.now), " observation sets)"))
     pb <- txtProgressBar(min=0, max=nrow(dat.now), style=3)
     pb.ind=0
@@ -183,12 +214,16 @@ for(SITE in sites.push){
       for(OBS in unique(paste(dat.ind$observation_date))){
         dat.obs <- dat.ind[dat.ind$observation_date==OBS,]
         
-        resp <- npn.putObs(newdata=dat.obs, user_id=user_id, user_pw = user_pw)
+        resp <- npn.putObs(newdata=dat.obs, user_id=user_id, user_pw = user_pw, npn_server="dev")
         resp <- httr::content(resp, as="parsed")
         xml.chil <- xml2::xml_children(resp)
+        
+        # Potential extension: Push to Google Doc whether uploaded to NPN or not
         if(xml2::xml_attrs(xml.chil[[1]])[["response_code"]]=="1"){
           # print("Observation Successfully Uploaded")
         } else {
+          # xml.chil2 <- xml2::xml_children(xml.chil[[1]])
+          # xml.chil2[["response_message"]]
           warning(paste0("Observation Not Uploaded: individual ", IND, " (", OBS, ")"))
           # Eventually change this so it gives more info
           # subchil <- xml2::xml_children(xml.chil[[1]])
