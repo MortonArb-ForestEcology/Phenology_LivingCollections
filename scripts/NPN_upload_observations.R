@@ -12,40 +12,43 @@
 
 # ------------------------------------------
 # Read in NPN-level metadata
+# Commented out because you only need to do this once.  
+# If you need these data, just undo the commented out.
+# We should also migrate these functions to using the NPN's rnpn package
 # ------------------------------------------
 
-# Using get All stations to get data Christy has access to
-# Arb network ID = 720
-source("../../NPN_Data_Utils/R/npn_get_stations.R")
-stat.arb <- npn.getStations(network_ids=720)
-stat.arb
-write.csv(stat.arb, "../data/NPN/NPN_TheMortonArboretum_Stations_All.csv", row.names=F)
-
-# merge in our NPN data
-file.inds <- "../data/NPN/NPN_MortonArb_Individuals_All.csv"
-UPDATE=T # Can choose if we want to update or not
-if(file.exists(file.inds) & !UPDATE){
-  arb.inds <- read.csv(file.inds)
-} else {
-  source("../../NPN_Data_Utils/R/npn_getIndAtStation.R")
-  
-  arb.inds <- data.frame()
-  for(i in 1:nrow(stat.arb)){
-    coll.inds <- npn.getIndAtStation(station_ids = stat.arb$station_id[i])
-    coll.inds$station_id <- stat.arb$station_id[i]
-    coll.inds$station_name <- stat.arb$station_name[i]
-    
-    arb.inds <- rbind(arb.inds, coll.inds)
-  }
-  arb.inds <- arb.inds[!is.na(arb.inds$individual_id),]
-  write.csv(arb.inds, "../data/NPN/NPN_MortonArb_Individuals_All.csv", row.names=F)
-}
-for(i in 1:ncol(arb.inds)){
-  arb.inds[,i] <- as.factor(arb.inds[,i])
-}
-
-summary(arb.inds)
-arb.inds$PlantNumber <- arb.inds$individual_name
+# # Using get All stations to get data Christy has access to
+# # Arb network ID = 720
+# source("../../NPN_Data_Utils/R/npn_get_stations.R")
+# stat.arb <- npn.getStations(network_ids=720)
+# stat.arb
+# write.csv(stat.arb, "../data/NPN/NPN_TheMortonArboretum_Stations_All.csv", row.names=F)
+# 
+# # merge in our NPN data
+# file.inds <- "../data/NPN/NPN_MortonArb_Individuals_All.csv"
+# UPDATE=T # Can choose if we want to update or not
+# if(file.exists(file.inds) & !UPDATE){
+#   arb.inds <- read.csv(file.inds)
+# } else {
+#   source("../../NPN_Data_Utils/R/npn_getIndAtStation.R")
+#   
+#   arb.inds <- data.frame()
+#   for(i in 1:nrow(stat.arb)){
+#     coll.inds <- npn.getIndAtStation(station_ids = stat.arb$station_id[i])
+#     coll.inds$station_id <- stat.arb$station_id[i]
+#     coll.inds$station_name <- stat.arb$station_name[i]
+#     
+#     arb.inds <- rbind(arb.inds, coll.inds)
+#   }
+#   arb.inds <- arb.inds[!is.na(arb.inds$individual_id),]
+#   write.csv(arb.inds, "../data/NPN/NPN_MortonArb_Individuals_All.csv", row.names=F)
+# }
+# for(i in 1:ncol(arb.inds)){
+#   arb.inds[,i] <- as.factor(arb.inds[,i])
+# }
+# 
+# summary(arb.inds)
+# arb.inds$PlantNumber <- arb.inds$individual_name
 
 # ------------------------------------------
 
@@ -65,6 +68,10 @@ arb.inds <- read.csv("../data/NPN/NPN_MortonArb_Individuals_All.csv", stringsAsF
 arb.inds$PlantNumber=arb.inds$individual_name
 summary(arb.inds)
 
+
+dim(arb.inds[arb.inds$station_name %in% c("Oak Collection", "Maple Collection", "Elm Collection"),])
+dim(arb.inds[arb.inds$station_name %in% c("Oak Collection", "Maple Collection", "Elm Collection"),])
+
 # ------------------------------------------
 
 
@@ -80,14 +87,14 @@ user_pw <- strsplit(npn_creds[2], ":")[[1]][2]
 # Loop through collections
 sites.push <- c("Oak", "Maple", "Elm")
 yrs.push <- c(2018:2020)
-overwrite=T
+overwrite=F
 
 for(SITE in sites.push){
   GENUS <- car::recode(SITE, "'Oak'='Quercus'; 'Maple'='Acer'; 'Elm'='Ulmus'")
   station_id <- stat.arb$station_id[grep(SITE, stat.arb$station_name)]
   
   if(SITE=="Maple") yrs.push <- yrs.push[yrs.push>=2019]
-  if(SITE=="ELM") yrs.push <- yrs.push[yrs.push>=2020]
+  if(SITE=="Elm") yrs.push <- yrs.push[yrs.push>=2020]
   
   for(YR in yrs.push){
     dat.now <- clean.google(collection = GENUS, dat.yr = YR)
@@ -126,22 +133,22 @@ for(SITE in sites.push){
     dat.long$intensity[dat.long$intensity %in% c("None", "0", "0%")] <- NA
     dat.long$intensity_id <- car::recode(dat.long$intensity, 
                                          "'<3'='32';
-                                      '3-10'='32'; 
-                                      '11-100'='39';
-                                      '101-1,000'='40';
-                                      '1,001-10,000'='41';
-                                      '>10,000'='42'; 
-                                      '<5%'='25'; 
-                                      '5-24%'='26';
-                                      '25-49%'='27';
-                                      '50-74%'='28';
-                                      '75-94%'='29';
-                                      '>95%'='30';
-                                      'Little'='44';
-                                      'Some'='45';
-                                      'Lots'='46'")
+                                          '3-10'='32';
+                                          '11-100'='39';
+                                          '101-1,000'='40';
+                                          '1,001-10,000'='41';
+                                          '>10,000'='42';
+                                          '<5%'='25';
+                                          '5-24%'='26';
+                                          '25-49%'='27';
+                                          '50-74%'='28';
+                                          '75-94%'='29';
+                                          '>95%'='30';
+                                          'Little'='44';
+                                          'Some'='45';
+                                          'Lots'='46'")
     dat.long[is.na(dat.long)] <- -9999
-    summary(dat.long)
+    # summary(dat.long)
     
     # for(COL in names(dat.long)){
     #   if(COL %in% c("Date.Observed")) next
@@ -157,14 +164,16 @@ for(SITE in sites.push){
                           observation_date=dat.long$Date.Observed,
                           observation_extent=dat.long$phenophase_status,
                           observation_comment=gsub(" " , "_", dat.long$Notes),
-                          observation_value_id=dat.long$intensity_id)
-    dat.arb <- dat.arb[!is.na(dat.arb$observation_extent) | dat.arb$observation_extent==-9999,] # Get rid of no obs
+                          abundance_value_id=dat.long$intensity_id)
+    dat.arb <- dat.arb[!is.na(dat.arb$observation_extent) & dat.arb$observation_extent!=-9999,] # Get rid of no obs
     summary(dat.arb)
     dim(dat.arb)
     
     # Check to see if data has already been pushed
     if(overwrite==F){
       # Download data for the station starting at Jan 1 for the year
+      # dat.npn <- npn.getObs(station_id = station_id, start_date=paste0(YR, "-01-01"), end_date=paste0(YR, "-12-31"))
+      # summary(dat.npn)
       dat.npn <- rnpn::npn_download_status_data(station_ids=station_id, years=YR, request_source="C. Rollinson, Morton Arb")
       dat.npn$observation_date <- as.Date(dat.npn$observation_date)
       summary(dat.npn)
@@ -181,21 +190,21 @@ for(SITE in sites.push){
         npn.ind <- dat.npn[dat.npn$individual_id==IND,]
         
         # Now check and see if this date is in our data
-        for(OBS in unique(dat.arb$Date.Observed[dat.arb$individual_id==IND])){
+        for(OBS in unique(dat.arb$observation_date[dat.arb$individual_id==IND])){
           
           if(!OBS %in% unique(npn.ind$observation_date)) next # data for a new data
-          npn.obs <- dat.ind[dat.ind$observation_date==OBS,]
+          npn.obs <- npn.ind[npn.ind$observation_date==OBS,]
           
           # Check each observation
-          rows.check <- which(dat.arb$individual_id==IND & dat.arb$Date.Observed==OBS)
+          rows.check <- which(dat.arb$individual_id==IND & dat.arb$observation_date==OBS)
           for(i in rows.check){
-            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$NPN.Code[rows.check[i]], ]
-            stat.now <- dat.arb$phenophase_status[rows.check[i]]==npn.chk$phenophase_status
-            int.now  <- dat.arb$intensity_id[rows.check[i]]==npn.chk$intensity_category_id
+            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$phenophase_id[rows.check[i]],]
+            stat.now <- dat.arb$observation_extent[rows.check[i]]==npn.chk$phenophase_status
+            int.now  <- dat.arb$observation_value_id[rows.check[i]]==npn.chk$intensity_category_id
             
             # If all of the data matches, get rid of that from dat.arb
             if(all(stat.now, int.now)){
-              dat.arb <- dat.arb[row.names(dat.arb)!=rows.check[i],]
+              dat.arb <- dat.arb[row.names(dat.arb)!=i,]
             } # End removal
           } # End loop through phenophases
         } # End loop through observation dates
@@ -203,7 +212,7 @@ for(SITE in sites.push){
       
     } # End overwrite check
     
-    
+    if(nrow(dat.arb)==0) next
     
     # Push new or updated data individual by individual and date by date
     print(paste0("Pushing data for ", SITE, ", ", YR, " (", nrow(dat.arb), " data points for ", nrow(dat.now), " observation sets)"))
@@ -214,7 +223,7 @@ for(SITE in sites.push){
       for(OBS in unique(paste(dat.ind$observation_date))){
         dat.obs <- dat.ind[dat.ind$observation_date==OBS,]
         
-        resp <- npn.putObs(newdata=dat.obs, user_id=user_id, user_pw = user_pw, npn_server="dev")
+        resp <- npn.putObs(newdata=dat.obs, user_id=user_id, user_pw = user_pw, npn_server="production")
         resp <- httr::content(resp, as="parsed")
         xml.chil <- xml2::xml_children(resp)
         
