@@ -216,7 +216,7 @@ for(SITE in sites.push){
     
     # Push new or updated data individual by individual and date by date
     print(paste0("Pushing data for ", SITE, ", ", YR, " (", nrow(dat.arb), " data points for ", nrow(dat.now), " observation sets)"))
-    pb <- txtProgressBar(min=0, max=nrow(dat.now), style=3)
+    pb <- txtProgressBar(min=0, max=length(unique(paste(dat.arb$individual_id, dat.arb$observation_date, sep="_"))), style=3)
     pb.ind=0
     for(IND in unique(dat.arb$individual_id)){
       dat.ind <- dat.arb[dat.arb$individual_id==IND,]
