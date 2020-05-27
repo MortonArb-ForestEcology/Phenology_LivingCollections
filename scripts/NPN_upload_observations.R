@@ -183,29 +183,28 @@ for(SITE in sites.push){
       # 2. Check to see if all of the data agrees with what is in our database.  
       # 3.a. If data agrees, remove it from the data to be pushed
       # 3.b. If data does not agree, push what we have at the Arb to overwrite NPN's data
-      for(IND in paste(unique(dat.arb$individual_id))){
+      for(IND in unique(dat.arb$individual_id)){
         if(!IND %in% unique(dat.npn$individual_id)) next # data for a new individual
-        # print(IND)
+        
         # Subset to just data for this individual to make life easier
         npn.ind <- dat.npn[dat.npn$individual_id==IND,]
         
         # Now check and see if this date is in our data
-        for(OBS in paste(unique(dat.arb$observation_date[dat.arb$individual_id==IND]))){
+        for(OBS in unique(dat.arb$observation_date[dat.arb$individual_id==IND])){
           
-          # print(OBS)
-          if(!OBS %in% unique(paste(npn.ind$observation_date))) next # data for a new data
+          if(!OBS %in% unique(npn.ind$observation_date)) next # data for a new data
           npn.obs <- npn.ind[npn.ind$observation_date==OBS,]
+          
           # Check each observation
-          rows.check <- row.names(dat.arb)[which(dat.arb$individual_id==IND & dat.arb$observation_date==OBS)]
+          rows.check <- which(dat.arb$individual_id==IND & dat.arb$observation_date==OBS)
           for(i in rows.check){
-            df.ind <- which(row.names(dat.arb)==paste(i))
-            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$phenophase_id[df.ind],]
-            stat.now <- dat.arb$observation_extent[df.ind]==npn.chk$phenophase_status
-            int.now  <- dat.arb$abundance_value_id[df.ind]==npn.chk$intensity_category_id
+            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$phenophase_id[rows.check[i]],]
+            stat.now <- dat.arb$observation_extent[rows.check[i]]==npn.chk$phenophase_status
+            int.now  <- dat.arb$observation_value_id[rows.check[i]]==npn.chk$intensity_category_id
             
             # If all of the data matches, get rid of that from dat.arb
             if(all(stat.now, int.now)){
-              dat.arb <- dat.arb[which(row.names(dat.arb)!=paste(i)),]
+              dat.arb <- dat.arb[row.names(dat.arb)!=i,]
             } # End removal
           } # End loop through phenophases
         } # End loop through observation dates
