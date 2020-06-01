@@ -129,6 +129,7 @@ if(max(obs.all$observation_date)<Sys.Date()-1){
 # Doing some graphing
 # -----------------------------------
 library(ggplot2)
+obs.all <- obs.all[lubridate::year(obs.all$observation_date)==2020,]
 
 obs.sites <- aggregate(obs.all[,c("latitude", "longitude")],
                        by=obs.all[,c("site_id", "kingdom", "County")],
@@ -217,6 +218,24 @@ ggplot(data=obs.plant[obs.plant$genus %in% c("Quercus") & obs.plant$phenophase_d
 dev.off()
 
 
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Status_Ulmus.png"), height=6, width=8, units="in", res=180)
+ggplot(data=obs.plant[obs.plant$genus %in% c("Ulmus") & obs.plant$phenophase_description %in% pheno.spring,]) +
+  facet_grid(genus + species ~ phenophase_category + phenophase_description, scales="free") +
+  geom_point(aes(x=observation_date, y=individual_id, color=phenophase_status), pch="|", size=5) +
+  scale_color_manual(name="status", values=c("gray50", "green4", "lightblue")) +
+  labs(title=paste0("Chicago Oak Phenology (updated ", Sys.Date(), ")"), x="Date") +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust=0.5, face="bold"),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.x=element_text(angle=-30, hjust=0),
+        strip.text.y=element_text(face="italic", margin=unit(c(0,0,0.5,0), "lines")),
+        legend.position="bottom")
+dev.off()
+
+
+
+
 summary(obs.plant)
 obs.last <- aggregate(observation_date~ County + site_id + latitude + longitude + genus + species + common_name + individual_id + phenophase_category + phenophase_description, 
                       data=obs.plant, FUN=max)
@@ -256,6 +275,29 @@ dev.off()
 
 png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Map_Status_Quercus_latest.png"), height=6, width=8, units="in", res=180)
 ggplot(data=obs.last[obs.last$genus %in% c("Quercus") & obs.last$phenophase_description %in% pheno.spring,]) + 
+  facet_grid(genus + species ~ phenophase_category + phenophase_description) +
+  coord_equal() +
+  geom_polygon(data=chicagoland, aes(x=long, y=lat, group=group), fill=NA, color="black") +
+  geom_jitter(aes(x=longitude, y=latitude, color=phenophase_status), size=3, height=0.03, width=0.03, alpha=0.5) +
+  scale_x_continuous(expand=c(0.25,0.25)) +
+  labs(title=paste0("Chicago Oak Status (updated ", Sys.Date(), ")"), x="Date") +
+  scale_color_manual(name="status", values=c("gray50", "green4", "lightblue")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust=0.5, face="bold"),
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        strip.text.y=element_text(face="italic", margin=unit(c(0,0,0.5,0), "lines")),
+        legend.position="right",
+        # panel.spacing.x = unit(4, "lines"),
+        panel.grid = element_blank(),
+        plot.background = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank())
+dev.off()
+
+
+png(file.path(path.google, "Observing_NPN/NPN_ChicagoLand_Phenology_Map_Status_Ulmus_latest.png"), height=6, width=8, units="in", res=180)
+ggplot(data=obs.last[obs.last$genus %in% c("Ulmus") & obs.last$phenophase_description %in% pheno.spring,]) + 
   facet_grid(genus + species ~ phenophase_category + phenophase_description) +
   coord_equal() +
   geom_polygon(data=chicagoland, aes(x=long, y=lat, group=group), fill=NA, color="black") +
