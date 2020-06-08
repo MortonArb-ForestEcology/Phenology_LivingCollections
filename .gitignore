@@ -20,3 +20,5 @@ data/NPN/NPN_Chicago_Observations_all.csv
 data/.DS_Store
 .DS_Store
 data/NPN/.NPN_creds
+data_raw/meteorology/GHCN_extracted/USC00115097_latest.csv
+*.dly
