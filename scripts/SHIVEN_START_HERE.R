@@ -39,7 +39,7 @@ dir.create(path.ghcn, recursive=T, showWarnings = F)
 # Repository URL: https://github.com/MortonArb-ForestEcology/Phenology_Forecasting
 # Note: this script might have some packages you need to install, so open it up and see what Rstudio tells you to install
 source("../../Phenology_Forecasting/scripts/met_download_GHCN.R")
-download.ghcn(ID=ID, vars.in=vars.want, path.save=path.ghcn, dir.raw=dir.raw, gapfill=T) # This downloads the data and puts it in the path.ghcn
+download.ghcn(ID=ID, vars.in=vars.want, path.save=path.ghcn, dir.raw=dir.raw, gapfill=T, method="https") # This downloads the data and puts it in the path.ghcn
 # -------------------------------------
 
 
