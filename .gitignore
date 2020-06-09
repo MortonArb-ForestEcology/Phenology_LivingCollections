@@ -22,3 +22,4 @@ data/.DS_Store
 data/NPN/.NPN_creds
 
 .RData
+data_raw/meteorology/GHCN_extracted/USC00115097_latest.csv
