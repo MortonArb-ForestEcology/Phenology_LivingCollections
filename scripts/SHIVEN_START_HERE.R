@@ -66,7 +66,6 @@ summary(dat.ghcn) #
 
 # CHALLENGE: Make 1 graph from the weather data.  Start with what you want to show.  Once you've done it, save it and post it to slack.  Also, save how you did it and commit it to Github!
 # I created a graph that displays the min and max temperatures for the first year since the data was too crowded for the entire dataset
-ggplot(dat.ghcn[1:365, ], aes(x= YDAY, y=TMAX, col="red")) + geom_point() + #maximum temp values: supposed to be red but are blue
-  geom_point(aes(x=YDAY, y=TMIN, col="blue")) + #minimum temp values: supposed to be blue but are red
-  labs(title="Temp Over the Year", x="Day of the Year", y="Temp Range (in Celsius)") #labels: struggled to change legend labels
-
+ggplot(dat.ghcn[1:365, ]) + geom_point(aes(x= YDAY, y=TMAX, color="TMAX")) + #maximum temp values: supposed to be red but are blue
+  geom_point(aes(x=YDAY, y=TMIN, color="TMIN")) + #minimum temp values: supposed to be blue but are red
+  labs(title="Temp Over the Year", x="Day of the Year", y="Temp Range (in Celsius)", scale_color_manual(name="Temp Type", values=c("red", "blue"))) #labels: struggled to change legend labels
