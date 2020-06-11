@@ -63,9 +63,41 @@ download.ghcn(ID=ID, vars.in=vars.want, path.save=path.ghcn, dir.raw=dir.raw, ga
 dat.ghcn <- read.csv(file.path(path.ghcn, "USC00115097_latest.csv"))
 dat.ghcn$DATE <- as.Date(dat.ghcn$DATE) # Converts this to a date format so it knows about time
 summary(dat.ghcn) # 
+tail(dat.ghcn)
 
 # CHALLENGE: Make 1 graph from the weather data.  Start with what you want to show.  Once you've done it, save it and post it to slack.  Also, save how you did it and commit it to Github!
 # I created a graph that displays the min and max temperatures for the first year since the data was too crowded for the entire dataset
 ggplot(dat.ghcn[1:365, ]) + geom_point(aes(x= YDAY, y=TMAX, color="TMAX")) + #maximum temp values: supposed to be red but are blue
   geom_point(aes(x=YDAY, y=TMIN, color="TMIN")) + #minimum temp values: supposed to be blue but are red
   labs(title="Temp Over the Year", x="Day of the Year", y="Temp Range (in Celsius)", scale_color_manual(name="Temp Type", values=c("red", "blue"))) #labels: struggled to change legend labels
+
+
+# Making another graph that displays the yearly temp mins and maxes in a plot
+# Started off by creating functions to calculate the mins and maxes of each year and putting them in a data frame
+Tmax_year <- function (start_day, end_day) {
+  yearly_max <- max(dat.ghcn$TMAX[start_day:end_day], na.rm=FALSE)
+  return(yearly_max)
+}
+Tmin_year <- function (start_day, end_day) {
+  yearly_min <- min(dat.ghcn$TMAX[start_day:end_day], na.rm=FALSE)
+  return(yearly_min)
+}
+
+#data frame with all the yearly extremes but did not include 2007 or 2020 because those years were incomplete
+yearly_Textremes <- data.frame("Year" = c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019), 
+                            "YearlyTempMax" = c(Tmax_year(276, 641), Tmax_year(642, 1006), Tmax_year(1007, 1371), Tmax_year(1372, 1736), 
+                                                  Tmax_year(1737, 2102), Tmax_year(2103, 2467), Tmax_year(2468, 2832), Tmax_year(2833, 3197),
+                                                  Tmax_year(3198, 3563), Tmax_year(3564, 3928), Tmax_year(3929, 4293), Tmax_year(4294, 4658)),
+                            "YearlyTempMin" = c(Tmin_year(276, 641), Tmin_year(642, 1006), Tmin_year(1007, 1371), Tmin_year(1372, 1736), 
+                                                  Tmin_year(1737, 2102), Tmin_year(2103, 2467), Tmin_year(2468, 2832), Tmin_year(2833, 3197), 
+                                                  Tmin_year(3198, 3563), Tmin_year(3564, 3928), Tmin_year(3929, 4293), Tmin_year(4294, 4658)))
+
+yearly_Textremes
+
+# Bar graph displaying mins and maxes of each year
+ggplot(yearly_Textremes) + geom_bar(stat="identity", aes(x=Year, y=YearlyTempMax), fill="red") + 
+  geom_bar(stat="identity", aes(x=Year, y=YearlyTempMin), fill="blue") +
+  labs(title="Temp Extremes Over the Years", x= "Year", y= "Temperature Extreme") +
+  theme_minimal()
+
+                                    
