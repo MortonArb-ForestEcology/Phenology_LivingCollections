@@ -110,26 +110,28 @@ ggplot(yearly_Textremes) + geom_bar(stat="identity", aes(x=Year, y=YearlyTempMax
   theme_minimal()
 
 # Creating a seasonal variable to new data frame
-Season_Calculation <- function (row) {
-  if ((dat.ghcn$MONTH[row, ] == 6 & dat.ghcn$DAY[row, ] >= 21) | dat.ghcn$MONTH[row, ] == 7 | dat.ghcn$MONTH[row, ] == 8 | (dat.ghcn$MONTH[row, ] == 9 & dat.ghcn$DAY[row, ] <= 20)) {
-    Season[row] = "Summer"
-  } else { if ((dat.ghcn$MONTH[row, ] == 9 & dat.ghcn$DAY[row, ] >= 21) | dat.ghcn$MONTH[row, ] == 10 | dat.ghcn$MONTH[row, ] == 11 | (dat.ghcn$MONTH[row, ] == 12 & dat.ghcn$DAY[row, ] <= 20)) {
-      Season[row] = "Autumn"
-      } else { if ((dat.ghcn$MONTH[row, ] == 12 & dat.ghcn$DAY[row, ] >= 21) | dat.ghcn$MONTH[row, ] == 1 | dat.ghcn$MONTH[row, ] == 2 | (dat.ghcn$MONTH[row, ] == 3 & dat.ghcn$DAY[row, ] <= 20)) {
-        Season[row] = "Winter"
+# Season_Calculation <- function (row) {
+dat.ghcn <- data.frame(dat.ghcn, Season = NA)
+head(dat.ghcn)
+  
+for (i in 1:nrow(dat.ghcn)) {
+  if ((dat.ghcn$MONTH[i] == 6 & dat.ghcn$DAY[i] >= 21) | dat.ghcn$MONTH[i] == 7 | dat.ghcn$MONTH[i] == 8 | (dat.ghcn$MONTH[i] == 9 & dat.ghcn$DAY[i] <= 20)) {
+    dat.ghcn$Season[i] = "Summer"
+  } else { if ((dat.ghcn$MONTH[i] == 9 & dat.ghcn$DAY[i] >= 21) | dat.ghcn$MONTH[i] == 10 | dat.ghcn$MONTH[i] == 11 | (dat.ghcn$MONTH[i] == 12 & dat.ghcn$DAY[i] <= 20)) {
+      dat.ghcn$Season[i] = "Autumn"
+      } else { if ((dat.ghcn$MONTH[i] == 12 & dat.ghcn$DAY[i] >= 21) | dat.ghcn$MONTH[i] == 1 | dat.ghcn$MONTH[i] == 2 | (dat.ghcn$MONTH[i] == 3 & dat.ghcn$DAY[i] <= 20)) {
+        dat.ghcn$Season[i] = "Winter"
         } else {
-          Season[row] = "Spring"
+          dat.ghcn$Season[i] = "Spring"
         }
       }
+    }
   }
-  return(Season[row])
-}
+# }
 
 #Spring is the only season that is displayed
-SEASON <- Season_Calculation(1:4815, )
-dat.ghcn <- cbind(dat.ghcn, SEASON)
-dat.ghcn$SEASON
-ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = SEASON))
+head(dat.ghcn)
+ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = Season))
 
 # Just testing some stuff out
 ggplot(yearly_Textremes, aes(x=Year, y=YearlyTempMin, size=YearlyTempMax)) + geom_point()
