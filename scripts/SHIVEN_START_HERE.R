@@ -103,24 +103,25 @@ ggplot(yearly_Textremes) + geom_bar(stat="identity", aes(x=Year, y=YearlyTempMax
 # Creating a seasonal variable to new data frame
 Season_Calculation <- function (row) {
   if ((dat.ghcn$MONTH[row, ] == 6 & dat.ghcn$DAY[row, ] >= 21) | dat.ghcn$MONTH[row, ] == 7 | dat.ghcn$MONTH[row, ] == 8 | (dat.ghcn$MONTH[row, ] == 9 & dat.ghcn$DAY[row, ] <= 20)) {
-    Season = "Summer"
+    Season[row] = "Summer"
   } else { if ((dat.ghcn$MONTH[row, ] == 9 & dat.ghcn$DAY[row, ] >= 21) | dat.ghcn$MONTH[row, ] == 10 | dat.ghcn$MONTH[row, ] == 11 | (dat.ghcn$MONTH[row, ] == 12 & dat.ghcn$DAY[row, ] <= 20)) {
-      Season = "Autumn"
+      Season[row] = "Autumn"
       } else { if ((dat.ghcn$MONTH[row, ] == 12 & dat.ghcn$DAY[row, ] >= 21) | dat.ghcn$MONTH[row, ] == 1 | dat.ghcn$MONTH[row, ] == 2 | (dat.ghcn$MONTH[row, ] == 3 & dat.ghcn$DAY[row, ] <= 20)) {
-        Season = "Winter"
+        Season[row] = "Winter"
         } else {
-          Season = "Spring"
+          Season[row] = "Spring"
         }
       }
   }
-  return(Season)
+  return(Season[row])
 }
 
 #Spring is the only season that is displayed
-dat.ghcn[1:4815, ]
-dat.ghcn <- cbind(dat.ghcn, Season_Calculation(1:4815, ))
-ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = dat.ghcn$SEASON))
+SEASON <- Season_Calculation(1:4815, )
+dat.ghcn <- cbind(dat.ghcn, SEASON)
+dat.ghcn$SEASON
+ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = SEASON))
 
 # Just testing some stuff out
 ggplot(yearly_Textremes, aes(x=Year, y=YearlyTempMin, size=YearlyTempMax)) + geom_point()
-ggplot(dat.ghcn) + geom_point(aes(x = YEAR, y = PRCP))
+ggplot(dat.ghcn) + geom_point(aes(x = YEAR, y = PRCP, col=TMAX))
