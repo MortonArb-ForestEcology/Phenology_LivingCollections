@@ -53,7 +53,7 @@ dir.create(path.ghcn, recursive=T, showWarnings = F)
 # Note: this script might have some packages you need to install, so open it up and see what Rstudio tells you to install
 source("../../Phenology_Forecasting/scripts/met_download_GHCN.R")
 source("../../Phenology_Forecasting/scripts/met_gapfill.R")
-dir("../../")
+# dir("../../")
 download.ghcn(ID=ID, vars.in=vars.want, path.save=path.ghcn, dir.raw=dir.raw, gapfill=T) # This downloads the data and puts it in the path.ghcn
 # -------------------------------------
 
@@ -71,27 +71,36 @@ ggplot(dat.ghcn[1:365, ]) + geom_point(aes(x= YDAY, y=TMAX, color="TMAX")) + #ma
   geom_point(aes(x=YDAY, y=TMIN, color="TMIN")) + #minimum temp values: supposed to be blue but are red
   labs(title="Temp Over the Year", x="Day of the Year", y="Temp Range (in Celsius)", scale_color_manual(name="Temp Type", values=c("red", "blue"))) #labels: struggled to change legend labels
 
+head(dat.ghcn)
 
 # Making another graph that displays the yearly temp mins and maxes in a plot
 # Started off by creating functions to calculate the mins and maxes of each year and putting them in a data frame
-Tmax_year <- function (start_day, end_day) {
-  yearly_max <- max(dat.ghcn$TMAX[start_day:end_day], na.rm=FALSE)
+Tmax_year <- function (YEAR) {
+  yearly_max <- max(dat.ghcn$TMAX[dat.ghcn$YEAR==YEAR], na.rm=FALSE)
   return(yearly_max)
 }
-Tmin_year <- function (start_day, end_day) {
-  yearly_min <- min(dat.ghcn$TMAX[start_day:end_day], na.rm=FALSE)
+Tmin_year <- function (YEAR) {
+  yearly_min <- min(dat.ghcn$TMIN[dat.ghcn$YEAR==YEAR], na.rm=FALSE)
   return(yearly_min)
 }
 
 #data frame with all the yearly extremes but did not include 2007 or 2020 because those years were incomplete
-yearly_Textremes <- data.frame("Year" = c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019), 
-                            "YearlyTempMax" = c(Tmax_year(276, 641), Tmax_year(642, 1006), Tmax_year(1007, 1371), Tmax_year(1372, 1736), 
-                                                  Tmax_year(1737, 2102), Tmax_year(2103, 2467), Tmax_year(2468, 2832), Tmax_year(2833, 3197),
-                                                  Tmax_year(3198, 3563), Tmax_year(3564, 3928), Tmax_year(3929, 4293), Tmax_year(4294, 4658)),
-                            "YearlyTempMin" = c(Tmin_year(276, 641), Tmin_year(642, 1006), Tmin_year(1007, 1371), Tmin_year(1372, 1736), 
-                                                  Tmin_year(1737, 2102), Tmin_year(2103, 2467), Tmin_year(2468, 2832), Tmin_year(2833, 3197), 
-                                                  Tmin_year(3198, 3563), Tmin_year(3564, 3928), Tmin_year(3929, 4293), Tmin_year(4294, 4658)))
+# yearly_Textremes <- data.frame("Year" = c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019), 
+#                             "YearlyTempMax" = c(Tmax_year(2008), Tmax_year(2009), Tmax_year(2010), Tmax_year(2011), 
+                            #                       Tmax_year(1737, 2102), Tmax_year(2103, 2467), Tmax_year(2468, 2832), Tmax_year(2833, 3197),
+                            #                       Tmax_year(3198, 3563), Tmax_year(3564, 3928), Tmax_year(3929, 4293), Tmax_year(4294, 4658)),
+                            # "YearlyTempMin" = c(Tmin_year(276, 641), Tmin_year(642, 1006), Tmin_year(1007, 1371), Tmin_year(1372, 1736), 
+                            #                       Tmin_year(1737, 2102), Tmin_year(2103, 2467), Tmin_year(2468, 2832), Tmin_year(2833, 3197), 
+                            #                       Tmin_year(3198, 3563), Tmin_year(3564, 3928), Tmin_year(3929, 4293), Tmin_year(4294, 4658)))
 
+                            
+yearly_Textremes <- data.frame(Year=(min(dat.ghcn$YEAR)+1):(max(dat.ghcn$YEAR)-1),
+                               YearlyTempMax=NA,
+                               YearlyTempMin=NA)
+for(i in 1:nrow(yearly_Textremes)){
+  yearly_Textremes$YearlyTempMax[i] <- Tmax_year(yearly_Textremes$Year[i])
+  yearly_Textremes$YearlyTempMin[i] <- Tmin_year(yearly_Textremes$Year[i])
+}
 yearly_Textremes
 
 # Bar graph displaying mins and maxes of each year
