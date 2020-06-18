@@ -141,12 +141,24 @@ ggplot(dat.ghcn) + geom_point(aes(x = YEAR, y = PRCP, col=TMAX))
 
 # Attempts to Make a Line Graph: realized geom_line vs geom_path does not matter in time series graph
 # I can't figure out how to maually change the tick marks: figured it out
-ggplot(data = yearly_Textremes) + geom_line(aes(x = Year, y = YearlyTempMax, col = "YearlyTempMax")) + 
-  geom_point(aes(x = Year, y = YearlyTempMax)) +
-  geom_line(aes(x = Year, y = YearlyTempMin, col = "YearlyTempMin")) + 
-  geom_point (aes(x = Year, y = YearlyTempMin)) + #
-  geom_line(aes(x = Year, y = mean(YearlyTempMin), col = "YearlyTempMin"), linetype = 2) + #average min temp: blue dashed lin
-  geom_line(aes(x = Year, y = mean(YearlyTempMax), col= "YearlyTempMax"), linetype = 2) + #average max temp: red dashed line
+# Tried to create a new column so the mins and maxes of the years would connect but did not work
+yearly_Textremes$grp = NA
+head(yearly_Textremes)
+for (i in 1:nrow(yearly_Textremes)) {
+  yearly_Textremes$grp[i] = i
+}
+head(yearly_Textremes)
+
+#can't figure out how to portray the differences betweeen the mins and maxes each year
+ggplot(data = yearly_Textremes) + geom_line(aes(x = Year, y = YearlyTempMax, col = "YearlyTempMax")) + #lines connecting yearly temp maxes: red
+  geom_point(aes(x = Year, y = YearlyTempMax), group = yearly_Textremes$grp) + #yearly temp max: black dots
+  geom_line(aes(x = Year, y = YearlyTempMin, col = "YearlyTempMin")) +  #line connecting yearly temp mins: navy
+  geom_point (aes(x = Year, y = YearlyTempMin)) + #yearly temp min: black dots
+  geom_line(aes(x = Year, y = mean(YearlyTempMin), col = "AvgYearlyTempMin"), linetype = 2) + #average min temp: blue dashed lin
+  geom_line(aes(x = Year, y = mean(YearlyTempMax), col= "AvgYearlyTempMax"), linetype = 2) + #average max temp: red dashed line
   labs(title = "Yearly Temp Extremes", x = "Year", y = "Temp Extreme (in Celsius)", 
-       scale_color_manual(name = "Temp Type", values = c ("red", "navy"))) +
-  scale_x_continuous(breaks = seq(2008, 2020, 1)) + theme_minimal()
+       scale_color_manual(name = "Temp Type", values = c("red", "navy", "navy", "red"))) + #coloring for these lines is not working
+  scale_x_continuous(breaks = seq(2008, 2020, 2)) + theme_minimal()
+  
+#new line graph
+ggplot()
