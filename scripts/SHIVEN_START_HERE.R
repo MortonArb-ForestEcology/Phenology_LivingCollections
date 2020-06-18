@@ -129,10 +129,24 @@ for (i in 1:nrow(dat.ghcn)) {
   }
 # }
 
-#Spring is the only season that is displayed
+#Spring is the only season that is displayed: fixed
 head(dat.ghcn)
 ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = Season))
 
+
 # Just testing some stuff out
-ggplot(yearly_Textremes, aes(x=Year, y=YearlyTempMin, size=YearlyTempMax)) + geom_point()
+ggplot(data = subset(yearly_Textremes, Year >= 2010), aes(x=Year, y=YearlyTempMin, size=YearlyTempMax)) + geom_point()
 ggplot(dat.ghcn) + geom_point(aes(x = YEAR, y = PRCP, col=TMAX))
+
+
+# Attempts to Make a Line Graph: realized geom_line vs geom_path does not matter in time series graph
+# I can't figure out how to maually change the tick marks: figured it out
+ggplot(data = yearly_Textremes) + geom_line(aes(x = Year, y = YearlyTempMax, col = "YearlyTempMax")) + 
+  geom_point(aes(x = Year, y = YearlyTempMax)) +
+  geom_line(aes(x = Year, y = YearlyTempMin, col = "YearlyTempMin")) + 
+  geom_point (aes(x = Year, y = YearlyTempMin)) + #
+  geom_line(aes(x = Year, y = mean(YearlyTempMin), col = "YearlyTempMin"), linetype = 2) + #average min temp: blue dashed lin
+  geom_line(aes(x = Year, y = mean(YearlyTempMax), col= "YearlyTempMax"), linetype = 2) + #average max temp: red dashed line
+  labs(title = "Yearly Temp Extremes", x = "Year", y = "Temp Extreme (in Celsius)", 
+       scale_color_manual(name = "Temp Type", values = c ("red", "navy"))) +
+  scale_x_continuous(breaks = seq(2008, 2020, 1)) + theme_minimal()
