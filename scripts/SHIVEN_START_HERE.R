@@ -160,5 +160,14 @@ ggplot(data = yearly_Textremes) + geom_line(aes(x = Year, y = YearlyTempMax, col
        scale_color_manual(name = "Temp Type", values = c("red", "navy", "navy", "red"))) + #coloring for these lines is not working
   scale_x_continuous(breaks = seq(2008, 2020, 2)) + theme_minimal()
   
-#new line graph
-ggplot()
+#new line graph of 2019 temp extremes: looks like a lot, is there any way to make it look cleaner?
+ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX, col = "TMAX")) + #red line of temp maxes throughout the year
+  geom_point(aes(x = YDAY, y = TMAX)) + #black points of temp maxes throughout the year
+  geom_line(aes(x = YDAY, y = TMIN, col = "TMIN")) + #blue line of temp mins throughout the year
+  geom_point(aes(x = YDAY, y = TMIN)) + #black points of temp mins throughout the year
+  geom_smooth(aes(x = YDAY, y = TMAX, col = "TMAX")) + #red parabolic curve to fit temp max data
+  geom_smooth(aes(x = YDAY, y = TMIN, col = "TMIN")) + #blue parabolic curve to fit temp min data
+  labs(title = "2019 Daily Temp Extremes", x = "Day of Year", y = "Temp Extreme", #label names
+       scale_color_manual(name = "Temp Type", values = c("red", "blue"))) + #formats lines properly
+  scale_x_continuous(breaks = seq(0, 365, 30)) + scale_y_continuous(breaks = seq(-40, 40, 10)) + #fixed scaling to make more sense
+  theme_minimal()
