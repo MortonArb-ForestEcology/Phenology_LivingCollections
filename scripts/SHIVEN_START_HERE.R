@@ -158,15 +158,17 @@ ggplot(data = yearly_Textremes) + geom_line(aes(x = Year, y = YearlyTempMax, col
   geom_line(aes(x = Year, y = mean(YearlyTempMax), col= "AvgYearlyTempMax"), linetype = 2) + #average max temp: red dashed line
   labs(title = "Yearly Temp Extremes", x = "Year", y = "Temp Extreme (in Celsius)", 
        scale_color_manual(name = "Temp Type", values = c("red", "navy", "navy", "red"))) + #coloring for these lines is not working
-  scale_x_continuous(breaks = seq(2008, 2020, 2)) + theme_minimal()
+  scale_x_continuous(breaks = seq(2008, 2020, 2)) + theme_minimal() +
+  geom_rect(aes(xmin=Year-0.25, xmax=Year+0.25, ymin=YearlyTempMin, ymax=YearlyTempMax, fill = YearlyTempMax-YearlyTempMin))
+  
   
 #new line graph of 2019 temp extremes: looks like a lot, is there any way to make it look cleaner?
 ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX, col = "TMAX")) + #red line of temp maxes throughout the year
   geom_point(aes(x = YDAY, y = TMAX)) + #black points of temp maxes throughout the year
   geom_line(aes(x = YDAY, y = TMIN, col = "TMIN")) + #blue line of temp mins throughout the year
   geom_point(aes(x = YDAY, y = TMIN)) + #black points of temp mins throughout the year
-  geom_smooth(aes(x = YDAY, y = TMAX, col = "TMAX")) + #red parabolic curve to fit temp max data
-  geom_smooth(aes(x = YDAY, y = TMIN, col = "TMIN")) + #blue parabolic curve to fit temp min data
+  geom_smooth(data = dat.ghcn, aes(x = YDAY, y = TMAX, col = "TMAX")) + #red parabolic curve to fit temp max data
+  geom_smooth(data = dat.ghcn, aes(x = YDAY, y = TMIN, col = "TMIN")) + #blue parabolic curve to fit temp min data
   labs(title = "2019 Daily Temp Extremes", x = "Day of Year", y = "Temp Extreme", #label names
        scale_color_manual(name = "Temp Type", values = c("red", "blue"))) + #formats lines properly
   scale_x_continuous(breaks = seq(0, 365, 30)) + scale_y_continuous(breaks = seq(-40, 40, 10)) + #fixed scaling to make more sense
@@ -174,44 +176,58 @@ ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX
 
 
 #Made an interactive graph: is there anyway to make it load faster?
-PrecipGraph <- ggplot(data = subset(dat.ghcn, PRCP > 2, YEAR = 2008)) + geom_point(aes(x = YDAY, y = PRCP, col = YEAR))
+PrecipGraph <- ggplot(data = subset(dat.ghcn, PRCP > 2 & YEAR == 2008)) + geom_point(aes(x = YDAY, y = PRCP, col = PRCP))
 library(plotly)
 ggplotly(PrecipGraph)
 
 
 #Interactive Line graph of TMAX averages of seasons of each year with different lines for each year 
-SpringSum = 0
-WinterSum = 0
-SummerSum = 0
-AutumnSum = 0
-SpringCount = 0
-SummerCount = 0
-WinterCount = 0
-AutumnCount = 0
+# SpringSum = 0
+# WinterSum = 0
+# SummerSum = 0
+# AutumnSum = 0
+# SpringCount = 0
+# SummerCount = 0
+# WinterCount = 0
+# AutumnCount = 0
+# 
+# for (i in 1:nrow(dat.ghcn)) {
+#   if (dat.ghcn$Season[i] == "Spring") {
+#     SpringSum = SpringSum + dat.ghcn$TMAX[i]
+#     SpringCount = SpringCount + 1
+#   } else if (dat.ghcn$Season[i] == "Summer") {
+#     SummerSum = SummerSum + dat.ghcn$TMAX[i]
+#     SummerCount = SummerCount + 1
+#     } else if (dat.ghcn$Season[i] == "Autumn") {
+#       AutumnSum = AutumnSum + dat.ghcn$TMAX[i]
+#       AutumnCount = AutumnCount + 1
+#       } else {
+#         WinterSum = WinterSum + dat.ghcn$TMAX[i]
+#         WinterCount = WinterCount + 1
+#       }
+#   SpringAvg = SpringSum/SpringCount
+#   SummerAvg = SummerSum/SummerCount
+#   AutumnAvg = AutumnSum/AutumnCount
+#   WinterAvg = WinterSum/WinterCount
+# }
+# 
+# 
+# 
+# #I didn't make the Seasons numerics because then I wouldn't be able to make a line graph, how could group be implemented here?
+# SeasonalAverages = data.frame(Season = c("Spring", "Summer", "Autumn", "Winter"), SeasonAvg = c(SpringAvg, SummerAvg, AutumnAvg, WinterAvg))
+# SeasonalAverages
 
-for (i in 1:nrow(dat.ghcn)) {
-  if (dat.ghcn$Season[i] == "Spring") {
-    SpringSum = SpringSum + dat.ghcn$TMAX[i]
-    SpringCount = SpringCount + 1
-  } else if (dat.ghcn$Season[i] == "Summer") {
-    SummerSum = SummerSum + dat.ghcn$TMAX[i]
-    SummerCount = SummerCount + 1
-    } else if (dat.ghcn$Season[i] == "Autumn") {
-      AutumnSum = AutumnSum + dat.ghcn$TMAX[i]
-      AutumnCount = AutumnCount + 1
-      } else {
-        WinterSum = WinterSum + dat.ghcn$TMAX[i]
-        WinterCount = WinterCount + 1
-      }
-  SpringAvg = SpringSum/SpringCount
-  SummerAvg = SummerSum/SummerCount
-  AutumnAvg = AutumnSum/AutumnCount
-  WinterAvg = WinterSum/WinterCount
-}
+dat.season <- aggregate(cbind(TMAX, TMIN, PRCP) ~ Season,
+                        data=dat.ghcn,
+                        FUN=mean)
+dat.season
 
-#I didn't make the Seasons numerics because then I wouldn't be able to make a line graph, how could group be implemented here?
-SeasonalAverages = data.frame(Season = c("Spring", "Summer", "Autumn", "Winter"), SeasonAvg = c(SpringAvg, SummerAvg, AutumnAvg, WinterAvg))
-SeasonalAverages
+dat.season.yr <- aggregate(cbind(TMAX, TMIN, PRCP) ~ Season + YEAR,
+                           data=dat.ghcn,
+                           FUN=mean)
+summary(dat.season.yr)
+ #make graph that you intended to make earlier
+
 
 #line was not showing up
 SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
