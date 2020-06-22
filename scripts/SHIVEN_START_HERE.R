@@ -171,3 +171,51 @@ ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX
        scale_color_manual(name = "Temp Type", values = c("red", "blue"))) + #formats lines properly
   scale_x_continuous(breaks = seq(0, 365, 30)) + scale_y_continuous(breaks = seq(-40, 40, 10)) + #fixed scaling to make more sense
   theme_minimal()
+
+
+#Made an interactive graph: is there anyway to make it load faster?
+PrecipGraph <- ggplot(data = subset(dat.ghcn, PRCP > 2, YEAR = 2008)) + geom_point(aes(x = YDAY, y = PRCP, col = YEAR))
+library(plotly)
+ggplotly(PrecipGraph)
+
+
+#Interactive Line graph of TMAX averages of seasons of each year with different lines for each year 
+SpringSum = 0
+WinterSum = 0
+SummerSum = 0
+AutumnSum = 0
+SpringCount = 0
+SummerCount = 0
+WinterCount = 0
+AutumnCount = 0
+
+for (i in 1:nrow(dat.ghcn)) {
+  if (dat.ghcn$Season[i] == "Spring") {
+    SpringSum = SpringSum + dat.ghcn$TMAX[i]
+    SpringCount = SpringCount + 1
+  } else if (dat.ghcn$Season[i] == "Summer") {
+    SummerSum = SummerSum + dat.ghcn$TMAX[i]
+    SummerCount = SummerCount + 1
+    } else if (dat.ghcn$Season[i] == "Autumn") {
+      AutumnSum = AutumnSum + dat.ghcn$TMAX[i]
+      AutumnCount = AutumnCount + 1
+      } else {
+        WinterSum = WinterSum + dat.ghcn$TMAX[i]
+        WinterCount = WinterCount + 1
+      }
+  SpringAvg = SpringSum/SpringCount
+  SummerAvg = SummerSum/SummerCount
+  AutumnAvg = AutumnSum/AutumnCount
+  WinterAvg = WinterSum/WinterCount
+}
+
+#I didn't make the Seasons numerics because then I wouldn't be able to make a line graph, how could group be implemented here?
+SeasonalAverages = data.frame(Season = c("Spring", "Summer", "Autumn", "Winter"), SeasonAvg = c(SpringAvg, SummerAvg, AutumnAvg, WinterAvg))
+SeasonalAverages
+
+#line was not showing up
+SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
+  geom_point(aes(x = Season, y = SeasonAvg)) + theme_minimal() +
+  labs(title = "Seasonal Averages during 2007-2020", x = "Season", y = "Season Average (in Celsius")
+SeasonAvgGraph
+ggplotly(SeasonAvgGraph)
