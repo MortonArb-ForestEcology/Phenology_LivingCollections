@@ -235,8 +235,8 @@ head(dat.season.yr)
 # not working because season is a categorical variable
 TotalSeasonGraph <- ggplot (data = dat.season) + geom_point(aes(x = Season, y = TMAX))
 ggplotly(TotalSeasonGraph)
-YearlySeasonGraph <- ggplot (data = dat.season.yr) + geom_point (aes(x = YEAR, y = TMAX, col = Season))
-ggplotly(YearlySeasonGraph) #not working
+YearlySeasonGraph <- ggplot (data = dat.season.yr, aes(label = TMIN, PRCP)) + geom_point (aes(x = YEAR, y = TMAX, col = Season))
+ggplotly(YearlySeasonGraph) #not working: fixed, figured out how to add different
 
 # #line was not showing up
 # SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
@@ -246,8 +246,18 @@ ggplotly(YearlySeasonGraph) #not working
 # ggplotly(SeasonAvgGraph)
 
 
-# practice using the plotly function: it's running so slowly
-head(dat.ghcn)
-practice <- ggplot(data = dat.ghcn, aes(x = YEAR, y = PRCP, label = YDAY)) + geom_point(aes(col = Season))
-practice
-ggplotly(practice)
+#practice with the aggregate function
+#mean temp extremes for each month: 2 different ways of doing it
+agg_mean <- aggregate(dat.ghcn[5:6], by=list(dat.ghcn$MONTH), FUN=mean)
+  agg_mean$Group.1 <- month.abb[agg_mean$Group.1]  
+  agg_mean %>% rename(Month = Group.1)
+agg_mean2 <- aggregate(cbind(TMAX, TMIN) ~ MONTH,
+                       data = dat.ghcn, FUN=mean)
+  agg_mean2$MONTH <- month.abb[agg_mean2$MONTH]
+  agg_mean2
+
+
+#practice with the merge function
+  
+  
+#practice with the stack function
