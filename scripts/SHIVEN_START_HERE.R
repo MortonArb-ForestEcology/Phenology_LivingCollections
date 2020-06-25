@@ -217,21 +217,37 @@ ggplotly(PrecipGraph)
 # SeasonalAverages = data.frame(Season = c("Spring", "Summer", "Autumn", "Winter"), SeasonAvg = c(SpringAvg, SummerAvg, AutumnAvg, WinterAvg))
 # SeasonalAverages
 
+#individual meeting changes
 dat.season <- aggregate(cbind(TMAX, TMIN, PRCP) ~ Season,
                         data=dat.ghcn,
                         FUN=mean)
+dat.season$Season <- factor(dat.season$Season, levels = c("Winter", "Spring", "Summer", "Autumn"))
 dat.season
 
 dat.season.yr <- aggregate(cbind(TMAX, TMIN, PRCP) ~ Season + YEAR,
                            data=dat.ghcn,
                            FUN=mean)
+dat.season.yr$Season <- factor(dat.season.yr$Season, levels = c("Winter", "Spring", "Summer", "Autumn"))
 summary(dat.season.yr)
- #make graph that you intended to make earlier
+head(dat.season.yr)
+
+# make graph that you intended to make earlier: Interactive Line graph of TMAX averages of seasons total and of each year with different lines for each year 
+# not working because season is a categorical variable
+TotalSeasonGraph <- ggplot (data = dat.season) + geom_point(aes(x = Season, y = TMAX))
+ggplotly(TotalSeasonGraph)
+YearlySeasonGraph <- ggplot (data = dat.season.yr) + geom_point (aes(x = YEAR, y = TMAX, col = Season))
+ggplotly(YearlySeasonGraph) #not working
+
+# #line was not showing up
+# SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
+#   geom_point(aes(x = Season, y = SeasonAvg)) + theme_minimal() +
+#   labs(title = "Seasonal Averages during 2007-2020", x = "Season", y = "Season Average (in Celsius")
+# SeasonAvgGraph
+# ggplotly(SeasonAvgGraph)
 
 
-#line was not showing up
-SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
-  geom_point(aes(x = Season, y = SeasonAvg)) + theme_minimal() +
-  labs(title = "Seasonal Averages during 2007-2020", x = "Season", y = "Season Average (in Celsius")
-SeasonAvgGraph
-ggplotly(SeasonAvgGraph)
+# practice using the plotly function: it's running so slowly
+head(dat.ghcn)
+practice <- ggplot(data = dat.ghcn, aes(x = YEAR, y = PRCP, label = YDAY)) + geom_point(aes(col = Season))
+practice
+ggplotly(practice)
