@@ -249,14 +249,16 @@ ggplotly(YearlySeasonGraph) #not working: fixed, figured out how to add differen
 #practice with the aggregate function
 #mean temp extremes for each month: 2 different ways of doing it
 agg_mean <- aggregate(dat.ghcn[5:6], by=list(dat.ghcn$MONTH), FUN=mean)
-  agg_mean %>% rename(agg_mean$Group.1=agg_mean$MONTH)
+  names(agg_mean)[names(agg_mean) == "Group.1"] <- "MONTH"
   agg_mean
 agg_mean2 <- aggregate(cbind(PRCP,SNOW,SNWD) ~ MONTH,
                        data = dat.ghcn, FUN=mean) 
   agg_mean2
 
 
-#practice with the merge function: not working properly as the months is repeated 12 times with same values
-merge(x=agg_mean2, y=agg_mean[,2:3])
+#practice with the merge function: fixed
+merge(x=agg_mean2, y=agg_mean)
   
 #practice with the stack function
+stack_df <- stack(agg_mean2, select=c("PRCP", "SNOW"))
+unstack(stack_df)
