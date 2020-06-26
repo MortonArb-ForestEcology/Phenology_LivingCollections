@@ -131,7 +131,7 @@ for (i in 1:nrow(dat.ghcn)) {
 
 #Spring is the only season that is displayed: fixed
 head(dat.ghcn)
-ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = Season))
+ggplot(dat.ghcn) + geom_point(aes(x = TMIN, y = TMAX, col = Season)) + labs(title = "Temp Extremes for Different Seasons")
 
 
 # Just testing some stuff out
@@ -235,8 +235,9 @@ head(dat.season.yr)
 # not working because season is a categorical variable
 TotalSeasonGraph <- ggplot (data = dat.season) + geom_point(aes(x = Season, y = TMAX))
 ggplotly(TotalSeasonGraph)
-YearlySeasonGraph <- ggplot (data = dat.season.yr, aes(label = TMIN, PRCP)) + geom_point (aes(x = YEAR, y = TMAX, col = Season))
-ggplotly(YearlySeasonGraph) #not working: fixed, figured out how to add different
+YearlySeasonGraph <- ggplot (data = dat.season.yr, aes(label = TMIN, PRCP)) + geom_point (aes(x = YEAR, y = TMAX, col = Season)) +
+  labs(title = "Temp Maxes across Different Seasons", x = "Year", y = "Temp Max")
+ggplotly(YearlySeasonGraph) #fixed, figured out how to add different elements
 
 # #line was not showing up
 # SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
