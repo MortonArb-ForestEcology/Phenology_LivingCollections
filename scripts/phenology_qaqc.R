@@ -6,7 +6,7 @@
 # -------------------------------------------------------------
 # Set file paths, load libraries etc.
 # -------------------------------------------------------------
-library(googlesheets)
+library(googlesheets4)
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
 library(lubridate)
@@ -18,7 +18,7 @@ source("clean_google_form.R")
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 
-path.dat <- file.path(dir.base, "Observing Lists/2018_Quercus")
+path.dat <- file.path(dir.base, "Observing Lists/2020_Quercus")
 maps.out <- file.path(path.dat)
 # path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
 # path.gis <- "Y:/Collections" # Path on a PC
@@ -62,6 +62,7 @@ summary(dat.all[,"Observer"])
 
 range(dat.all$Date.Observed)
 dat.all[lubridate::year(dat.all$Date.Observed)<lubridate::year(Sys.Date()),1:6]
+dat.all[lubridate::year(dat.all$Date.Observed)>lubridate::year(Sys.Date()),1:6]
 dat.all[dat.all$Date.Observed>Sys.Date(),1:6]
 
 # dim(dat.all)
@@ -114,7 +115,7 @@ length(unique(dat.all$Species))
 
 # Saving the figures that show observations for each individual
 for(PHENO in phenophase.obs){
-  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_Phenophase", paste0("2019_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
+  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/", paste0("status_", lubridate::year(Sys.Date())), "by_Phenophase", paste0(lubridate::year(Sys.Date()), "_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
   for(OBS in levels(dat.all$Obs.List)){
     dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
     dat.tmp$Phenophase <- dat.tmp[,PHENO]
@@ -147,7 +148,7 @@ for(PHENO in phenophase.obs){
 
 for(OBS in levels(dat.all$Obs.List)){
   dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
-  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/by_ObservingList", paste0("2019_Observations_", OBS, "_by_Phenophase_byTree.pdf")), width=11, height=8.5)
+  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/", paste0("status_", lubridate::year(Sys.Date())), "by_ObservingList", paste0(lubridate::year(Sys.Date()), "_Observations_", PHENO, "_by_Phenophase_byTree.pdf")), width=11, height=8.5)
   for(PHENO in phenophase.obs){
     dat.tmp$Phenophase <- dat.tmp[,PHENO]
     print(
@@ -204,6 +205,12 @@ summary(dat.all)
 #----------------------------
 # Check for our list of removed trees 
 # Checking to make sure everybody has made observations in the past week
+
+
+
+# ###### ------------------ NOTE ------------------ ###### #
+# This section needs to be fixed and updated to googlesheets4!
+# ###### ------------------ NOTE ------------------ ###### #
 obs.gs <- gs_title("VolunteerAssignments_Phenology")
 obs.all <- data.frame(gs_read(obs.gs, ws="2019"))[1:5]
 obs.all$Obs.List <- paste(obs.all$Collection, obs.all$List, sep="-")
