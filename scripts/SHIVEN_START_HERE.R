@@ -235,9 +235,13 @@ head(dat.season.yr)
 # not working because season is a categorical variable
 TotalSeasonGraph <- ggplot (data = dat.season) + geom_point(aes(x = Season, y = TMAX))
 ggplotly(TotalSeasonGraph)
-YearlySeasonGraph <- ggplot (data = dat.season.yr, aes(label = TMIN, PRCP)) + geom_point (aes(x = YEAR, y = TMAX, col = Season)) +
+YearlySeasonGraph <- ggplot (data = dat.season.yr) + geom_point (aes(x = YEAR, y = TMAX, col = Season, text = sprintf("PRCP: %s<br>Tmin: %s", round(PRCP, 1), round(TMIN, 1))
+)) +
   labs(title = "Temp Maxes across Different Seasons", x = "Year", y = "Temp Max")
 ggplotly(YearlySeasonGraph) #fixed, figured out how to add different elements
+
+summary(dat.season.yr)
+head
 
 # #line was not showing up
 # SeasonAvgGraph <- ggplot(data = SeasonalAverages) + geom_line(aes(x = Season, y = SeasonAvg)) +
