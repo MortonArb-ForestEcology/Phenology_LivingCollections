@@ -73,9 +73,10 @@ quercus$Time <- format(quercus$Timestamp, '%H:%M:%S')
 #making graph interactive
 leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data being used
                   ggtitle("leaf.present.observed") + # title
-                  facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species
+                  facet_grid(Species*PlantNumber~., scales="free_y", switch="y"
+                             ) + # lines for different species
                   geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed, 
-                                 text = sprintf("Year: %s<br>Month: %s<br>Day: %s", Year, Month, Day) # its not working because text is not working
+                                 text = sprintf("Time: %s<br>Observer: %s", Time, Observer) # its not working because text is not working
                                  ), binwidth=7) + # green filling & actual data
                   scale_fill_manual(values=c("gray50", "green4", "blue2", "black") ) + # color scheme
                   scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
