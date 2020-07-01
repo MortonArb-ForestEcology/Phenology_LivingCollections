@@ -59,7 +59,7 @@ summary(quercus)
 #         strip.text.y=element_text(size=rel(1), angle=180))
 
 #extracting the month to put into graph
-1library(lubridate)
+library(lubridate)
 summary(quercus)
 quercus$Date.Observed
 quercus$Time
@@ -84,16 +84,16 @@ leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data b
                   theme(legend.position="bottom",
                      legend.text = element_text(size=rel(1)),
                      legend.title = element_text(size=rel(1)),
-                     plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
+                     plot.title = element_text(size=rel(1), face="bold", hjust=0.5), #formats title to be bold and in center
                      panel.grid = element_blank(),
-                     panel.background=element_rect(fill=NA, color="black"),
-                     panel.spacing=unit(0, "lines"),
+                     panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
+                     panel.spacing=unit(0, "lines"), #connects all the individual trees together
                      axis.text.x=element_text(size=rel(1)),
-                     axis.title.x=element_text(size=rel(1), face="bold"),
-                     axis.title.y=element_blank(),
-                     axis.text.y=element_blank(),
-                     axis.ticks.y=element_blank(),
-                     strip.text.y=element_text(size=rel(1), angle=180))
+                     axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
+                     axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
+                     axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
+                     axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
+                     strip.text.y=element_text(size=rel(1), angle=180)) #gets rid of ticks outside gray box of y-axis
 leafObserve
 ggplotly(leafObserve)
 
