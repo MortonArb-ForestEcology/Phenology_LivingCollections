@@ -59,7 +59,7 @@ summary(quercus)
 #         strip.text.y=element_text(size=rel(1), angle=180))
 
 #extracting the month to put into graph
-library(lubridate)
+1library(lubridate)
 summary(quercus)
 quercus$Date.Observed
 quercus$Time
@@ -74,7 +74,9 @@ quercus$Time <- format(quercus$Timestamp, '%H:%M:%S')
 leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data being used
                   ggtitle("leaf.present.observed") + # title
                   facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species
-                  geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed), binwidth=7) + # green filling & actual data
+                  geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed, 
+                                 text = sprintf("Year: %s<br>Month: %s<br>Day: %s", Year, Month, Day) # its not working because text is not working
+                                 ), binwidth=7) + # green filling & actual data
                   scale_fill_manual(values=c("gray50", "green4", "blue2", "black") ) + # color scheme
                   scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
                   scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
