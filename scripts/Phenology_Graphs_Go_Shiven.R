@@ -82,7 +82,7 @@ leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data b
                   scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
                   scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
                   scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) + # I'm not sure
-                  theme(legend.position="bottom",
+                  theme(legend.position='top', #need to move legend position 
                      legend.text = element_text(size=rel(1)),
                      legend.title = element_text(size=rel(1)),
                      plot.title = element_text(size=rel(1), face="bold", hjust=0.5), #formats title to be bold and in center
@@ -94,8 +94,8 @@ leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data b
                      axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
                      axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
                      axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
-                     strip.text.y=element_text(size=rel(1), angle=180)) #gets rid of ticks outside gray box of y-axis
+                     strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
 leafObserve
-ggplotly(leafObserve)
+ggplotly(leafObserve)  #only works when I run the entire code
 
 quercus[quercus$Species=="Quercus alba", ]
