@@ -105,11 +105,13 @@ ggplotly(leafObserve + theme(strip.text = element_text(angle=90),
 
 quercus[quercus$Species=="Quercus alba", ]
 quercus$Species
-library(shiny)
-library(shinydashboard)
-install.packages("htmltools")
-library(htmltools)
+
+#getting shiny to work
 install.packages("shiny", dependencies=T)
 install.packages("Rtools")
+install.packages("htmltools")
+library(shiny)
+library(shinydashboard)
+library(htmltools)
 
 runExample("01_hello")
