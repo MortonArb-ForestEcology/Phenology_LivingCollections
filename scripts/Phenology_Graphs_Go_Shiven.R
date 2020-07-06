@@ -69,13 +69,14 @@ quercus$Day <- day(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
 quercus$Year <- year(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
 quercus$Time <- format(quercus$Timestamp, '%H:%M:%S')
 
+summary(quercus)
 
 #making graph interactive
 leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data being used
-                  ggtitle("leaf.present.observed") + # title
+                  ggtitle("Leaf Present") + # title
                   facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species
                   geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed, 
-                                 text = sprintf("Time: %s<br>Observer: %s", Time, Observer) # its not working because text is not working
+                                 text = sprintf("Timestamp: %s<br>Observer: %s", paste(Timestamp), Observer) # its not working because text is not working
                                  ), binwidth=7) + # green filling & actual data
                   scale_fill_manual(values=c("gray50", "green4", "blue2", "black") ) + # color scheme
                   scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
@@ -94,8 +95,21 @@ leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data b
                      axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
                      axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
                      strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+
 leafObserve
-ggplotly(leafObserve) %>% layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
+ggplotly(leafObserve + theme(strip.text = element_text(angle=90), 
+                             plot.margin=unit(c(0,5,0,0), "lines"), 
+                             legend.title=element_blank())) %>% 
+  layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
                                                margin = list(b = 50, l = 50)))  #only works sometimes: but then y-axis disappears with layout part of legend to the bottom
 
 quercus[quercus$Species=="Quercus alba", ]
+quercus$Species
+library(shiny)
+library(shinydashboard)
+install.packages("htmltools")
+library(htmltools)
+install.packages("shiny", dependencies=T)
+install.packages("Rtools")
+
+runExample("01_hello")
