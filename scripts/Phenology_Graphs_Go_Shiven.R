@@ -73,8 +73,7 @@ quercus$Time <- format(quercus$Timestamp, '%H:%M:%S')
 #making graph interactive
 leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data being used
                   ggtitle("leaf.present.observed") + # title
-                  facet_grid(Species*PlantNumber~., scales="free_y", switch="y"
-                             ) + # lines for different species
+                  facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species
                   geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed, 
                                  text = sprintf("Time: %s<br>Observer: %s", Time, Observer) # its not working because text is not working
                                  ), binwidth=7) + # green filling & actual data
@@ -96,6 +95,7 @@ leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data b
                      axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
                      strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
 leafObserve
-ggplotly(leafObserve)  #only works when I run the entire code
+ggplotly(leafObserve) %>% layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
+                                               margin = list(b = 50, l = 50)))  #only works sometimes: but then y-axis disappears with layout part of legend to the bottom
 
 quercus[quercus$Species=="Quercus alba", ]
