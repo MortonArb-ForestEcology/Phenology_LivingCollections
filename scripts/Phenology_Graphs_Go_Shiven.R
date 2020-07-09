@@ -107,11 +107,45 @@ quercus[quercus$Species=="Quercus alba", ]
 quercus$Species
 
 #getting shiny to work
-install.packages("shiny", dependencies=T)
-install.packages("Rtools")
-install.packages("htmltools")
 library(shiny)
 library(shinydashboard)
 library(htmltools)
 
-runExample("01_hello")
+#runExample("01_hello")
+
+summary(quercus)
+quercus$Species
+
+
+library(plotly)
+library(MASS)
+
+covmat <- matrix(c(0.8, 0.4, 0.3, 0.8), nrow = 2, byrow = T)
+df <- mvrnorm(n = 100, c(0,0), Sigma = covmat)
+df <- as.data.frame(df)
+df
+
+colnames(df) <- c("x", "y")
+fig <- plot_ly(df, x = ~x, y = ~y, alpha = 0.3)
+fig
+fig <- fig %>% add_markers(marker = list(line = list(color = "black", width = 1)))
+fig
+fig <- fig %>% layout(
+  title = "Drop down menus - Plot type",
+  xaxis = list(domain = c(0.1, 1)),
+  yaxis = list(title = "y"),
+  updatemenus = list(
+    list(
+      y = 0.8,
+      buttons = list(
+        
+        list(method = "restyle",
+             args = list("type", "scatter"),
+             label = "Scatter"),
+        
+        list(method = "restyle",
+             args = list("type", "histogram2d"),
+             label = "2D Histogram")))
+  ))
+
+fig
