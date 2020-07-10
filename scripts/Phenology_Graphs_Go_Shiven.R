@@ -97,26 +97,69 @@ leafObserve <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) + # data b
                      strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
 
 leafObserve
-ggplotly(leafObserve + theme(strip.text = element_text(angle=90), 
+InteractiveLeaves <- ggplotly(leafObserve + theme(strip.text = element_text(angle=90), 
                              plot.margin=unit(c(0,5,0,0), "lines"), 
                              legend.title=element_blank())) %>% 
   layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
                                                margin = list(b = 50, l = 50)))  #only works sometimes: but then y-axis disappears with layout part of legend to the bottom
+InteractiveLeaves
 
 quercus[quercus$Species=="Quercus alba", ]
 quercus$Species
+unique(quercus$Species)
+
+
+#gonna practice making a dropdown with a scatter plot
+QuercusScatter <-quercus %>%
+  plot_ly(
+    type = 'scatter', 
+    x = ~Date.Observed, 
+    y = ~PlantNumber,
+    text = ~Species,
+    hoverinfo = 'text',
+    mode = 'markers', 
+    transforms = list(
+      list(
+        type = 'filter',
+        target = ~Species,
+        operation = '=',
+        value = unique(quercus$Species)[1]
+      )
+    )) %>% layout(
+      updatemenus = list(
+        list(
+          type = 'dropdown',
+          active = 0,
+          buttons = list(
+            list(method = "restyle",
+                 args = list("transforms[0].value", unique(quercus$Species)[1]),
+                 label = unique(quercus$Species)[1]),
+            list(method = "restyle",
+                 args = list("transforms[0].value", unique(quercus$Species)[2]),
+                 label = unique(quercus$Species)[2]),
+            list(method = "restyle",
+                 args = list("transforms[0].value", unique(quercus$Species)[3]),
+                 label = unique(quercus$Species)[3])
+          )
+        )
+      )
+    )
+QuercusScatter
+
+
 
 #getting shiny to work
 library(shiny)
 library(shinydashboard)
 library(htmltools)
-
 #runExample("01_hello")
 
-summary(quercus)
-quercus$Species
+
+#saving this to html
+?htmlwidgets
 
 
+#practice making a dropdown: copied from internet
 library(plotly)
 library(MASS)
 
@@ -124,12 +167,10 @@ covmat <- matrix(c(0.8, 0.4, 0.3, 0.8), nrow = 2, byrow = T)
 df <- mvrnorm(n = 100, c(0,0), Sigma = covmat)
 df <- as.data.frame(df)
 df
-
+?plot_ly
 colnames(df) <- c("x", "y")
 fig <- plot_ly(df, x = ~x, y = ~y, alpha = 0.3)
-fig
 fig <- fig %>% add_markers(marker = list(line = list(color = "black", width = 1)))
-fig
 fig <- fig %>% layout(
   title = "Drop down menus - Plot type",
   xaxis = list(domain = c(0.1, 1)),
@@ -147,5 +188,46 @@ fig <- fig %>% layout(
              args = list("type", "histogram2d"),
              label = "2D Histogram")))
   ))
+
+fig
+
+
+x <- seq(-2 * pi, 2 * pi, length.out = 1000)
+df <- data.frame(x, y1 = sin(x), y2 = cos(x))
+x
+df
+
+fig <- plot_ly(df, x = ~x)
+fig <- fig %>% add_lines(y = ~y1, name = "A")
+fig <- fig %>% add_lines(y = ~y2, name = "B", visible = F)
+fig <- fig %>% layout(
+  title = "Drop down menus - Styling",
+  xaxis = list(domain = c(0.1, 1)),
+  yaxis = list(title = "y"),
+  updatemenus = list(
+    list(
+      y = 0.8,
+      buttons = list(
+        
+        list(method = "restyle",
+             args = list("line.color", "blue"),
+             label = "Blue"),
+        
+        list(method = "restyle",
+             args = list("line.color", "red"),
+             label = "Red"))),
+    
+    list(
+      y = 0.7,
+      buttons = list(
+        list(method = "restyle",
+             args = list("visible", list(TRUE, FALSE)),
+             label = "Sin"),
+        
+        list(method = "restyle",
+             args = list("visible", list(FALSE, TRUE)),
+             label = "Cos")))
+  )
+)
 
 fig
