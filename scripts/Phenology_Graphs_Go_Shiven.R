@@ -109,6 +109,14 @@ quercus$Species
 unique(quercus$Species)
 
 
+button.list <- list()
+for(i in 1:length(unique(quercus$Species))){
+# for(i in 1:10){
+  button.list[[i]] <- list(method="restyle",
+                           args=list("transforms[0].value", unique(quercus$Species)[i]),
+                           label = unique(quercus$Species)[i])
+}
+
 #gonna practice making a dropdown with a scatter plot
 QuercusScatter <-quercus %>%
   plot_ly(
@@ -130,21 +138,23 @@ QuercusScatter <-quercus %>%
         list(
           type = 'dropdown',
           active = 0,
-          buttons = list(
-            list(method = "restyle",
-                 args = list("transforms[0].value", unique(quercus$Species)[1]),
-                 label = unique(quercus$Species)[1]),
-            list(method = "restyle",
-                 args = list("transforms[0].value", unique(quercus$Species)[2]),
-                 label = unique(quercus$Species)[2]),
-            list(method = "restyle",
-                 args = list("transforms[0].value", unique(quercus$Species)[3]),
-                 label = unique(quercus$Species)[3])
-          )
+          buttons = button.list
+          # buttons = list(
+          #   list(method = "restyle",
+          #        args = list("transforms[0].value", unique(quercus$Species)[1]),
+          #        label = unique(quercus$Species)[1]),
+          #   list(method = "restyle",
+          #        args = list("transforms[0].value", unique(quercus$Species)[2]),
+          #        label = unique(quercus$Species)[2]),
+          #   list(method = "restyle",
+          #        args = list("transforms[0].value", unique(quercus$Species)[3]),
+          #        label = unique(quercus$Species)[3])
+          # )
         )
       )
     )
 QuercusScatter
+
 
 
 
