@@ -163,7 +163,8 @@ ggplot(data = yearly_Textremes) + geom_line(aes(x = Year, y = YearlyTempMax, col
   
   
 #new line graph of 2019 temp extremes: looks like a lot, is there any way to make it look cleaner?
-ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX, col = "TMAX")) + #red line of temp maxes throughout the year
+YearExtremes <- 
+  ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX, col = "TMAX")) + #red line of temp maxes throughout the year
   geom_point(aes(x = YDAY, y = TMAX)) + #black points of temp maxes throughout the year
   geom_line(aes(x = YDAY, y = TMIN, col = "TMIN")) + #blue line of temp mins throughout the year
   geom_point(aes(x = YDAY, y = TMIN)) + #black points of temp mins throughout the year
@@ -173,6 +174,12 @@ ggplot(data = subset(dat.ghcn, YEAR == 2019)) + geom_line(aes(x = YDAY, y = TMAX
        scale_color_manual(name = "Temp Type", values = c("red", "blue"))) + #formats lines properly
   scale_x_continuous(breaks = seq(0, 365, 30)) + scale_y_continuous(breaks = seq(-40, 40, 10)) + #fixed scaling to make more sense
   theme_minimal()
+YearExtremes
+#practice saving this graph to html
+library(htmlwidgets)
+dir.create("Z:\\new folder")
+saveWidget(YearExtremes, 
+           file="Z:\\new folder\\scatterplot.html")
 
 
 #Made an interactive graph: is there anyway to make it load faster?

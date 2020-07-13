@@ -114,6 +114,21 @@ InteractiveLeaves
 quercus[quercus$Species=="Quercus alba", ]
 quercus$Species
 unique(quercus$Species)
+unique(quercus$PlantNumber[quercus$Species=="Quercus alba"])
+quercus$PlantNumber[quercus$Species=="Quercus alba"]
+
+#testing
+quercus.test <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) +
+  geom_point(aes(x=Date.Observed, y=PlantNumber, text=Observer))
+
+ggplotly(quercus.test)
+
+plotlyquercus.test <- plot_ly(
+  data = quercus,
+  type = 'scatter',
+  x = ~Date.Observed, 
+  y = ~PlantNumber)
+plotlyquercus.test
 
 
 button.list <- list()
@@ -162,6 +177,7 @@ QuercusScatter <-quercus %>%
       )
     )
 QuercusScatter
+
 
 # Just testing saving it to the desktop.  We need to figure out how to work with the formatting, but it works!
 htmlwidgets::saveWidget(as_widget(QuercusScatter), "~/Desktop/QuercusScatter.html")
