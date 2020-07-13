@@ -155,7 +155,8 @@ QuercusScatter <-quercus %>%
     )
 QuercusScatter
 
-
+# Just testing saving it to the desktop.  We need to figure out how to work with the formatting, but it works!
+htmlwidgets::saveWidget(as_widget(QuercusScatter), "~/Desktop/QuercusScatter.html")
 
 
 #getting shiny to work
