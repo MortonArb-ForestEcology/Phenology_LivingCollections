@@ -108,14 +108,24 @@ QuercusAlba.Interactive <- ggplotly(leafObserve + theme(strip.text = element_tex
                              legend.title=element_blank())) %>% 
   layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
                                                margin = list(b = 50, l = 50)))  #only works sometimes: but then y-axis disappears with layout part of legend to the bottom
-QuercusAlba.Interactive 
 
-#practice with scatter with same data
-drop <- function (quercus.row) {
-  list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[quercus.row]), label = unique(quercus$Species)[quercus.row]) 
-       }
-  
-QuercusScatter.Interactive <- quercus %>%
+InteractiveLeaves
+
+quercus[quercus$Species=="Quercus alba", ]
+quercus$Species
+unique(quercus$Species)
+
+
+button.list <- list()
+for(i in 1:length(unique(quercus$Species))){
+# for(i in 1:10){
+  button.list[[i]] <- list(method="restyle",
+                           args=list("transforms[0].value", unique(quercus$Species)[i]),
+                           label = unique(quercus$Species)[i])
+}
+
+#gonna practice making a dropdown with a scatter plot
+QuercusScatter <-quercus %>%
   plot_ly(
     type = 'scatter', 
     x = ~Date.Observed, 
@@ -135,76 +145,26 @@ QuercusScatter.Interactive <- quercus %>%
         list(
           type = 'dropdown',
           active = 0,
-          buttons = list(
-            # for (i in 1:length(quercus$Species)) { #didn't work
-            #   list(method = "restyle",args = list("transforms[0].value", unique(quercus$Species)[i]),
-            #   label = unique(quercus$Species)[i])
-            # }
-            # drop(1), drop(2), drop(3), drop(4), drop(5), drop(6), drop(7), drop(8), drop(9), drop(10),  #didn't work again (tried to use function)
-            # drop(11), drop(12), drop(13), drop(14), drop(15), drop(16), drop(17), drop(18), drop(19), drop(20), 
-            # drop(21), drop(22), drop(23), drop(24), drop(25), drop(26), drop(27), drop(28), drop(29), drop(30),
-            # drop(31), drop(32), drop(33), drop(34), drop(35), drop(36), drop(37), drop(38), drop(39), drop(40), 
-            # drop(41), drop(42), drop(43), drop(44), drop(45), drop(46), drop(47), drop(48), drop(49), drop(50),
-            # drop(51), drop(52), drop(53)
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[1]), label = unique(quercus$Species)[1]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[2]), label = unique(quercus$Species)[2]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[3]), label = unique(quercus$Species)[3]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[4]), label = unique(quercus$Species)[4]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[5]), label = unique(quercus$Species)[5]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[6]), label = unique(quercus$Species)[6]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[7]), label = unique(quercus$Species)[7]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[8]), label = unique(quercus$Species)[8]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[9]), label = unique(quercus$Species)[9]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[10]), label = unique(quercus$Species)[10]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[11]), label = unique(quercus$Species)[11]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[12]), label = unique(quercus$Species)[12]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[13]), label = unique(quercus$Species)[13]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[14]), label = unique(quercus$Species)[14]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[15]), label = unique(quercus$Species)[15]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[16]), label = unique(quercus$Species)[16]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[17]), label = unique(quercus$Species)[17]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[18]), label = unique(quercus$Species)[18]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[19]), label = unique(quercus$Species)[19]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[20]), label = unique(quercus$Species)[20]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[21]), label = unique(quercus$Species)[21]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[22]), label = unique(quercus$Species)[22]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[23]), label = unique(quercus$Species)[23]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[24]), label = unique(quercus$Species)[24]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[25]), label = unique(quercus$Species)[25]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[26]), label = unique(quercus$Species)[26]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[27]), label = unique(quercus$Species)[27]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[28]), label = unique(quercus$Species)[28]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[29]), label = unique(quercus$Species)[29]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[30]), label = unique(quercus$Species)[30]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[31]), label = unique(quercus$Species)[31]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[32]), label = unique(quercus$Species)[32]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[33]), label = unique(quercus$Species)[33]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[34]), label = unique(quercus$Species)[34]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[35]), label = unique(quercus$Species)[35]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[36]), label = unique(quercus$Species)[36]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[37]), label = unique(quercus$Species)[37]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[38]), label = unique(quercus$Species)[38]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[39]), label = unique(quercus$Species)[39]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[40]), label = unique(quercus$Species)[40]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[41]), label = unique(quercus$Species)[41]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[42]), label = unique(quercus$Species)[42]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[43]), label = unique(quercus$Species)[43]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[44]), label = unique(quercus$Species)[44]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[45]), label = unique(quercus$Species)[45]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[46]), label = unique(quercus$Species)[46]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[47]), label = unique(quercus$Species)[47]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[48]), label = unique(quercus$Species)[48]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[49]), label = unique(quercus$Species)[49]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[50]), label = unique(quercus$Species)[50]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[51]), label = unique(quercus$Species)[51]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[53]), label = unique(quercus$Species)[52]),
-            list(method = "restyle", args = list("transforms[0].value", unique(quercus$Species)[53]), label = unique(quercus$Species)[53])
-        ))))
-QuercusScatter.Interactive
 
+          buttons = button.list
+          # buttons = list(
+          #   list(method = "restyle",
+          #        args = list("transforms[0].value", unique(quercus$Species)[1]),
+          #        label = unique(quercus$Species)[1]),
+          #   list(method = "restyle",
+          #        args = list("transforms[0].value", unique(quercus$Species)[2]),
+          #        label = unique(quercus$Species)[2]),
+          #   list(method = "restyle",
+          #        args = list("transforms[0].value", unique(quercus$Species)[3]),
+          #        label = unique(quercus$Species)[3])
+          # )
+        )
+      )
+    )
+QuercusScatter
 
-#saving this to html: not working
-htmlwidgets::saveWidget(as_widget(QuercusAlba.Interactive), "../../Phenology_Forecasting/scripts")
+# Just testing saving it to the desktop.  We need to figure out how to work with the formatting, but it works!
+htmlwidgets::saveWidget(as_widget(QuercusScatter), "~/Desktop/QuercusScatter.html")
 
 
 quercus[quercus$Species=="Quercus alba", ]
