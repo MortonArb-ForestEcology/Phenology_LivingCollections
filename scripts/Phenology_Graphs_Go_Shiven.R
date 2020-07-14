@@ -117,20 +117,21 @@ unique(quercus$Species)
 unique(quercus$PlantNumber[quercus$Species=="Quercus alba"])
 quercus$PlantNumber[quercus$Species=="Quercus alba"]
 
-#testing
-quercus.test <- ggplot(data=quercus[quercus$Species=="Quercus alba",]) +
-  geom_point(aes(x=Date.Observed, y=PlantNumber, text=Observer))
-
-ggplotly(quercus.test)
-
+#testing with plotly vs ggplot: looks like plotly did not display nearly as many values when done with the entire quercus dataset
 plotlyquercus.test <- plot_ly(
-  data = quercus,
+  data = quercus[quercus$Species == "Quercus alba", ],
   type = 'scatter',
   x = ~Date.Observed, 
   y = ~PlantNumber)
 plotlyquercus.test
 
+ggplotquercus.test <- ggplot(data=quercus[quercus$Species == "Quercus alba", ]) + 
+  geom_point(aes(x=Date.Observed, y=PlantNumber))
+ggplotquercus.test
+ggplotly(ggplotquercus.test)
 
+
+#Creating button for dropdown in QuercusScatter
 button.list <- list()
 for(i in 1:length(unique(quercus$Species))){
 # for(i in 1:10){
