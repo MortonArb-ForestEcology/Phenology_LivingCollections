@@ -119,13 +119,11 @@ quercus$PlantNumber[quercus$Species=="Quercus alba"]
 
 #testing with plotly vs ggplot: looks like plotly did not display nearly as many values when done with the entire quercus dataset
 plotlyquercus.test <- plot_ly(
-  data = quercus[quercus$Species == "Quercus alba", ],
-  type = 'scatter',
-  x = ~Date.Observed, 
-  y = ~PlantNumber)
+  data = quercus,
+  type = 'scatter', x = ~Date.Observed, y = ~PlantNumber, mode = 'markers')
 plotlyquercus.test
 
-ggplotquercus.test <- ggplot(data=quercus[quercus$Species == "Quercus alba", ]) + 
+ggplotquercus.test <- ggplot(data=quercus) + 
   geom_point(aes(x=Date.Observed, y=PlantNumber))
 ggplotquercus.test
 ggplotly(ggplotquercus.test)
