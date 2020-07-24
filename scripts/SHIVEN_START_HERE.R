@@ -281,6 +281,8 @@ unstack(stack_df)
 library(dplyr)
 library(shiny)
 library(ggplot2)
+library(plotly)
+library(ggthemes)
 
 # # Sample workable data
 # 
@@ -326,18 +328,18 @@ ui <- fluidPage(
 )
 
 
-# Define server logic required to draw a histogram
+# Define server logic required to draw a histogram: figured out how to do plotly with shiny
 server <- function(input, output) {
   
-  output$Plot <- renderPlot({
+  output$Plot <- renderPlotly({
     data = yearly_Textremes %>%
       filter(Year %in% input$selects) %>%
       select(one_of(c("Year", input$selects2))) %>%
       gather(Attribute, value, -Year)
     
-    ggplot(data = data, aes(x = Year, y= value)) + 
-      geom_bar(aes(group = Attribute, fill = Year), stat = "identity", color = "blue")
-  })
+    print(ggplotly(ggplot(data = data, aes(x = Year, y= value)) + 
+      geom_bar(aes(group = Attribute, fill = Year), stat = "identity", color = "blue")))
+    })
 }
 
 # Run the application 
