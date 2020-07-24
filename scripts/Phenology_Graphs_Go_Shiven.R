@@ -193,6 +193,8 @@ unique(quercus$Species)
 library(dplyr)
 library(shiny)
 library(ggplot2)
+library(plotly)
+library(tidyr)
 
 # Since I cannot enter the choices one by one..
 
@@ -234,14 +236,12 @@ server <- function(input, output) {
   output$Plot <- renderPlot({
     data = quercus %>%
       filter(Species %in% input$selects) %>%
-      select(one_of(c("Species", input$selects2))) 
-      %>%
+      select(one_of(c("Species", input$selects2))) %>%
       gather(Attribute, value, -Species)
     
-    ggplot(data = data, aes(x = Species, y= fill)) + 
-      geom_histogram(
-        aes(group = Attribute, fill = Species), 
-        stat = "identity", color = "blue")
+    ggplot(data = data, aes(x = Species)) + 
+      geom_histogram(aes(group = Attribute, fill = Species), 
+        stat = "count", color = "blue")
   })
 }
 
