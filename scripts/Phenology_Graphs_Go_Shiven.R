@@ -195,6 +195,7 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(tidyr)
+library(ggthemes)
 
 # Since I cannot enter the choices one by one..
 
@@ -230,23 +231,25 @@ ui <- fluidPage(
 )
 
 
-# Define server logic required to draw a histogram
+# Define server logic required to draw a histogram: now interactive
 server <- function(input, output) {
   
-  output$Plot <- renderPlot({
+  output$Plot <- renderPlotly({
     data = quercus %>%
       filter(Species %in% input$selects) %>%
       select(one_of(c("Species", input$selects2))) %>%
       gather(Attribute, value, -Species)
     
-    ggplot(data = data, aes(x = Species)) + 
+    print(ggplotly(ggplot(data = data, aes(x = Species)) + 
       geom_histogram(aes(group = Attribute, fill = Species), 
-        stat = "count", color = "blue")
+        stat = "count", color = "blue")))
   })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
+
 
 ggplot(data = quercus[quercus$Species == "Quercus alba", ], aes(x = PlantNumber, y= Observer)) + 
   geom_histogram(aes(fill = Species), stat = "identity", color = "blue")
