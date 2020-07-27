@@ -86,7 +86,7 @@ user_id <- strsplit(npn_creds[1], ":")[[1]][2]
 user_pw <- strsplit(npn_creds[2], ":")[[1]][2]
 # Loop through collections
 sites.push <- c("Oak", "Maple", "Elm")
-yrs.push <- c(2018:2020)
+yrs.push <- c(lubridate::year(Sys.Date()))
 overwrite=F
 
 for(SITE in sites.push){
