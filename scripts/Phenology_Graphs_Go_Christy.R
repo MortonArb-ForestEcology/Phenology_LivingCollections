@@ -215,8 +215,26 @@ quercus$Date.Observed[quercus$Species == "Quercus macrocarpa"]
 #not working because it stops halfway through
 #load packages from SHIVEN_START_HERE to use mtcars dataset
 
-quercus.spp <- paste(unique(quercus$Species))
-paste(rep("Species", 2), collapse=", ")
+# quercus.spp <- paste(unique(quercus$Species))
+phenophases <- names(quercus)[grep(".observed", names(quercus))]
+intensity <- names(quercus)[grep(".intensity", names(quercus))]
+
+# Converting phenophases in to character columns instead of factors
+for(i in 1:length(phenophases)){
+	quercus[,phenophases[i]] <- as.character(quercus[,phenophases[i]])
+}
+for(i in 1:length(intensity)){
+	quercus[, intensity[i]] <- as.character(quercus[, intensity[i]])
+}
+
+
+
+quercus.stack <- stack(quercus[,phenophases], drop=F)
+names(quercus.stack) <- c("status", "phenophase")
+quercus.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber")] <- quercus[,c("Observer", "Date.Observed", "Species", "PlantNumber")]
+summary(quercus.stack) 
+
+
 ui <- fluidPage(
   # Some custom CSS for a smaller font for preformatted text
   tags$head(
@@ -233,9 +251,13 @@ ui <- fluidPage(
       # )
      # ))),
     selectInput("Species", "Choose a Species:",
-				    list(Quercus=as.list(quercus.spp))), 
+				    list(Quercus=as.list(paste(unique(quercus.stack$Species))))), 
+    selectInput("Phenophase", "Choose a Phenophase:",
+				    list(Phenos=as.list(paste(unique(quercus.stack$phenophase))))), 
+	verbatimTextOutput("hover_info"),			    
     mainPanel(
-      plotOutput("plot1")
+      plotOutput("plot1"),
+      # hover=hoverOpts(id="plot_hover")
     )
 
   #   column(width = 4,
@@ -275,14 +297,15 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
+	
   output$plot1 <- renderPlot({
     # if (input$plot_type == "base") {
 		# plot(mtcars$wt, mtcars$mpg)
     # } else if (input$plot_type == "ggplot2") {
       # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
     # }
-    ggplot(data=quercus[quercus$Species==input$Species,]) +
-	    geom_histogram(aes(x=Date.Observed, fill=Observer))
+    ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) +
+	    geom_histogram(aes(x=Date.Observed, fill=status), binwidth=7)
   })
   
   # output$click_info <- renderPrint({
@@ -290,8 +313,8 @@ server <- function(input, output) {
   #   str(input$plot_click)
   # })
   # output$hover_info <- renderPrint({
-  #   cat("input$plot_hover:\n")
-  #   str(input$plot_hover)
+    # cat("input$plot_hover:\n")
+    # str(input$plot_hover)
   # })
   # output$dblclick_info <- renderPrint({
   #   cat("input$plot_dblclick:\n")
