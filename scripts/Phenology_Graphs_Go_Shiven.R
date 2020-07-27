@@ -62,6 +62,7 @@ summary(quercus)
 
 #extracting the month to put into graph
 library(lubridate)
+
 summary(quercus)
 quercus$Date.Observed
 quercus$Time
@@ -132,53 +133,6 @@ ggplotquercus.test
 ggplotly(ggplotquercus.test)
 
 
-# #Creating button for dropdown in QuercusScatter
-# button.list <- list()
-# for(i in 1:length(unique(quercus$Species))){
-# # for(i in 1:10){
-#   button.list[[i]] <- list(method="restyle",
-#                            args=list("transforms[0].value", unique(quercus$Species)[i]),
-#                            label = unique(quercus$Species)[i])
-# }
-# 
-# # #gonna practice making a dropdown with a scatter plot
-# QuercusScatter <-quercus %>%
-#   plot_ly(
-#     type = 'scatter', 
-#     x = ~Date.Observed, 
-#     y = ~PlantNumber,
-#     text = ~Observer,
-#     hoverinfo = 'text',
-#     mode = 'markers', 
-#     transforms = list(
-#       list(
-#         type = 'filter',
-#         target = ~Species,
-#         operation = '=',
-#         value = unique(quercus$Species)[1]
-#       )
-#     )) %>% layout(
-#       updatemenus = list(
-#         list(
-#           type = 'dropdown',
-#           active = 0,
-# 
-#           buttons = button.list
-#           # buttons = list(
-#           #   list(method = "restyle",
-#           #        args = list("transforms[0].value", unique(quercus$Species)[1]),
-#           #        label = unique(quercus$Species)[1]),
-#           #   list(method = "restyle",
-#           #        args = list("transforms[0].value", unique(quercus$Species)[2]),
-#           #        label = unique(quercus$Species)[2]),
-#           #   list(method = "restyle",
-#           #        args = list("transforms[0].value", unique(quercus$Species)[3]),
-#           #        label = unique(quercus$Species)[3])
-#           # )
-#         )
-#       )
-#     )
-# QuercusScatter
 
 
 # Just testing saving it to the desktop.  We need to figure out how to work with the formatting, but it works!
@@ -255,3 +209,89 @@ ggplot(data = quercus[quercus$Species == "Quercus alba", ], aes(x = PlantNumber,
   geom_histogram(aes(fill = Species), stat = "identity", color = "blue")
 
 quercus$Date.Observed[quercus$Species == "Quercus macrocarpa"]
+
+
+#shiny usage from internet: https://gallery.shinyapps.io/093-plot-interaction-basic/?_ga=2.159045370.1313669618.1595826759-1262602594.1594961620
+#not working because it stops halfway through
+#load packages from SHIVEN_START_HERE to use mtcars dataset
+ui <- fluidPage(
+  # Some custom CSS for a smaller font for preformatted text
+  tags$head(
+    tags$style(HTML("
+      pre, table.table {
+        font-size: smaller;
+      }
+    "))
+  ),
+  
+  fluidRow(
+    column(width = 4, wellPanel(
+      radioButtons("plot_type", "Plot type",
+                   c("base", "ggplot2")
+      )
+     )))
+  #   column(width = 4,
+  #          # In a plotOutput, passing values for click, dblclick, hover, or brush
+  #          # will enable those interactions.
+  #          plotOutput("plot1", height = 350,
+  #                     # Equivalent to: click = clickOpts(id = "plot_click")
+  #                     click = "plot_click",
+  #                     dblclick = dblclickOpts(
+  #                       id = "plot_dblclick"
+  #                     ),
+  #                     hover = hoverOpts(
+  #                       id = "plot_hover"
+  #                     ),
+  #                     brush = brushOpts(
+  #                       id = "plot_brush"
+  #                     )
+  #          )
+  #   )
+  # ),
+  # fluidRow(
+  #   column(width = 3,
+  #          verbatimTextOutput("click_info")
+  #   ),
+  #   column(width = 3,
+  #          verbatimTextOutput("dblclick_info")
+  #   ),
+  #   column(width = 3,
+  #          verbatimTextOutput("hover_info")
+  #   ),
+  #   column(width = 3,
+  #          verbatimTextOutput("brush_info")
+  #   )
+  # )
+)
+
+
+server <- function(input, output) {
+  output$plot1 <- renderPlot({
+    if (input$plot_type == "base") {
+      plot(mtcars$wt, mtcars$mpg)
+    } else if (input$plot_type == "ggplot2") {
+      ggplot(mtcars, aes(wt, mpg)) + geom_point()
+    }
+  })
+  
+  # output$click_info <- renderPrint({
+  #   cat("input$plot_click:\n")
+  #   str(input$plot_click)
+  # })
+  # output$hover_info <- renderPrint({
+  #   cat("input$plot_hover:\n")
+  #   str(input$plot_hover)
+  # })
+  # output$dblclick_info <- renderPrint({
+  #   cat("input$plot_dblclick:\n")
+  #   str(input$plot_dblclick)
+  # })
+  # output$brush_info <- renderPrint({
+  #   cat("input$plot_brush:\n")
+  #   str(input$plot_brush)
+  # })
+  
+}
+
+
+shinyApp(ui, server)
