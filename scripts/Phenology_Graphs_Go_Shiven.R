@@ -32,7 +32,7 @@ ggplot(data=quercus) +
 # summary(ulmus)
 # ----------------
 
-theme.formatting <- 
+# theme.formatting <- 
 
 summary(quercus)
 
@@ -226,10 +226,14 @@ ui <- fluidPage(
   
   fluidRow(
     column(width = 4, wellPanel(
-      radioButtons("plot_type", "Plot type",
-                   c("base", "ggplot2")
+      radioButtons("Species", "Species",
+                   c("Quercus alba", "Quercus rubra")
       )
-     )))
+     ))),
+    mainPanel(
+      plotOutput("plot1")
+    )
+
   #   column(width = 4,
   #          # In a plotOutput, passing values for click, dblclick, hover, or brush
   #          # will enable those interactions.
@@ -262,16 +266,19 @@ ui <- fluidPage(
   #          verbatimTextOutput("brush_info")
   #   )
   # )
+
 )
 
 
 server <- function(input, output) {
   output$plot1 <- renderPlot({
-    if (input$plot_type == "base") {
-      plot(mtcars$wt, mtcars$mpg)
-    } else if (input$plot_type == "ggplot2") {
-      ggplot(mtcars, aes(wt, mpg)) + geom_point()
-    }
+    # if (input$plot_type == "base") {
+		# plot(mtcars$wt, mtcars$mpg)
+    # } else if (input$plot_type == "ggplot2") {
+      # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
+    # }
+    ggplot(data=quercus[quercus$Species==input$Species,]) +
+	    geom_histogram(aes(x=Date.Observed, fill=Observer))
   })
   
   # output$click_info <- renderPrint({
