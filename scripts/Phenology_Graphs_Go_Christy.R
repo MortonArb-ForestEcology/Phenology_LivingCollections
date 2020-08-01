@@ -298,32 +298,9 @@ server <- function(input, output) {
     # } else if (input$plot_type == "ggplot2") {
       # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
     # }
-    #print(ggplotly(ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) +
-	    #geom_histogram(aes(x=Date.Observed, fill=status), binwidth=7)))
-    ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
-      ggtitle("Leaf Present") + # title
-      facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-      geom_bin2d(aes(x=Date.Observed, y=count, fill=status 
-                     #text = sprintf("Timestamp: %s<br>Observer: %s", paste(Timestamp), Observer) # its not working because text is not working
-      ), binwidth=7) + # green filling & actual data
-      #scale_fill_manual(values=c("gray50", "green4", "blue2", "black") ) + # color scheme
-      scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
-      scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
-      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) + # I'm not sure
-      theme(legend.position='top', #need to move legend position 
-            legend.text = element_text(size=rel(1)),
-            legend.title = element_text(size=rel(1)),
-            plot.title = element_text(size=rel(1), face="bold", hjust=0.5), #formats title to be bold and in center
-            panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
-            panel.spacing=unit(0, "lines"), #connects all the individual trees together
-            axis.text.x=element_text(size=rel(1)),
-            axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
-            axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
-            axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
-            axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
-            strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
-    
+    print(ggplotly(ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) +
+	    geom_histogram(aes(x=Date.Observed, fill=status), binwidth=7)))
+
   })
 }
   # output$click_info <- renderPrint({

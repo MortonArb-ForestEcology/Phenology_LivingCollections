@@ -279,9 +279,9 @@ server <- function(input, output) {
     #print(ggplotly(ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) +
     #geom_histogram(aes(x=Date.Observed, fill=status), binwidth=7)))
     print(ggplotly(ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
-      ggtitle("Leaf Present") + # title
+      ggtitle(paste(input$Phenophase, "for", input$Species, sep=" ")) + # title
       facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=input$Phenophase 
+      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status 
                      #,text = sprintf("Timestamp: %s<br>Observer: %s", paste(Timestamp), Observer) # its not working because text is not working
       ), binwidth=7) + # green filling & actual data
       scale_fill_manual(values=c("green4", "gray50", "blue2", "black") )  + # color scheme
@@ -291,7 +291,7 @@ server <- function(input, output) {
       theme(legend.position='top', #need to move legend position
              legend.text = element_text(size=rel(1)),
              legend.title = element_text(size=rel(1)),
-             plot.title = element_text(size=rel(1), face="bold", hjust=0.5), #formats title to be bold and in center
+             plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
              panel.grid = element_blank(),
              panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
              panel.spacing=unit(0, "lines"), #connects all the individual trees together
@@ -326,3 +326,5 @@ shinyApp(ui, server)
 
 summary(quercus.stack)
 unique(quercus.stack$phenophase)
+paste("Hello", "world", sep=" ")
+paste(quercus.stack$phenophase[1], "for", quercus.stack$Species[1], sep=" ") 
