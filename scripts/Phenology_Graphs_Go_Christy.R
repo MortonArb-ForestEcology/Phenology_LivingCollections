@@ -232,6 +232,10 @@ for(i in 1:length(intensity)){
 quercus.stack <- stack(quercus[,phenophases], drop=F)
 names(quercus.stack) <- c("status", "phenophase")
 quercus.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber")] <- quercus[,c("Observer", "Date.Observed", "Species", "PlantNumber")]
+quercus.stack$year <- lubridate::year(quercus.stack$Date.Observed)
+quercus.stack$month <- lubridate::month(quercus.stack$Date.Observed)
+quercus.stack$day <- lubridate::day(quercus.stack$Date.Observed)
+
 summary(quercus.stack) 
 
 
@@ -244,81 +248,27 @@ ui <- fluidPage(
       }
     "))),
   
-  # fluidRow(
-    # column(width = 4, wellPanel(
-      # radioButtons(label=quercus.spp[1:2]
-      # )
-     # ))),
     selectInput("Species", "Choose a Species:", list(Quercus=as.list(paste(unique(quercus.stack$Species))))), 
     selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(quercus.stack$phenophase))))), 
 	verbatimTextOutput("hover_info"),			    
-    mainPanel(plotOutput("plot1"),
+    mainPanel(plotlyOutput("plot1"),
       # hover=hoverOpts(id="plot_hover")
     ))
 
-  #   column(width = 4,
-  #          # In a plotOutput, passing values for click, dblclick, hover, or brush
-  #          # will enable those interactions.
-  #          plotOutput("plot1", height = 350,
-  #                     # Equivalent to: click = clickOpts(id = "plot_click")
-  #                     click = "plot_click",
-  #                     dblclick = dblclickOpts(
-  #                       id = "plot_dblclick"
-  #                     ),
-  #                     hover = hoverOpts(
-  #                       id = "plot_hover"
-  #                     ),
-  #                     brush = brushOpts(
-  #                       id = "plot_brush"
-  #                     )
-  #          )
-  #   )
-  # ),
-  # fluidRow(
-  #   column(width = 3,
-  #          verbatimTextOutput("click_info")
-  #   ),
-  #   column(width = 3,
-  #          verbatimTextOutput("dblclick_info")
-  #   ),
-  #   column(width = 3,
-  #          verbatimTextOutput("hover_info")
-  #   ),
-  #   column(width = 3,
-  #          verbatimTextOutput("brush_info")
-  #   )
-  # )
 
-#goal: try to get a geom_bin2d graph to work in shiny
+  
+
+# goal: try to get a geom_bin2d graph to work in shiny
 server <- function(input, output) {
-	
-  output$plot1 <- renderPlot({
-    # if (input$plot_type == "base") {
-		# plot(mtcars$wt, mtcars$mpg)
-    # } else if (input$plot_type == "ggplot2") {
-      # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
-    # }
-    print(ggplotly(ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) +
-	    geom_histogram(aes(x=Date.Observed, fill=status), binwidth=7)))
+
+  output$plot1 <- renderPlotly({
+    print(ggplot(data=quercus.stack[quercus.stack$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
+            # ggtitle(paste(input$Phenophase, "for", input$Species, sep=" ")) + # title
+            facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
+            geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, label=Observer, label2=paste(year, month, day, sep="-")), binwidth=7))
 
   })
 }
-  # output$click_info <- renderPrint({
-  #   cat("input$plot_click:\n")
-  #   str(input$plot_click)
-  # })
-  # output$hover_info <- renderPrint({
-    # cat("input$plot_hover:\n")
-    # str(input$plot_hover)
-  # })
-  # output$dblclick_info <- renderPrint({
-  #   cat("input$plot_dblclick:\n")
-  #   str(input$plot_dblclick)
-  # })
-  # output$brush_info <- renderPrint({
-  #   cat("input$plot_brush:\n")
-  #   str(input$plot_brush)
-  # })
 
 
 shinyApp(ui, server)
