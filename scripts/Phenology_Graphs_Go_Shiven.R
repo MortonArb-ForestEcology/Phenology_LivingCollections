@@ -266,8 +266,12 @@ ui <- fluidPage(
 #   )
 # )
 
+
+
 #goal: try to get a geom_bin2d graph to work in shiny
-#so far almost everything of the graph is working: text is not working and hovertext is weird, especially the Date.Observed
+#so far almost everything of the graph is working: hovertext for the Date.Observed is weird, legend position is wrong
+#Need to move legend so not in text but it is not going to bottom even when I put code on line 294
+#Date Observed Info is very weird, could instead just put Day, Month, and Year individually if cannot fix
 server <- function(input, output) {
   
   output$plot1 <- renderPlot({
@@ -281,16 +285,16 @@ server <- function(input, output) {
     print(ggplotly(ggplot(data=quercus.stack[quercus$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
       ggtitle(paste(input$Phenophase, "for", input$Species, sep=" ")) + # title
       facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status 
+      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, label=Observer
                      #,text = sprintf("Timestamp: %s<br>Observer: %s", paste(Timestamp), Observer) # its not working because text is not working
       ), binwidth=7) + # green filling & actual data
       scale_fill_manual(values=c("green4", "gray50", "blue2", "black") )  + # color scheme
       scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
       scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
       scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
-      theme(legend.position='top', #need to move legend position
-             legend.text = element_text(size=rel(1)),
-             legend.title = element_text(size=rel(1)),
+      theme(legend.position="bottom", #need to move legend position
+             legend.text = element_text(size=rel(0.5)),
+             legend.title = element_text(size=rel(0.5)),
              plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
              panel.grid = element_blank(),
              panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
