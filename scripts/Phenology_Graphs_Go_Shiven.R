@@ -77,7 +77,7 @@ leafObserve <- ggplot(data=quercus[quercus$Species == "Quercus alba", ]) + # dat
         strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
 
 leafObserve
-QuercusAlba.Interactive <- ggplotly(leafObserve + theme(strip.text = element_text(Fangle=90), 
+QuercusAlba.Interactive <- ggplotly(leafObserve + theme(strip.text = element_text(angle=90), 
                                                         plot.margin=unit(c(0,5,0,0), "lines"), 
                                                         legend.title=element_blank())) %>% 
   layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
@@ -194,7 +194,7 @@ server <- function(input, output) {
              plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
              panel.grid = element_blank(),
              panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
-             panel.spacing=unit(0, "lines"), #connects all the individual trees together
+             panel.spacing=unit(0.05, "lines"), #connects all the individual trees together
              axis.text.x=element_text(size=rel(1)),
              axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
              axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
