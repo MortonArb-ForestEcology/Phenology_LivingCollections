@@ -4,7 +4,7 @@ Map_Status/data/*.csv
 figures/maps*
 data/observations/*.csv
 
-
+data_raw/
 *.tiff
 *.history
 scripts/FallColor_First_2018_Map.png
@@ -15,3 +15,11 @@ analyses/.Rhistory
 scripts/CECA_Bloom_Future.csv
 scripts/CECA_Bloom_Past.csv
 data/QUMA_fruits_2019.csv
+data/NPN/groupRoster_The_Morton_Arboretum.csv
+data/NPN/NPN_Chicago_Observations_all.csv
+data/.DS_Store
+.DS_Store
+data/NPN/.NPN_creds
+
+.RData
+data_raw/meteorology/GHCN_extracted/USC00115097_latest.csv
