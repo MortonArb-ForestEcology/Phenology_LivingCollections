@@ -85,9 +85,9 @@ dat.all[dat.all$Date.Observed>Sys.Date(),1:6]
 # summary(dat.all)
 
 # Also merge in the observing lists and volunteer assignments
-quercus.list <- read.csv(file.path(dir.base, "Observing Lists/Quercus", "ObservingLists_Quercus.csv"))
-acer.list <- read.csv(file.path(dir.base, "Observing Lists/Acer", "ObservingLists_Acer.csv"))
-ulmus.list <- read.csv(file.path(dir.base, "Observing Lists/Ulmus", "ObservingLists_Ulmus.csv"))
+quercus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Quercus.csv"))
+acer.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Acer.csv"))
+ulmus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Ulmus.csv"))
 quercus.list$collection <- "Quercus"
 acer.list$collection <- "Acer"
 ulmus.list$collection <- "Ulmus"
