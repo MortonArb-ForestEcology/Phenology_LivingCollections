@@ -64,8 +64,8 @@ summary(quercus)
 library(lubridate)
 
 summary(quercus)
-quercus$Date.Observed
-quercus$Time
+summary(quercus$Date.Observed)
+summary(quercus$Time)
 
 quercus$Month <- month(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
 quercus$Day <- day(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
@@ -81,150 +81,16 @@ library(shinydashboard)
 library(htmltools)
 #runExample("01_hello")
 
-#making graph interactive
-leafObserve <- ggplot(data=quercus[quercus$Species == "Quercus alba", ]) + # data being used
-                  ggtitle("Leaf Present") + # title
-                  facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-                  geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=leaf.present.observed, 
-                                 text = sprintf("Timestamp: %s<br>Observer: %s", paste(Timestamp), Observer) # its not working because text is not working
-                                 ), binwidth=7) + # green filling & actual data
-                  scale_fill_manual(values=c("gray50", "green4", "blue2", "black") ) + # color scheme
-                  scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
-                  scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
-                  scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) + # I'm not sure
-                  theme(legend.position='top', #need to move legend position 
-                     legend.text = element_text(size=rel(1)),
-                     legend.title = element_text(size=rel(1)),
-                     plot.title = element_text(size=rel(1), face="bold", hjust=0.5), #formats title to be bold and in center
-                     panel.grid = element_blank(),
-                     panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
-                     panel.spacing=unit(0, "lines"), #connects all the individual trees together
-                     axis.text.x=element_text(size=rel(1)),
-                     axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
-                     axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
-                     axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
-                     axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
-                     strip.text.y=element_text(size=rel(1), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
-
-leafObserve
-QuercusAlba.Interactive <- ggplotly(leafObserve + theme(strip.text = element_text(angle=90), 
-                             plot.margin=unit(c(0,5,0,0), "lines"), 
-                             legend.title=element_blank())) %>% 
-  layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
-                                               margin = list(b = 50, l = 50)))  #only works sometimes: but then y-axis disappears with layout part of legend to the bottom
-
-QuercusAlba.Interactive
-
-quercus[quercus$Species=="Quercus alba", ]
-quercus$Species
-unique(quercus$Species)
-unique(quercus$PlantNumber[quercus$Species=="Quercus alba"])
-quercus$PlantNumber[quercus$Species=="Quercus alba"]
-
-#testing with plotly vs ggplot: looks like plotly did not display nearly as many values when done with the entire quercus dataset
-plotlyquercus.test <- plot_ly(
-  data = quercus,
-  type = 'scatter', x = ~Date.Observed, y = ~PlantNumber, mode = 'markers')
-plotlyquercus.test
-
-ggplotquercus.test <- ggplot(data=quercus) + 
-  geom_point(aes(x=Date.Observed, y=PlantNumber))
-ggplotquercus.test
-ggplotly(ggplotquercus.test)
-
-
-
-
-# Just testing saving it to the desktop.  We need to figure out how to work with the formatting, but it works!
-htmlwidgets::saveWidget(as_widget(QuercusScatter), "~/Desktop/QuercusScatter.html")
-
-
-quercus[quercus$Species=="Quercus alba", ]
-quercus$Species
-unique(quercus$Species)
-
-#Practice with Shiny: dropdown of different columns
-library(dplyr)
-library(shiny)
-library(ggplot2)
-library(plotly)
-library(tidyr)
-library(ggthemes)
-
-# Since I cannot enter the choices one by one..
-
-Atts <- quercus %>%
-  select(Observer) %>%
-  names()
-Atts
-
-Ctrs <- unique(quercus$Species)
-Ctrs
-
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-  
-  # Application title
-  titlePanel("Sample Drop Down"),
-  
-  # Sidebar with dropdown
-  
-  sidebarLayout(
-    sidebarPanel(
-      selectInput(inputId = "selects", choices = Ctrs,
-                  label = "Select Species", multiple = TRUE),
-      selectInput(inputId = "selects2", choices = Atts, label = "select data",
-                  multiple = TRUE)
-    ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("Plot")
-    )
-  )
-)
-
-
-# Define server logic required to draw a histogram: now interactive
-server <- function(input, output) {
-  
-  output$Plot <- renderPlotly({
-    data = quercus %>%
-      filter(Species %in% input$selects) %>%
-      select(one_of(c("Species", input$selects2))) %>%
-      gather(Attribute, value, -Species)
-    
-    print(ggplotly(ggplot(data = data, aes(x = Species)) + 
-      geom_histogram(aes(group = Attribute, fill = Species), 
-        stat = "count", color = "blue")))
-  })
-}
-
-# Run the application 
-shinyApp(ui = ui, server = server)
-
-
-
-ggplot(data = quercus[quercus$Species == "Quercus alba", ], aes(x = PlantNumber, y= Observer)) + 
-  geom_histogram(aes(fill = Species), stat = "identity", color = "blue")
-
-quercus$Date.Observed[quercus$Species == "Quercus macrocarpa"]
-
-
-#shiny usage from internet: https://gallery.shinyapps.io/093-plot-interaction-basic/?_ga=2.159045370.1313669618.1595826759-1262602594.1594961620
-#not working because it stops halfway through
-#load packages from SHIVEN_START_HERE to use mtcars dataset
-
 # quercus.spp <- paste(unique(quercus$Species))
 phenophases <- names(quercus)[grep(".observed", names(quercus))]
 intensity <- names(quercus)[grep(".intensity", names(quercus))]
 
 # Converting phenophases in to character columns instead of factors
 for(i in 1:length(phenophases)){
-	quercus[,phenophases[i]] <- as.character(quercus[,phenophases[i]])
+  quercus[,phenophases[i]] <- as.character(quercus[,phenophases[i]])
 }
 for(i in 1:length(intensity)){
-	quercus[, intensity[i]] <- as.character(quercus[, intensity[i]])
+  quercus[, intensity[i]] <- as.character(quercus[, intensity[i]])
 }
 
 
@@ -232,11 +98,18 @@ for(i in 1:length(intensity)){
 quercus.stack <- stack(quercus[,phenophases], drop=F)
 names(quercus.stack) <- c("status", "phenophase")
 quercus.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber")] <- quercus[,c("Observer", "Date.Observed", "Species", "PlantNumber")]
-quercus.stack$year <- lubridate::year(quercus.stack$Date.Observed)
-quercus.stack$month <- lubridate::month(quercus.stack$Date.Observed)
-quercus.stack$day <- lubridate::day(quercus.stack$Date.Observed)
-
 summary(quercus.stack) 
+head(quercus.stack)
+write.csv(quercus.stack, "pheno_qaqc_shiny/pheno_compiled.csv", row.names=F)
+
+#adding day, month, and year individually to quercus.stack because Date.Observed is not working in shiny graph: works now
+quercus.stack$Month <- month(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
+quercus.stack$Day <- day(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
+quercus.stack$Year <- year(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
+quercus.stack$Time <- format(quercus$Timestamp, '%H:%M:%S')
+summary(quercus.stack)
+head(quercus.stack)
+
 
 
 ui <- fluidPage(
@@ -248,27 +121,57 @@ ui <- fluidPage(
       }
     "))),
   
-    selectInput("Species", "Choose a Species:", list(Quercus=as.list(paste(unique(quercus.stack$Species))))), 
-    selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(quercus.stack$phenophase))))), 
-	verbatimTextOutput("hover_info"),			    
-    mainPanel(plotlyOutput("plot1"),
-      # hover=hoverOpts(id="plot_hover")
-    ))
+  selectInput("Species", "Choose a Species:", list(Quercus=as.list(paste(unique(quercus.stack$Species))))), 
+  selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(quercus.stack$phenophase))))), 
+  verbatimTextOutput("hover_info"),			    
+  mainPanel(plotlyOutput("plot1"),
+            # hover=hoverOpts(id="plot_hover")
+  ))
 
 
-  
-
-# goal: try to get a geom_bin2d graph to work in shiny
+#goal: try to get a geom_bin2d graph to work in shiny
+#so far almost everything of the graph is working: Date Observed is now normal but it has to be repeated twice for it to work
 server <- function(input, output) {
-
+  
   output$plot1 <- renderPlotly({
-    print(ggplot(data=quercus.stack[quercus.stack$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
-            # ggtitle(paste(input$Phenophase, "for", input$Species, sep=" ")) + # title
-            facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-            geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, label=Observer, label2=paste(year, month, day, sep="-")), binwidth=7))
-
+    # if (input$plot_type == "base") {
+    # plot(mtcars$wt, mtcars$mpg)
+    # } else if (input$plot_type == "ggplot2") {
+    # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
+    # }
+    print(ggplotly(ggplot(data=quercus.stack[quercus.stack$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
+                     ggtitle(paste(input$Phenophase, "for", input$Species, sep=" ")) + # title
+                     facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
+                     geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, 
+                                    #label=Observer, label2=paste(Year, Month, Day, sep="-"), 
+                                    text=paste('Date Observed:',Date.Observed,'<br>','Observer: ',Observer,'<br>', 'Status: ',status,'<br>','Plant Number: ', PlantNumber)), binwidth=7) + # green filling & actual data
+                     scale_fill_manual(values=c("green4", "gray50", "blue2", "black") )  + # color scheme
+                     scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
+                     scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
+                     scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
+                     theme(legend.position="bottom", #need to move legend position
+                           legend.text = element_text(size=rel(1)),
+                           legend.title=element_blank(),
+                           plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
+                           panel.grid = element_blank(),
+                           panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
+                           panel.spacing=unit(0.05, "lines"), #connects all the individual trees together
+                           axis.text.x=element_text(size=rel(1)),
+                           axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
+                           axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
+                           axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
+                           axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
+                           strip.text = element_text(angle=90), 
+                           plot.margin=unit(c(0,5,0,0), "lines"),
+                           strip.text.y=element_text(size=rel(1), angle=0)), tooltip="text") %>% 
+            layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
+                                 margin = list(b = 50, l = 50)))) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+    
   })
 }
+
+
+shinyApp(ui, server)
 
 
 shinyApp(ui, server)
