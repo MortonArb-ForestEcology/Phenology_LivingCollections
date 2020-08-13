@@ -211,3 +211,10 @@ server <- function(input, output) {
 
 
 shinyApp(ui, server)
+
+#Links of websites that talk about converting shiny to HTML
+#Looks like I'm going to have to create a Shiny Server in order to convert it into HTML
+#https://stackoverflow.com/questions/46575316/output-pure-html-file-from-r-shiny-app
+#https://shiny.rstudio.com/articles/rmarkdown.html
+#http://rstudio.github.io/shiny/tutorial/#deployment-web
+#https://shiny.rstudio.com/articles/generating-reports.html
