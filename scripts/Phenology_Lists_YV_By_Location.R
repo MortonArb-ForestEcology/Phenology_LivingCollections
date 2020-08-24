@@ -39,9 +39,9 @@ YV.org <- arrange(YV.org, Genus)
 YV.final <- YV.org[(is.na(YV.org$Latitude) == FALSE),]
 
 #Selecting for individual trees based on row where all the numbers listed after c= a row and individual tree
-YV.final <- YV.final[ c(3,17,21,31,47,167,170,171,184,209,216,248,251,263,276,292,324,332,333,465)-1, ] 
+YV.final <- YV.final[ c(29,33,42,131,132,141,173,183,189,213,215,220,238,256,275,288,297,312,328)-1, ] 
 
 #Be sure to change the file name to the individual lit beig written
-write.csv(YV.final, file.path(path.out, file = "Meadow_Lake_Species_List_By_Genus.csv"), row.names=FALSE)
+write.csv(YV.final, file.path(path.out, file = "Childrens_Garden_Species_List_By_Genus.csv"), row.names=FALSE)
 
 View(YV.final)
