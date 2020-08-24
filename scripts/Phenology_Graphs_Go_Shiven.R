@@ -120,36 +120,42 @@ library(htmltools)
 
 
 #shiny usage from internet: https://gallery.shinyapps.io/093-plot-interaction-basic/?_ga=2.159045370.1313669618.1595826759-1262602594.1594961620
-
+#adding leaf.falling.intensity to dat.all so I can add intensity to dat.all.stack
+dat.all$leaf.falling.intensity <- rep(NA, 4680) # need to make it so that the intensity and phenophases can be equal in size
+colnames(dat.all)
+dat.all <- dat.all[, c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,30,16,17,18,19,20,21,22,23,24,25,26,27,28,29)]
+head(dat.all)
 # quercus.spp <- paste(unique(quercus$Species))
-phenophases <- names(quercus)[grep(".observed", names(quercus))]
-intensity <- names(quercus)[grep(".intensity", names(quercus))]
+phenophases <- names(dat.all)[grep(".observed", names(dat.all))]
+intensity <- names(dat.all)[grep(".intensity", names(dat.all))]
 
 # Converting phenophases in to character columns instead of factors
 for(i in 1:length(phenophases)){
-  quercus[,phenophases[i]] <- as.character(quercus[,phenophases[i]])
+  dat.all[,phenophases[i]] <- as.character(dat.all[,phenophases[i]])
 }
+
 for(i in 1:length(intensity)){
-  quercus[, intensity[i]] <- as.character(quercus[, intensity[i]])
+  dat.all[, intensity[i]] <- as.character(dat.all[, intensity[i]])
 }
 
+intensity
+phenophases
+dat.all.stack <- stack(dat.all[,phenophases], drop=F)
+dat.all.stack.2 <- stack(dat.all[,intensity], drop=F)
+names(dat.all.stack) <- c("Phenophase.Status", "Phenophase")
+names(dat.all.stack.2) <- c("Intensity.Status", "Intensity")
+head(dat.all.stack)
+head(dat.all.stack.2)
+nrow(dat.all.stack)
+nrow(dat.all.stack.2)
+dat.all.stack <- cbind(dat.all.stack, dat.all.stack.2)
+dat.all.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Obs.List", "Notes")] <- dat.all[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Obs.List", "Notes")]
+head(dat.all.stack)
+tail(dat.all.stack)
+summary(dat.all.stack)
 
-
-quercus.stack <- stack(quercus[,phenophases], drop=F)
-names(quercus.stack) <- c("status", "phenophase")
-quercus.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber")] <- quercus[,c("Observer", "Date.Observed", "Species", "PlantNumber")]
-summary(quercus.stack) 
-head(quercus.stack)
-
-#adding day, month, and year individually to quercus.stack because Date.Observed is not working in shiny graph: works now
-quercus.stack$Month <- month(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
-quercus.stack$Day <- day(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
-quercus.stack$Year <- year(as.POSIXlt(quercus$Date.Observed, format="%Y/%m/%d"))
-quercus.stack$Time <- format(quercus$Timestamp, '%H:%M:%S')
-summary(quercus.stack)
-head(quercus.stack)
-
-
+#tried to make it so that coloring would be consistent
+color.levels <- factor(dat.all.stack$Phenophase.Status ,levels = c("Yes", "No", "Unsure", "No Observation"))
 
 ui <- fluidPage(
   # Some custom CSS for a smaller font for preformatted text
@@ -160,16 +166,19 @@ ui <- fluidPage(
       }
     "))),
   
-  selectInput("Species", "Choose a Species:", list(Quercus=as.list(paste(unique(quercus.stack$Species))))), 
-  selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(quercus.stack$phenophase))))), 
+  selectInput("Obs.List", "Choose a Obs.List:", list(Obs.List=as.list(paste(sort(unique(dat.all.stack$Obs.List)))))), 
+  selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase))))), 
   verbatimTextOutput("hover_info"),			    
-  mainPanel(plotlyOutput("plot1"),
+  mainPanel(plotlyOutput("plot1", height = 750),
             # hover=hoverOpts(id="plot_hover")
   ))
 
 
 #goal: try to get a geom_bin2d graph to work in shiny
 #so far almost everything of the graph is working: Date Observed is now normal but it has to be repeated twice for it to work
+#Weirds that on scale_x_date I have to have the range as quercus
+#Not working with Obs.List as x
+
 server <- function(input, output) {
   
   output$plot1 <- renderPlotly({
@@ -178,14 +187,13 @@ server <- function(input, output) {
     # } else if (input$plot_type == "ggplot2") {
     # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
     # }
-    print(ggplotly(ggplot(data=quercus.stack[quercus.stack$Species==input$Species & quercus.stack$phenophase==input$Phenophase, ]) + # data being used
-      ggtitle(paste(input$Phenophase, "for", input$Species, sep=" ")) + # title
-      facet_grid(Species*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, 
-                     #label=Observer, label2=paste(Year, Month, Day, sep="-"), 
-                     text=paste('Date Observed:',Date.Observed,'<br>','Observer: ',Observer,'<br>', 'Status: ',status,'<br>','Plant Number: ', PlantNumber)), binwidth=7) + # green filling & actual data
-      scale_fill_manual(values=c("green4", "gray50", "blue2", "black") )  + # color scheme
-      scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?
+    ggplotly(ggplot(data=dat.all.stack[dat.all.stack$Obs.List==input$Obs.List & dat.all.stack$Phenophase==input$Phenophase, ]) + # data being used
+      ggtitle(paste(input$Phenophase, "for", input$Obs.List, sep=" ")) + # title
+      facet_grid(Obs.List*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
+      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase.Status, 
+                     text=paste('Date Observed:',Date.Observed,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes)), binwidth=7) + # green filling & actual data
+      scale_fill_manual(dat.all.stack$Phenophase.Status, values = c("Yes"="green4", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
+      scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?, only works when range is quercus
       scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
       scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
       theme(legend.position="bottom", #need to move legend position
@@ -204,7 +212,7 @@ server <- function(input, output) {
              plot.margin=unit(c(0,5,0,0), "lines"),
              strip.text.y=element_text(size=rel(1), angle=0)), tooltip="text") %>% 
              layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
-                           margin = list(b = 50, l = 50)))) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+                           margin = list(b = 50, l = 50))) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
   })
 }
