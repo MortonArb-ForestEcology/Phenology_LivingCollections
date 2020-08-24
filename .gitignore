@@ -25,3 +25,4 @@ data/NPN/.NPN_creds
 data_raw/meteorology/GHCN_extracted/USC00115097_latest.csv
 scripts/pheno_qaqc_shiny/pheno_compiled.csv
 scripts/pheno_qaqc_shiny/rsconnect/shinyapps.io/mortonarb-forestecology/pheno_qaqc_shiny.dcf
+scripts/test_shiny/pheno_compiled.csv

@@ -2,6 +2,7 @@
 library(shiny)
 library(ggplot2)
 library(plotly)
+library(stringr)
 
 dat.pheno <- read.csv("pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
@@ -9,37 +10,20 @@ dat.pheno$status <- factor(dat.pheno$status, levels=c("No", "Yes", "Unsure", "No
 summary(dat.pheno)
 # dat.pheno <- quercus.stack
 
-colors.all <- data.frame(pheno.status = c("No", "Yes", "Unsure", "No Observation"), 
-                         color.code = c("gray50","green4", "blue2", "black"))
-
 function(input, output) {
-  
-  # dat.pheno <- reactive({
-  #   quercus.stack[quercus.stack$Date.Observed>=input$StartDate,]
-  #   })
-  # cols.use <- reactive({
-  #   paste(colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.pheno$Date.Observed>=input$StartDate & dat.pheno$Obs.List==input$ObsList & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)]])}
-  #   )
- 
-  
   output$plot1 <- renderPlotly({
-    # if (input$plot_type == "base") {
-    # plot(mtcars$wt, mtcars$mpg)
-    # } else if (input$plot_type == "ggplot2") {
-    # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
-    # }
     dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$Obs.List==input$ObsList & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
     
-    cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
+    # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
     print(
       ggplotly(ggplot(data=dat.pheno[dat.subs, ]) + # data being used
                      ggtitle(paste(input$Phenophase, "for", input$ObsList, sep=" ")) + # title
-                     facet_grid(Species~., scales="free_y", switch="y") + # lines for different species +
+                     facet_grid(Species+PlantNumber~., scales="free", space="free", switch="y") + # lines for different species +
                      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, 
                                     #label=Observer, label2=paste(Year, Month, Day, sep="-"), 
-                                    text=paste('Date Observed:',Date.Observed,'<br>','Observer: ',Observer,'<br>', 'Status: ',status,'<br>','Plant Number: ', PlantNumber, '<br>', "Notes: ", Notes)), binwidth=7) + # green filling & actual data
-                     scale_fill_manual(values= cols.use)  + # color scheme
+                                    text=stringr::str_wrap(paste('Date Observed:',Date.Observed,'<br>', "Date Entered: ", Timestamp, '<br>','Observer: ',Observer,'<br>', 'Status: ',status,'<br>','Plant Number: ', PlantNumber, '<br>', "Notes: ", Notes), indent=0, exdent=5)), binwidth=7) + # green filling & actual data
+                     scale_fill_manual(values= c("No" = "gray50", "Yes"="green4", "Unsure"="blue3", "No Observation"="black"))  + # color scheme
                      scale_x_date(name="Date", expand=c(0,0)) + # x-axis and other stuff?
                      scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
                      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
@@ -57,7 +41,7 @@ function(input, output) {
                            axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
                            strip.text = element_text(angle=90), 
                            plot.margin=unit(c(0,5,0,0), "lines"),
-                           strip.text.y=element_text(size=rel(1), angle=0)), tooltip="text") %>% 
+                           strip.text.y=element_text(margin=unit(c(2,2,2,2), "lines"), size=rel(0.75), angle=0, hjust=0, vjust=0)), tooltip="text") %>% 
             layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
                                  margin = list(b = 50, l = 50)))) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
