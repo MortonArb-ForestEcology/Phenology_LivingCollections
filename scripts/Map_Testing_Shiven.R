@@ -115,8 +115,8 @@ head(dat.all.stack.2)
 nrow(dat.all.stack)
 nrow(dat.all.stack.2)
 dat.all.stack <- cbind(dat.all.stack, dat.all.stack.2) #not working anymore
-dat.all.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Obs.List",  "BgLatitude", "BgLongitude", "Notes")] <- 
-  dat.all[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Obs.List", "BgLatitude", "BgLongitude", "Notes")]
+dat.all.stack[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Obs.List",  "collection", "BgLatitude", "BgLongitude", "Notes")] <- 
+  dat.all[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Obs.List", "collection", "BgLatitude", "BgLongitude", "Notes")]
 head(dat.all.stack)
 tail(dat.all.stack)
 summary(dat.all.stack)
@@ -135,7 +135,7 @@ ggplotly(ggplot(data=dat.all.stack[dat.all.stack$Obs.List=="Acer-6", ]) +
 #Don't have the issue with the phenophases on top of each other as I pick phenophases
 #need to work on slider: not working for single value or range
 #used this website (can make range or single value for date but both are not working): https://shiny.rstudio.com/articles/sliders.html
-#worked with obs.list and phenophase dropdowns, stopped working with slider for date
+#worked with obs.list and phenophase dropdowns, stopped working with slider for date, not because it is a slider but because it is a date: tried with dropdown
 ui <- fluidPage(
   # Some custom CSS for a smaller font for preformatted text
   titlePanel("Customizable Map for QAQC Data"),
@@ -145,12 +145,9 @@ ui <- fluidPage(
         font-size: smaller;
       }
     "))),
-  
-  #selectInput("Date.Observed", "Choose a Date:", list(Date.Observed=as.list(paste(sort(unique(dat.all.stack$Date.Observed)))))), 
-  #sidebarLayout(sidebarPanel(
-    sliderInput("format", "Custom Format:", min = min(dat.all.stack$Date.Observed), max = max(dat.all.stack$Date.Observed),
-                value = max(dat.all.stack$Date.Observed)),
-  #)),
+  sidebarPanel(sliderInput("Date.Observed", "Choose a Date:", min = min(dat.all.stack$Date.Observed), max = max(dat.all.stack$Date.Observed),
+                value = max(dat.all.stack$Date.Observed))),
+  selectInput("collection", "Choose a collection:", list(collection=as.list(paste(unique(dat.all.stack$collection))))),
   selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase))))), 
   verbatimTextOutput("hover_info"),			    
   mainPanel(plotlyOutput("plot1", width = 850, height = 750),
@@ -171,13 +168,13 @@ server <- function(input, output) {
     # } else if (input$plot_type == "ggplot2") {
     # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
     # }
-    ggplotly(ggplot(data=dat.all.stack[dat.all.stack$Date.Observed==input$Date.Observed & dat.all.stack$Phenophase==input$Phenophase, ]) + # data being used
-               ggtitle(paste("Map of ", input$Phenophase, "for", input$Date.Observed, sep=" ")) + # title
+    ggplotly(ggplot(data=dat.all.stack[dat.all.stack$collection==input$collection & dat.all.stack$Phenophase==input$Phenophase & dat.all.stack$Date.Observed==as.Date(input$Date.Observed), ]) + # data being used
+               ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, sep=" ")) + # title
                #facet_grid(Obs.List*PlantNumber~., scales="free_y", switch="y") + # lines for different species +
-               geom_point(aes(x=BgLongitude, y=BgLatitude, fill=Phenophase.Status, size=10,
+               geom_point(aes(x=BgLongitude, y=BgLatitude, color=Phenophase.Status,
                               text=paste('Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
                                          'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes)), binwidth=7) + # green filling & actual data
-               scale_fill_manual(dat.all.stack$Phenophase.Status, values = c("Yes"="green4", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
+               scale_color_manual(dat.all.stack$Phenophase.Status, values = c("Yes"="green4", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
                coord_equal() + #makes scaling of graph 1:1
                #scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?, only works when range is quercus
                #scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
@@ -205,3 +202,24 @@ server <- function(input, output) {
 
 
 shinyApp(ui, server)
+
+dat.all.stack$O
+
+#not a plotly issue
+ggplotly(ggplot(data=dat.all.stack[dat.all.stack$Date.Observed==max(dat.all.stack$Date.Observed) & dat.all.stack$Phenophase==dat.all.stack$Phenophase[1], ]) + # data being used
+           ggtitle(paste("Map of ", dat.all.stack$Phenophase[1], "for", unique(dat.all.stack$Date.Observed)[1], sep=" ")) + # title
+           geom_point(aes(x=BgLongitude, y=BgLatitude, fill=Phenophase.Status, size=10,
+                          text=paste('Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
+                                     'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes)), binwidth=7) + # green filling & actual data
+           scale_fill_manual(dat.all.stack$Phenophase.Status, values = c("Yes"="green4", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
+           coord_equal() + #makes scaling of graph 1:1
+           theme(legend.position="bottom", #need to move legend position
+                 legend.text = element_text(size=rel(1)),
+                 legend.title=element_blank(),
+                 plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
+                 axis.text.x=element_text(size=rel(1)),
+                 axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
+                 strip.text.y=element_text(size=rel(1), angle=0)), tooltip="text") %>% 
+  layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
+                       margin = list(b = 50, l = 50))) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+
