@@ -97,7 +97,7 @@ for(SITE in sites.push){
   if(SITE=="Elm") yrs.push <- yrs.push[yrs.push>=2020]
   
   for(YR in yrs.push){
-    dat.now <- clean.google(collection = GENUS, dat.yr = YR)
+    dat.now <- clean.google(collection = GENUS, dat.yr = YR, gsauth="crollinson@mortonarb.org")
     summary(dat.now)
     
     dat.now <- dat.now[dat.now$PlantNumber %in% arb.inds$individual_name, ]

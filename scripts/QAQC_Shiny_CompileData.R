@@ -12,7 +12,7 @@ library(lubridate)
 # Source my cleaning function
 source("clean_google_form.R")
 
-quercus <- clean.google(collection="Quercus", dat.yr=lubridate::year(Sys.Date()))
+quercus <- clean.google(collection="Quercus", dat.yr=lubridate::year(Sys.Date()), gsauth="crollinson@mortonarb.org")
 summary(quercus)
 tail(quercus)
 # quercus[quercus$Date.Observed>Sys.Date(),1:6]
@@ -85,5 +85,5 @@ library(htmltools)
 #runExample("01_hello")
 
 setwd("pheno_qaqc_shiny/")
-rsconnect::deployApp()
+rsconnect::deployApp(forceUpdate = T)
 # shinyApp()

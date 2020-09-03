@@ -1,4 +1,11 @@
-clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyITSg", collection="Quercus", dat.yr=lubridate::year(Sys.Date())){
+clean.google <- function(google.key = "1eEsiJ9FdDiNj_2QwjT5-Muv-t0e-b1UGu0AFBRyITSg", collection="Quercus", dat.yr=lubridate::year(Sys.Date()), gsauth=NULL){
+  
+  # Authorize the account.  If you don't supply a user, it will prompt you and you'll need to stop and enter it.
+  # gsauth should be the email associated with the account
+  if(!is.null(gsauth)){
+    googlesheets4::gs4_auth(email=gsauth)
+  }
+  
   # get the data from a particular sheet
   dat.raw <- data.frame(googlesheets4::read_sheet(ss=google.key, sheet=paste(collection, "Raw Observations", dat.yr, sep=" "), col_types="c"))
   # names(dat.raw)
