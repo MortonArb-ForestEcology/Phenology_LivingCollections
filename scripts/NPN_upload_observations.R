@@ -147,6 +147,22 @@ for(SITE in sites.push){
                                           'Little'='44';
                                           'Some'='45';
                                           'Lots'='46'")
+    dat.long$intensity_description <- car::recode(dat.long$intensity, 
+                                         "'<3'='Less than 3';
+                                          '3-10'='3 to 10';
+                                          '11-100'='11 to 100';
+                                          '101-1,000'='101 to 1,000';
+                                          '1,001-10,000'='1,001 to 10,000';
+                                          '>10,000'='More than 10,000';
+                                          '<5%'='Less than 5%';
+                                          '5-24%'='5-24%';
+                                          '25-49%'='25-49%';
+                                          '50-74%'='50-74%';
+                                          '75-94%'='75-94%';
+                                          '>95%'='95% or more';
+                                          'Little'='Little';
+                                          'Some'='Some';
+                                          'Lots'='Lots'")
     dat.long[is.na(dat.long)] <- -9999
     # summary(dat.long)
     
@@ -164,7 +180,8 @@ for(SITE in sites.push){
                           observation_date=dat.long$Date.Observed,
                           observation_extent=dat.long$phenophase_status,
                           observation_comment=gsub(" " , "_", dat.long$Notes),
-                          abundance_value_id=dat.long$intensity_id)
+                          intensity_id=dat.long$intensity_id,
+                          intensity_value = dat.long$intensity_description)
     dat.arb <- dat.arb[!is.na(dat.arb$observation_extent) & dat.arb$observation_extent!=-9999,] # Get rid of no obs
     summary(dat.arb)
     dim(dat.arb)
@@ -201,7 +218,7 @@ for(SITE in sites.push){
             row.ind <- which(row.names(dat.arb)==i)
             npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$phenophase_id[row.ind],]
             stat.now <- dat.arb$observation_extent[row.ind]==npn.chk$phenophase_status
-            int.now  <- dat.arb$abundance_value_id[row.ind]==npn.chk$intensity_category_id
+            int.now  <- dat.arb$intensity_value[row.ind]==npn.chk$intensity_value
             
             # If all of the data matches, get rid of that from dat.arb
             if(all(stat.now, int.now)){
@@ -216,7 +233,7 @@ for(SITE in sites.push){
     if(nrow(dat.arb)==0) next
     
     # Push new or updated data individual by individual and date by date
-    print(paste0("Pushing data for ", SITE, ", ", YR, " (", nrow(dat.arb), " data points for ", nrow(dat.now), " observation sets)"))
+    print(paste0("Pushing data for ", SITE, ", ", YR, " (", nrow(dat.arb), " data points. Date Range: ", min(dat.arb$observation_date), " to ", max(dat.arb$observation_date), ")"))
     pb <- txtProgressBar(min=0, max=length(unique(paste(dat.arb$individual_id, dat.arb$observation_date, sep="_"))), style=3)
     pb.ind=0
     for(IND in unique(dat.arb$individual_id)){
