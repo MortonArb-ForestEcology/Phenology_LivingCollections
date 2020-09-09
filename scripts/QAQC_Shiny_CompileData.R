@@ -85,5 +85,5 @@ library(htmltools)
 #runExample("01_hello")
 
 setwd("pheno_qaqc_shiny/")
-rsconnect::deployApp(forceUpdate = T)
+rsconnect::deployApp(forceUpdate = T, launch.browser = F)
 # shinyApp()
