@@ -196,11 +196,12 @@ for(SITE in sites.push){
           npn.obs <- npn.ind[npn.ind$observation_date==OBS,]
           
           # Check each observation
-          rows.check <- which(dat.arb$individual_id==IND & dat.arb$observation_date==OBS)
+          rows.check <- row.names(dat.arb)[which(dat.arb$individual_id==IND & dat.arb$observation_date==OBS)]
           for(i in rows.check){
-            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$phenophase_id[rows.check[i]],]
-            stat.now <- dat.arb$observation_extent[rows.check[i]]==npn.chk$phenophase_status
-            int.now  <- dat.arb$observation_value_id[rows.check[i]]==npn.chk$intensity_category_id
+            row.ind <- which(row.names(dat.arb)==i)
+            npn.chk <- npn.obs[npn.obs$phenophase_id == dat.arb$phenophase_id[row.ind],]
+            stat.now <- dat.arb$observation_extent[row.ind]==npn.chk$phenophase_status
+            int.now  <- dat.arb$abundance_value_id[row.ind]==npn.chk$intensity_category_id
             
             # If all of the data matches, get rid of that from dat.arb
             if(all(stat.now, int.now)){
