@@ -53,7 +53,14 @@ quma.fp <- quma[quma$fruit.present.observed=="Yes", c("Observer", "Date.Observed
 View(quma.fp)
 
 #writing a CSV 
-write.csv(quma.fp, file.path(path.out, "Macrocarpa_Current_Fruit.csv"), row.names=FALSE)
+write.csv(quma.fp, file=file.path(path.out, "Macrocarpa_Current_Fruit.csv"), row.names=FALSE)
+
+# Doing an aggregation to get the last date (using max function) fruit was reported
+summary(quma.fp)
+quma.flast <- aggregate(Date.Observed ~ Species + PlantNumber + fruit.present.observed, data=quma.fp, FUN=max)
+quma.flast
+write.csv(quma.flast, file=file.path(path.out, "Macrocarpa_Current_Fruit_latestDateSeen.csv"), row.names=FALSE)
+
 
 #I dont know if this is necessary but this seperates out the species column into two seperate columns
 #genus and species incase we are seeing all quercus with fruit present then we can just pull macrocarpa
