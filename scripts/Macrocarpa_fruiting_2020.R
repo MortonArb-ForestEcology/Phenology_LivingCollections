@@ -1,12 +1,13 @@
 # Attempting to get the current fruit status for Quercus Macrocarpa
 
 # install.packages("devtools")
-library('devtools')
+# library('devtools')
 # devtools::install_github("usa-npn/rnpn")
 
 library(googlesheets4); library(car); library(lubridate)
 library(ggplot2); library(tidyr)
 
+path.out <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/"
 path.out <- "G:/My Drive/LivingCollections_Phenology/Observing Lists/"
 
 
@@ -52,7 +53,7 @@ quma.fp <- quma[quma$fruit.present.observed=="Yes", c("Observer", "Date.Observed
 View(quma.fp)
 
 #writing a CSV 
-write.csv(quma.fp, file.path(path.out, file = "Macrocarpa_Current_Fruit.csv"), row.names=FALSE)
+write.csv(quma.fp, file.path(path.out, "Macrocarpa_Current_Fruit.csv"), row.names=FALSE)
 
 #I dont know if this is necessary but this seperates out the species column into two seperate columns
 #genus and species incase we are seeing all quercus with fruit present then we can just pull macrocarpa
