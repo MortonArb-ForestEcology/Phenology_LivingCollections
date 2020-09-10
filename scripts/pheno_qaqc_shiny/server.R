@@ -12,13 +12,13 @@ summary(dat.pheno)
 
 function(input, output) {
   output$plot1 <- renderPlotly({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$Obs.List==input$ObsList & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
     print(
       ggplotly(ggplot(data=dat.pheno[dat.subs, ]) + # data being used
-                     ggtitle(paste(input$Phenophase, "for", input$ObsList, sep=" ")) + # title
+                     ggtitle(paste(input$Phenophase, "for", input$Collection, sep=" ")) + # title
                      facet_grid(Species+PlantNumber~., scales="free", space="free", switch="y") + # lines for different species +
                      geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, 
                                     #label=Observer, label2=paste(Year, Month, Day, sep="-"), 

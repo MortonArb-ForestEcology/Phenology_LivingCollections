@@ -7,7 +7,7 @@ library(stringr)
 dat.pheno <- read.csv("pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
 # dat.pheno$Timestamp <- strptime(dat.pheno$Timestamp, format="")
-obs.list <- paste(unique(dat.pheno$Obs.List)[order(unique(dat.pheno$Obs.List))])
+coll.list <- paste(unique(dat.pheno$collection)[order(unique(dat.pheno$collection))])
 pheno.list <- paste(unique(dat.pheno$phenophase))
 
 fluidPage(
@@ -21,8 +21,8 @@ fluidPage(
   
     sliderInput("DateRange", "Start Date", min=min(dat.pheno$Date.Observed), max=max(dat.pheno$Date.Observed), value=c(min(dat.pheno$Date.Observed), max(dat.pheno$Date.Observed))),
     # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
-    selectInput("ObsList", "Choose an Observing List:", list(ObsList=as.list(obs.list))), 
+    selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
     selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
-  verbatimTextOutput("hover_info"),			    
+  # verbatimTextOutput("hover_info"),			    
   mainPanel(plotlyOutput("plot1"), height="100%")
 )
