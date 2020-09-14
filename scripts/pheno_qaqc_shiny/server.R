@@ -11,39 +11,43 @@ summary(dat.pheno)
 # dat.pheno <- quercus.stack
 
 function(input, output) {
-  output$plot1 <- renderPlotly({
+  output$plot1 <- renderPlot({
     dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
-    print(
-      ggplotly(ggplot(data=dat.pheno[dat.subs, ]) + # data being used
-                     ggtitle(paste(input$Phenophase, "for", input$Collection, sep=" ")) + # title
-                     facet_grid(Species+PlantNumber~., scales="free", space="free", switch="y") + # lines for different species +
-                     geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, 
-                                    #label=Observer, label2=paste(Year, Month, Day, sep="-"), 
-                                    text=stringr::str_wrap(paste('Date Observed:',Date.Observed,'<br>', "Date Entered: ", Timestamp, '<br>','Observer: ',Observer,'<br>', 'Status: ',status,'<br>','Plant Number: ', PlantNumber, '<br>', "Notes: ", Notes), indent=0, exdent=5)), binwidth=7) + # green filling & actual data
-                     scale_fill_manual(values= c("No" = "gray50", "Yes"="green4", "Unsure"="blue3", "No Observation"="black"))  + # color scheme
-                     scale_x_date(name="Date", expand=c(0,0)) + # x-axis and other stuff?
-                     scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
-                     scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
-                     theme(legend.position="bottom", #need to move legend position
-                           legend.text = element_text(size=rel(1)),
-                           legend.title=element_blank(),
-                           plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
-                           panel.grid = element_blank(),
-                           panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
-                           panel.spacing=unit(0.05, "lines"), #connects all the individual trees together
-                           axis.text.x=element_text(size=rel(1)),
-                           axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
-                           axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
-                           axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
-                           axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
-                           strip.text = element_text(angle=90), 
-                           plot.margin=unit(c(0,5,0,0), "lines"),
-                           strip.text.y=element_text(margin=unit(c(2,2,2,2), "lines"), size=rel(0.75), angle=0, hjust=0, vjust=0)), tooltip="text") %>% 
-            layout(legend = list(orientation = "h", x = 0.4, y = -0.2, 
-                                 margin = list(b = 50, l = 50)))) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+    ggplot(data=dat.pheno[dat.subs, ]) + # data being used
+      ggtitle(paste(input$Phenophase, "for", input$Collection, sep=" ")) + # title
+      facet_grid(Species~., scales="free", space="free", switch="y") + # lines for different species +
+      geom_point(aes(x=Date.Observed, y=PlantNumber, color=status), size=5, alpha=0.8) + # green filling & actual data
+      scale_color_manual(values= c("No" = "gray50", "Yes"="green4", "Unsure"="blue3", "No Observation"="black"))  + # color scheme
+      scale_x_date(name="Date") + # x-axis and other stuff?
+      # scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
+      scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
+      theme(legend.position="top", #need to move legend position
+            legend.text = element_text(size=rel(1)),
+            legend.title=element_blank(),
+            legend.key = element_rect(fill=NA),
+            plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
+            panel.grid = element_blank(),
+            panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
+            panel.spacing=unit(0.05, "lines"), #connects all the individual trees together
+            axis.text.x=element_text(size=rel(1)),
+            axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
+            axis.title.y=element_blank(), #gets rid of y-axis name: I think it should be there
+            axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
+            axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
+            plot.margin=unit(c(0,5,0,0), "lines"),
+            strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
+  }, width=600, height=2000)
+  
+  output$info <- renderPrint({
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    
+    txthere <- nearPoints(dat.pheno[dat.subs,c("phenophase", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
+                          input$plot_click, threshold =10, maxpoints=5)
+    t(txthere)
+    # names(txthere) <- "observation"
   })
 }

@@ -9,6 +9,7 @@ library(ggplot2); library(grid) # graphing packages
 library(plotly)
 
 library(car)
+library(shiny)
 
 # ----------------
 # get the data from each collection
@@ -16,10 +17,12 @@ library(car)
 dat.pheno <- read.csv("pheno_qaqc_shiny/pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
 # dat.pheno$Timestamp <- strptime(dat.pheno$Timestamp, format="")
+
+# dat.pheno <- dat.pheno[dat.pheno$Date.Observed>=as.Date("2020-08-01") & dat.pheno$collection=="Quercus",]
+summary(dat.pheno)
+# https://stackoverflow.com/questions/27965931/tooltip-when-you-mouseover-a-ggplot-on-shiny
 coll.list <- paste(unique(dat.pheno$collection)[order(unique(dat.pheno$collection))])
 pheno.list <- paste(unique(dat.pheno$phenophase))
-
-# https://stackoverflow.com/questions/27965931/tooltip-when-you-mouseover-a-ggplot-on-shiny
 
 
 ui <- fluidPage(
@@ -40,19 +43,18 @@ server <- function(input, output) {
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
-    print(ggplot(data=dat.pheno[dat.subs, ]) + # data being used
+    ggplot(data=dat.pheno[dat.subs, ]) + # data being used
                  ggtitle(paste(input$Phenophase, "for", input$Collection, sep=" ")) + # title
                  facet_grid(Species~., scales="free", space="free", switch="y") + # lines for different species +
-                 geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=status, 
-                                #label=Observer, label2=paste(Year, Month, Day, sep="-"), 
-                                text=stringr::str_wrap(paste('Date Observed:',Date.Observed,'<br>', "Date Entered: ", Timestamp, '<br>','Observer: ',Observer,'<br>', 'Status: ',status,'<br>','Plant Number: ', PlantNumber, '<br>', "Notes: ", Notes), indent=0, exdent=5)), binwidth=7) + # green filling & actual data
-                 scale_fill_manual(values= c("No" = "gray50", "Yes"="green4", "Unsure"="blue3", "No Observation"="black"))  + # color scheme
-                 scale_x_date(name="Date", expand=c(0,0)) + # x-axis and other stuff?
-                 scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
+                 geom_point(aes(x=Date.Observed, y=PlantNumber, color=status), size=5, alpha=0.8) + # green filling & actual data
+                 scale_color_manual(values= c("No" = "gray50", "Yes"="green4", "Unsure"="blue3", "No Observation"="black"))  + # color scheme
+                 scale_x_date(name="Date") + # x-axis and other stuff?
+                 # scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
                  scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
-                 theme(legend.position="bottom", #need to move legend position
+                 theme(legend.position="top", #need to move legend position
                        legend.text = element_text(size=rel(1)),
                        legend.title=element_blank(),
+                       legend.key = element_rect(fill=NA),
                        plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
                        panel.grid = element_blank(),
                        panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
@@ -63,11 +65,18 @@ server <- function(input, output) {
                        axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
                        axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
                        plot.margin=unit(c(0,5,0,0), "lines"),
-                       strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0)) )#gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+                       strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
-  })
+  }, width=600, height=2000)
   
-  output$info <- renderText({"TEST"})
+  output$info <- renderPrint({
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    
+    txthere <- nearPoints(dat.pheno[dat.subs,c("phenophase", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
+                          input$plot_click, threshold =10, maxpoints=5)
+    t(txthere)
+    # names(txthere) <- "observation"
+  })
 }
 
 
