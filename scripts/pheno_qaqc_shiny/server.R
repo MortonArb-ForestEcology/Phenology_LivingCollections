@@ -9,8 +9,8 @@ dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
 dat.pheno$status <- factor(dat.pheno$status, levels=c("No", "Yes", "Unsure", "No Observation", NA))
 dat.pheno$pheno.label <- gsub(".observed", "", dat.pheno$phenophase)
 dat.pheno$pheno.label <- car::recode(dat.pheno$pheno.label, 
-                                     "'leaf.breaking.buds'='Leaves - Breaking Buds'; 
-                                     'leaf.present'='Leaves - Present';
+                                     "'leaf.present'='Leaves - Present';
+                                     'leaf.breaking.buds'='Leaves - Breaking Buds'; 
                                      'leaf.increasing'='Leaves - Increasing Size'; 
                                      'leaf.color'='Leaves - Fall Color'; 
                                      'leaf.falling'='Leaves - Falling'; 
