@@ -7,12 +7,36 @@ library(stringr)
 dat.pheno <- read.csv("pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
 dat.pheno$status <- factor(dat.pheno$status, levels=c("No", "Yes", "Unsure", "No Observation", NA))
+dat.pheno$pheno.label <- gsub(".observed", "", dat.pheno$phenophase)
+dat.pheno$pheno.label <- car::recode(dat.pheno$pheno.label, 
+                                     "'leaf.breaking.buds'='Leaves - Breaking Buds'; 
+                                     'leaf.present'='Leaves - Present';
+                                     'leaf.increasing'='Leaves - Increasing Size'; 
+                                     'leaf.color'='Leaves - Fall Color'; 
+                                     'leaf.falling'='Leaves - Falling'; 
+                                     'flower.buds'='Flowers - Present (inc. buds)'; 
+                                     'flower.open'='Flowers - Open Flowers'; 
+                                     'flower.pollen'='Flowers - Pollen Release'; 
+                                     'fruit.present'='Fruit - Present'; 
+                                     'fruit.ripe'='Fruit - Ripe Fruit'; 
+                                     'fruit.drop'='Fruit - Recent Drop'")
+dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Present", 
+                                                                "Leaves - Breaking Buds", 
+                                                                "Leaves - Increasing Size",
+                                                                "Leaves - Fall Color",
+                                                                "Leaves - Falling",
+                                                                "Flowers - Present (inc. buds)",
+                                                                "Flowers - Open Flowers",
+                                                                "Flowers - Pollen Release",
+                                                                "Fruit - Present", 
+                                                                "Fruit - Ripe Fruit", 
+                                                                "Fruit - Recent Drop"))
 summary(dat.pheno)
 # dat.pheno <- quercus.stack
 
 function(input, output) {
   output$plot1 <- renderPlot({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
@@ -43,9 +67,9 @@ function(input, output) {
   }, width=600, height=2000)
   
   output$info <- renderPrint({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
-    txthere <- nearPoints(dat.pheno[dat.subs,c("phenophase", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
+    txthere <- nearPoints(dat.pheno[dat.subs,c("pheno.label", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
                           input$plot_click, threshold =10, maxpoints=5)
     t(txthere)
     # names(txthere) <- "observation"
