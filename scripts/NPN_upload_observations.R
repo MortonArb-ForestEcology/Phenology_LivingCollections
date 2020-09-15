@@ -58,7 +58,7 @@
 # ------------------------------------------
 # read in our column crosswalk
 xwalk <- read.csv("../data/NPN/NPN_Phenophase_Crosswalk.csv")
-xwalk
+# xwalk
 
 # Read in Arb station codes
 stat.arb <- read.csv("../data/NPN/NPN_TheMortonArboretum_Stations_All.csv")
@@ -66,11 +66,11 @@ stat.arb <- read.csv("../data/NPN/NPN_TheMortonArboretum_Stations_All.csv")
 # read in arb.individuals 
 arb.inds <- read.csv("../data/NPN/NPN_MortonArb_Individuals_All.csv", stringsAsFactors = T)
 arb.inds$PlantNumber=arb.inds$individual_name
-summary(arb.inds)
+# summary(arb.inds)
 
 
-dim(arb.inds[arb.inds$station_name %in% c("Oak Collection", "Maple Collection", "Elm Collection"),])
-dim(arb.inds[arb.inds$station_name %in% c("Oak Collection", "Maple Collection", "Elm Collection"),])
+# dim(arb.inds[arb.inds$station_name %in% c("Oak Collection", "Maple Collection", "Elm Collection"),])
+# dim(arb.inds[arb.inds$station_name %in% c("Oak Collection", "Maple Collection", "Elm Collection"),])
 
 # ------------------------------------------
 
@@ -98,10 +98,10 @@ for(SITE in sites.push){
   
   for(YR in yrs.push){
     dat.now <- clean.google(collection = GENUS, dat.yr = YR, gsauth="crollinson@mortonarb.org")
-    summary(dat.now)
+    # summary(dat.now)
     
     dat.now <- dat.now[dat.now$PlantNumber %in% arb.inds$individual_name, ]
-    dim(dat.now)
+    # dim(dat.now)
     
     if(nrow(dat.now)==0) next
     
@@ -117,13 +117,13 @@ for(SITE in sites.push){
     names(dat.status) <- c("status", "phenophase")
     dat.status$phenophase <- gsub(".observed", "", dat.status$phenophase)
     dat.status[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Notes")] <- dat.now[,c("Observer", "Date.Observed", "Species", "PlantNumber", "Notes")]
-    head(dat.status)
+    # head(dat.status)
     
     dat.intensity <- stack(dat.now[,names(dat.now)[names(dat.now) %in% paste0(xwalk$MortonArb.Description, ".intensity")]])
     names(dat.intensity) <- c("intensity", "phenophase")
     dat.intensity$phenophase <- gsub(".intensity", "", dat.intensity$phenophase)
     dat.intensity[,c("Observer", "Date.Observed", "PlantNumber")] <- dat.now[,c("Observer", "Date.Observed", "PlantNumber")]
-    summary(dat.intensity)
+    # summary(dat.intensity)
     
     # Merge the status and intensity together
     dat.long <- merge(dat.status, dat.intensity, all=T)
@@ -172,7 +172,7 @@ for(SITE in sites.push){
     # }
     # head(dat.long)
     # summary(dat.long[dat.long$individual_id==dat.long$individual_id[1],])
-    dim(dat.long)
+    # dim(dat.long)
     
     # Do some recoding to make things line up with NPN
     dat.arb <- data.frame(phenophase_id=dat.long$NPN.Code,
@@ -183,8 +183,8 @@ for(SITE in sites.push){
                           intensity_id=dat.long$intensity_id,
                           intensity_value = dat.long$intensity_description)
     dat.arb <- dat.arb[!is.na(dat.arb$observation_extent) & dat.arb$observation_extent!=-9999,] # Get rid of no obs
-    summary(dat.arb)
-    dim(dat.arb)
+    # summary(dat.arb)
+    # dim(dat.arb)
     
     # Check to see if data has already been pushed
     if(overwrite==F){
@@ -193,7 +193,7 @@ for(SITE in sites.push){
       # summary(dat.npn)
       dat.npn <- rnpn::npn_download_status_data(station_ids=station_id, years=YR, request_source="C. Rollinson, Morton Arb")
       dat.npn$observation_date <- as.Date(dat.npn$observation_date)
-      summary(dat.npn)
+      # summary(dat.npn)
       
       # Check to remove data from dat.now where the dates line up
       # 1. Go by Individual and Date
@@ -268,6 +268,6 @@ for(SITE in sites.push){
 } # End collections loop
 
 
-names(dat.now)
+# names(dat.now)
 # ------------------------------------------
 
