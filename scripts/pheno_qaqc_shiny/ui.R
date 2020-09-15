@@ -33,7 +33,7 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Recent Drop"))
 # dat.pheno$Timestamp <- strptime(dat.pheno$Timestamp, format="")
 coll.list <- paste(unique(dat.pheno$collection)[order(unique(dat.pheno$collection))])
-pheno.list <- paste(unique(dat.pheno$pheno.label))
+pheno.list <- levels(dat.pheno$pheno.label)
 
 fluidPage(
   # Some custom CSS for a smaller font for preformatted text

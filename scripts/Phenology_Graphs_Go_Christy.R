@@ -1,12 +1,12 @@
 # Making some better graphs to show what's going on with the phenology in the living collections
 
-library(googlesheets4)
+# library(googlesheets4)
 
-source("clean_google_form.R")
+# source("clean_google_form.R")
 
 library(ggplot2); library(grid) # graphing packages
 
-library(plotly)
+# library(plotly)
 
 library(car)
 library(shiny)
@@ -44,7 +44,7 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
 summary(dat.pheno)
 # https://stackoverflow.com/questions/27965931/tooltip-when-you-mouseover-a-ggplot-on-shiny
 coll.list <- paste(unique(dat.pheno$collection)[order(unique(dat.pheno$collection))])
-pheno.list <- paste(unique(dat.pheno$pheno.label))
+pheno.list <- levels(dat.pheno$pheno.label)
 
 # Calculating a number of individuals for each collection
 nind <- list()
