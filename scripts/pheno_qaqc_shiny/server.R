@@ -31,7 +31,7 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Present", 
                                                                 "Fruit - Ripe Fruit", 
                                                                 "Fruit - Recent Drop"))
-summary(dat.pheno)
+# summary(dat.pheno)
 # dat.pheno <- quercus.stack
 
 function(input, output) {
@@ -79,10 +79,10 @@ function(input, output) {
   output$info <- renderPrint({
     dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
-    txthere <- nearPoints(dat.pheno[dat.subs,c("pheno.label", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
+    txthere <- nearPoints(dat.pheno[dat.subs,c("pheno.label", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "intensity", "Notes")], 
                           input$plot_click, threshold =10, maxpoints=5)
     txthere <- t(txthere)
-    row.names(txthere) <- c("Phenophase", "Species", "PlantNumber", "Observing List", "Observer", "Date Observed", "Time Entered", "Phenophase Status", "Notes")
+    row.names(txthere) <- c("Phenophase", "Species", "PlantNumber", "Observing List", "Observer", "Date Observed", "Time Entered", "Phenophase Status", "Phenophase Intensity", "Notes")
     txthere
     # names(txthere) <- "observation"
   })

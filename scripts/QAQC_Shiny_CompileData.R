@@ -72,9 +72,17 @@ for(i in 1:length(intensity)){
 
 dat.all.stack <- stack(dat.all[,phenophases], drop=F)
 names(dat.all.stack) <- c("status", "phenophase")
+dat.all.stack$phenophase <- gsub(".observed", "", dat.all.stack$phenophase)
 dat.all.stack[,c("collection", "Obs.List", "Observer", "Date.Observed", "Species", "PlantNumber", "Timestamp", "Notes")] <- dat.all[,c("collection", "Obs.List", "Observer", "Date.Observed", "Species", "PlantNumber", "Timestamp", "Notes")]
 # summary(dat.all.stack) 
 # head(dat.all.stack)
+
+dat.int <- stack(dat.all[,intensity], drop=F)
+names(dat.int) <- c("intensity", "phenophase")
+dat.int$phenophase <- gsub(".intensity", "", dat.int$phenophase)
+dat.int[,c("collection", "Obs.List", "Observer", "Date.Observed", "Species", "PlantNumber", "Timestamp", "Notes")] <- dat.all[,c("collection", "Obs.List", "Observer", "Date.Observed", "Species", "PlantNumber", "Timestamp", "Notes")]
+
+dat.all.stack <- merge(dat.all.stack, dat.int, all=T)
 write.csv(dat.all.stack, "pheno_qaqc_shiny/pheno_compiled.csv", row.names=F)
 
 
