@@ -48,6 +48,6 @@ fluidPage(
     # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
     selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
     selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
-    mainPanel(plotOutput("plot1", click="plot_click"), height="100%"),
+    mainPanel(uiOutput("plot.ui", click="plot_click"), height="100%"),
     verbatimTextOutput("info")
 )

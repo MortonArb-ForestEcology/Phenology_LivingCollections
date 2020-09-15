@@ -16,13 +16,41 @@ library(shiny)
 # ----------------
 dat.pheno <- read.csv("pheno_qaqc_shiny/pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
-# dat.pheno$Timestamp <- strptime(dat.pheno$Timestamp, format="")
-
+dat.pheno$pheno.label <- gsub(".observed", "", dat.pheno$phenophase)
+dat.pheno$pheno.label <- car::recode(dat.pheno$pheno.label, 
+                                     "'leaf.breaking.buds'='Leaves - Breaking Buds'; 
+                                     'leaf.present'='Leaves - Present';
+                                     'leaf.increasing'='Leaves - Increasing Size'; 
+                                     'leaf.color'='Leaves - Fall Color'; 
+                                     'leaf.falling'='Leaves - Falling'; 
+                                     'flower.buds'='Flowers - Present (inc. buds)'; 
+                                     'flower.open'='Flowers - Open Flowers'; 
+                                     'flower.pollen'='Flowers - Pollen Release'; 
+                                     'fruit.present'='Fruit - Present'; 
+                                     'fruit.ripe'='Fruit - Ripe Fruit'; 
+                                     'fruit.drop'='Fruit - Recent Drop'")
+dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Present", 
+                                                                "Leaves - Breaking Buds", 
+                                                                "Leaves - Increasing Size",
+                                                                "Leaves - Fall Color",
+                                                                "Leaves - Falling",
+                                                                "Flowers - Present (inc. buds)",
+                                                                "Flowers - Open Flowers",
+                                                                "Flowers - Pollen Release",
+                                                                "Fruit - Present", 
+                                                                "Fruit - Ripe Fruit", 
+                                                                "Fruit - Recent Drop"))
 # dat.pheno <- dat.pheno[dat.pheno$Date.Observed>=as.Date("2020-08-01") & dat.pheno$collection=="Quercus",]
 summary(dat.pheno)
 # https://stackoverflow.com/questions/27965931/tooltip-when-you-mouseover-a-ggplot-on-shiny
 coll.list <- paste(unique(dat.pheno$collection)[order(unique(dat.pheno$collection))])
-pheno.list <- paste(unique(dat.pheno$phenophase))
+pheno.list <- paste(unique(dat.pheno$pheno.label))
+
+# Calculating a number of individuals for each collection
+nind <- list()
+for(GENUS in coll.list){
+  nind[[GENUS]] <- length(unique(dat.pheno$PlantNumber[dat.pheno$collection==GENUS]))
+}
 
 
 ui <- fluidPage(
@@ -31,15 +59,20 @@ ui <- fluidPage(
   # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
   selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
   selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
-  mainPanel(plotOutput("plot1", click="plot_click"), height="100%"),
+  mainPanel(uiOutput("plot.ui", click="plot_click"), height="100%"),
   verbatimTextOutput("info"))			    
 
 
 #goal: try to get a geom_bin2d graph to work in shiny
 #so far almost everything of the graph is working: Date Observed is now normal but it has to be repeated twice for it to work
 server <- function(input, output) {
+  nInd <- reactive({
+    length(unique(dat.pheno$PlantNumber[dat.pheno$collection==input$Collection]))
+  })
+  plotHeight <- reactive(15*nInd())
+  
   output$plot1 <- renderPlot({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
@@ -67,14 +100,20 @@ server <- function(input, output) {
                        plot.margin=unit(c(0,5,0,0), "lines"),
                        strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
-  }, width=600, height=2000)
+  })
+  
+  output$plot.ui <- renderUI({
+    plotOutput("plot1", click="plot_click", width=600, height=plotHeight())
+  })
   
   output$info <- renderPrint({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$phenophase==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
-    txthere <- nearPoints(dat.pheno[dat.subs,c("phenophase", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
-                          input$plot_click, threshold =10, maxpoints=5)
-    t(txthere)
+    txthere <- nearPoints(dat.pheno[dat.subs,c("pheno.label", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
+                          input$plot_click, threshold =5, maxpoints=5)
+    txthere <- t(txthere)
+    row.names(txthere) <- c("Phenophase", "Species", "PlantNumber", "Observing List", "Observer", "Date Observed", "Time Entered", "Phenophase Status", "Notes")
+    txthere
     # names(txthere) <- "observation"
   })
 }

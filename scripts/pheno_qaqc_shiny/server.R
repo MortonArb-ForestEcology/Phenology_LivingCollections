@@ -35,6 +35,11 @@ summary(dat.pheno)
 # dat.pheno <- quercus.stack
 
 function(input, output) {
+  nInd <- reactive({
+    length(unique(dat.pheno$PlantNumber[dat.pheno$collection==input$Collection]))
+  })
+  plotHeight <- reactive(15*nInd())
+  
   output$plot1 <- renderPlot({
     dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
@@ -64,14 +69,21 @@ function(input, output) {
             plot.margin=unit(c(0,5,0,0), "lines"),
             strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
-  }, width=600, height=2000)
+  })
+  
+  output$plot.ui <- renderUI({
+    plotOutput("plot1", click="plot_click", width=600, height=plotHeight())
+  })
+  
   
   output$info <- renderPrint({
     dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
     
     txthere <- nearPoints(dat.pheno[dat.subs,c("pheno.label", "Species", "PlantNumber", "Obs.List", "Observer","Date.Observed", "Timestamp", "status", "Notes")], 
                           input$plot_click, threshold =10, maxpoints=5)
-    t(txthere)
+    txthere <- t(txthere)
+    row.names(txthere) <- c("Phenophase", "Species", "PlantNumber", "Observing List", "Observer", "Date Observed", "Time Entered", "Phenophase Status", "Notes")
+    txthere
     # names(txthere) <- "observation"
   })
 }
