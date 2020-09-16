@@ -57,7 +57,7 @@ ui <- fluidPage(
   # Some custom CSS for a smaller font for preformatted text
   tags$style(HTML("
                   #info {
-                    height:100%; width:250px;
+                    height:250px; width:250px;
                     overflow-y:scroll; word-wrap:break-word;
                     font-size:10px
                   }
