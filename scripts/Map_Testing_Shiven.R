@@ -140,6 +140,7 @@ ggplotly(ggplot(data=dat.all.stack[dat.all.stack$Obs.List=="Quercus-9" & dat.all
                                                                                                             #"None"="red", "Little"="palegreen", "Some"="palegreen3", "Lots"="darkgreen"))) # color scheme
 dat.all.stack$Intensity.Status[dat.all.stack$Week==25 & dat.all.stack$Phenophase=="leaf.breaking.buds.observed" & dat.all.stack$Phenophase.Status=="Yes" & dat.all.stack$Obs.List=="Quercus-9"]
 sum(is.na(dat.all.stack$Intensity.Status[dat.all.stack$Phenophase.Status=="Yes"])) # 5855 of 10269 are NA when Phenophase observed is marked as yes 
+dat.all.stack$Intensity.Status[dat.all.stack$Phenophase.Status=="Yes", ]
 #Don't have the issue with the phenophases on top of each other as I pick phenophases
 #need to work on slider: not working for single value or range
 #used this website (can make range or single value for date but both are not working): https://shiny.rstudio.com/articles/sliders.html
@@ -156,7 +157,7 @@ ui <- fluidPage(
   sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(dat.all.stack$Week), max = max(dat.all.stack$Week),
                 value = max(dat.all.stack$Week))),
   selectInput("collection", "Choose a collection:", list(collection=as.list(paste(unique(dat.all.stack$collection))))),
-  #selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase))))), 
+  selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase))))), 
   verbatimTextOutput("hover_info"),			    
   mainPanel(plotlyOutput("plot1", width = 850, height = 750),
             # hover=hoverOpts(id="plot_hover")
@@ -176,19 +177,19 @@ server <- function(input, output) {
     # } else if (input$plot_type == "ggplot2") {
     # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
     # }
-    ggplotly(ggplot(data=dat.all.stack[dat.all.stack$collection==input$collection & 
-                                         #dat.all.stack$Phenophase==input$Phenophase & 
+    ggplotly(ggplot(data=dat.all.stack[dat.all.stack$collection==input$collection &  
+                                         dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
                                          dat.all.stack$Week==as.Date(input$Week), ]) + # data being used
-               ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, "on Week", input$Week, "in the past year",  sep=" ")) + # title
-               facet_grid(dat.all.stack$Phenophase~.) + # lines for different species +
+               ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, "on Week", input$Week,  sep=" ")) + # title
+               #facet_wrap(~Phenophase, ncol=2) + # lines for different species +
                geom_point(aes(x=BgLatitude, y=BgLongitude, color=Phenophase.Status, shape=Obs.List,
-                              text=paste('Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
+                              text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
                                          'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.all.stack$Obs.List, 
                           binwidth=7) + # green filling & actual data
-               scale_color_manual(dat.all.stack$Phenophase.Status, values = c("Yes"="palegreen2", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
+               scale_color_manual(values = c("Yes"="palegreen2", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
                # if (dat.all.stack$Phenophase.Status=="Yes") {
-               #   scale_color_gradient(dat.all.stack$Intensity.Status, values = c(NA="black", "0"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
+               #   scale_color_gradient(dat.all.stack$Intensity.Status[], values = c(NA="black", "0"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
                #                                                                   "0%"="", "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94"="forestgreen", ">95%"="darkgreen",
                #                                                                   "None"="red", "Little"="palegreen", "Some"="palegreen3", "Lots"="darkgreen")) 
                #   } + #what should I do for "0" and NA as those are likely mistakes: have them listed as black and red now, also is there way to soft-code this?
