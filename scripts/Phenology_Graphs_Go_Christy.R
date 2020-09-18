@@ -55,12 +55,22 @@ for(GENUS in coll.list){
 
 ui <- fluidPage(
   # Some custom CSS for a smaller font for preformatted text
-  sliderInput("DateRange", "Start Date", min=min(dat.pheno$Date.Observed), max=max(dat.pheno$Date.Observed), value=c(min(dat.pheno$Date.Observed), max(dat.pheno$Date.Observed))),
-  # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
-  selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
-  selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
-  mainPanel(uiOutput("plot.ui", click="plot_click"), height="100%"),
-  verbatimTextOutput("info"))			    
+  tags$style(HTML("
+                  #info {
+                    height:250px; width:250px;
+                    overflow-y:scroll; word-wrap:break-word;
+                    font-size:10px
+                  }
+                  ")),
+  fluidRow(
+    column(4,
+    sliderInput("DateRange", "Start Date", min=min(dat.pheno$Date.Observed), max=max(dat.pheno$Date.Observed), value=c(min(dat.pheno$Date.Observed), max(dat.pheno$Date.Observed))),
+    # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
+    selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
+    selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
+    verbatimTextOutput("info"), style="position:fixed"), #, style="position:fixed"
+  column(8,offset=4,mainPanel(uiOutput("plot.ui", click="plot_click")))
+  ))			    
 
 
 #goal: try to get a geom_bin2d graph to work in shiny
@@ -88,7 +98,7 @@ server <- function(input, output) {
                        legend.text = element_text(size=rel(1)),
                        legend.title=element_blank(),
                        legend.key = element_rect(fill=NA),
-                       plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
+                       plot.title = element_text(size=rel(2), face="bold", hjust=0.5), #formats title to be bold and in center
                        panel.grid = element_blank(),
                        panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
                        panel.spacing=unit(0.05, "lines"), #connects all the individual trees together
@@ -103,7 +113,7 @@ server <- function(input, output) {
   })
   
   output$plot.ui <- renderUI({
-    plotOutput("plot1", click="plot_click", width=600, height=plotHeight())
+    plotOutput("plot1", click="plot_click", width=500, height=plotHeight())
   })
   
   output$info <- renderPrint({
@@ -120,5 +130,3 @@ server <- function(input, output) {
 
 
 shinyApp(ui, server)
-
-
