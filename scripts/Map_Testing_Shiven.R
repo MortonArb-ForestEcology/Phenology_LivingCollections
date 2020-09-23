@@ -243,10 +243,11 @@ server <- function(input, output) {
     # } else if (input$plot_type == "ggplot2") {
     # ggplot(mtcars, aes(wt, mpg, color=carb)) + geom_point()
     # }
-    ggplotly(ggplot(data=dat.all.stack[dat.all.stack$collection==input$collection &  
-                                         dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
-                                         dat.all.stack$Week==as.Date(input$Week) & 
-                                         dat.all.stack$Species %in% input$Species, ]) + # data being used
+    dat.subs <- dat.all.stack$collection==input$collection &  
+      dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
+      dat.all.stack$Week==as.Date(input$Week) & 
+      dat.all.stack$Species %in% input$Species
+    ggplotly(ggplot(data=dat.all.stack[dat.subs, ]) + # data being used
                ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, "on Week", input$Week,  sep=" ")) + # title
                facet_wrap(~Phenophase, ncol=2) + # lines for different species +
                geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=5, color="gray80") +
@@ -262,14 +263,8 @@ server <- function(input, output) {
                #                                                                   "0%"="", "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94"="forestgreen", ">95%"="darkgreen",
                #                                                                   "None"="red", "Little"="palegreen", "Some"="palegreen3", "Lots"="darkgreen")) 
                #   } + #what should I do for "0" and NA as those are likely mistakes: have them listed as black and red now, also is there way to soft-code this?
-               coord_equal(xlim=range(dat.all.stack[dat.all.stack$collection==input$collection &  
-                                                      dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
-                                                      dat.all.stack$Week==as.Date(input$Week) & 
-                                                      dat.all.stack$Species %in% input$Species, "BgLongitude"], na.rm=T), 
-             ylim=range(dat.all.stack[dat.all.stack$collection==input$collection &  
-                                        dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
-                                        dat.all.stack$Week==as.Date(input$Week) & 
-                                        dat.all.stack$Species %in% input$Species, "BgLatitude"], na.rm=T)) +
+               coord_equal(xlim=range(dat.all.stack$BgLongitude[dat.subs], na.rm=T), 
+                           ylim=range(dat.all.stack$BgLatitude[dat.subs], na.rm=T)) +
                #makes scaling of graph 1:1
                #scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?, only works when range is quercus
                #scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
