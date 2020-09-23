@@ -124,6 +124,53 @@ head(dat.all.stack)
 tail(dat.all.stack)
 summary(dat.all.stack)
 
+
+#gradients for colors
+dat.all.stack$Intensity.Gradient = NA
+unique(dat.all.stack$Intensity.Status)
+unique(dat.all.stack$Phenophase.Status)
+unique(dat.all.stack$Intensity.Status[dat.all.stack$Phenophase.Status=="Yes"])
+
+for (i in 1:nrow(dat.all.stack)) {
+  if (dat.all.stack$Phenophase.Status[i]=="Yes") {
+    if (dat.all.stack$Intensity.Status[i]== NA | "0" | "0%" | "None") {
+      dat.all.stack$Intensity.Gradient[i] =
+    } else { if (dat.all.stack$Intensity.Status[i]== "<3" | "<5%") {
+      dat.all.stack$Intensity.Gradient[i] =
+    } else { if (dat.all.stack$Intensity.Status[i]== "Little" | "3-10" | "5-24%") {
+      dat.all.stack$Intensity.Gradient[i] =
+    } else { if (dat.all.stack$Intensity.Status[i]== "Some" | "11-100" | "25-49%") {
+      dat.all.stack$Intensity.Gradient[i] =
+    } else { if (dat.all.stack$Intensity.Status[i]== "101-1,000" | "50-74%") {
+      dat.all.stack$Intensity.Gradient[i] =
+    } else { if (dat.all.stack$Intensity.Status[i]== "Lots" | "1,001-10,000" | "75-94%") {
+      dat.all.stack$Intensity.Gradient[i] =
+    } else { if (dat.all.stack$Intensity.Status[i]== ">95" | ">10,000") {
+      dat.all.stack$Intensity.Gradient[i] =
+    }
+    }
+    }
+    }
+    }
+  } else { if (dat.all.stack$Phenophase.Status[i]=="No") {
+    dat.all.stack$Intensity.Gradient[i] ="red"
+    } else { if (dat.all.stack$Phenophase.Status[i]=="Unsure") {
+      dat.all.stack$Intensity.Gradient[i] ="orange" 
+    }
+      else { 
+        if (dat.all.stack$Phenophase.Status[i]=="No Observation") {
+          dat.all.stack$Intensity.Gradient[i] ="gray"
+        }
+        else { #Phenophase.Status is NA
+          dat.all.stack$Intensity.Gradient[i] ="black"
+        }
+      }
+    }
+  }
+}
+
+
+
 #tried to make it so that coloring would be consistent
 color.levels <- factor(dat.all.stack$Phenophase.Status ,levels = c("Yes", "No", "Unsure", "No Observation"))
 
@@ -138,9 +185,13 @@ ggplotly(ggplot(data=dat.all.stack[dat.all.stack$Obs.List=="Quercus-9" & dat.all
   #scale_color_manual(dat.all.stack$Intensity.Status, values = c(dat.all.stack$Intensity.Status, values = c(NA="black", "0"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
                                                                                                            # "0%"="black", "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94%"="forestgreen", ">95%"="darkgreen",
                                                                                                             #"None"="red", "Little"="palegreen", "Some"="palegreen3", "Lots"="darkgreen"))) # color scheme
+
 dat.all.stack$Intensity.Status[dat.all.stack$Week==25 & dat.all.stack$Phenophase=="leaf.breaking.buds.observed" & dat.all.stack$Phenophase.Status=="Yes" & dat.all.stack$Obs.List=="Quercus-9"]
 sum(is.na(dat.all.stack$Intensity.Status[dat.all.stack$Phenophase.Status=="Yes"])) # 5855 of 10269 are NA when Phenophase observed is marked as yes 
 dat.all.stack$Intensity.Status[dat.all.stack$Phenophase.Status=="Yes", ]
+
+sort(unique(dat.all.stack$collection))
+sort(unique(dat.all.stack$Species))
 #Don't have the issue with the phenophases on top of each other as I pick phenophases
 #need to work on slider: not working for single value or range
 #used this website (can make range or single value for date but both are not working): https://shiny.rstudio.com/articles/sliders.html
@@ -156,8 +207,10 @@ ui <- fluidPage(
     "))),
   sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(dat.all.stack$Week), max = max(dat.all.stack$Week),
                 value = max(dat.all.stack$Week))),
-  selectInput("collection", "Choose a collection:", list(collection=as.list(paste(unique(dat.all.stack$collection))))),
-  selectInput("Phenophase", "Choose a Phenophase:", list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase))))), 
+  selectInput("collection", "Choose a collection:", list(collection=as.list(paste(sort(unique(dat.all.stack$collection)))))),
+  selectizeInput("Phenophase", "Choose a Phenophase:", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), multiple = TRUE),
+  #selectInput("Species", "Choose a Species:", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), selected = NULL, multiple = FALSE), #not filtering to only relevant species
+  selectizeInput("Species", "Choose a Species", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), multiple = TRUE),
   verbatimTextOutput("hover_info"),			    
   mainPanel(plotlyOutput("plot1", width = 850, height = 750),
             # hover=hoverOpts(id="plot_hover")
@@ -170,7 +223,7 @@ ui <- fluidPage(
 #Not working with Obs.List as x
 
 server <- function(input, output) {
-  
+  #selectInput("Species", "Choose a Species:", list(Species=as.list(paste(sort(unique(dat.all.stack$Species[dat.all.stack$collection=input$collection]))))))
   output$plot1 <- renderPlotly({
     # if (input$plot_type == "base") {
     # plot(mtcars$wt, mtcars$mpg)
@@ -179,9 +232,10 @@ server <- function(input, output) {
     # }
     ggplotly(ggplot(data=dat.all.stack[dat.all.stack$collection==input$collection &  
                                          dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
-                                         dat.all.stack$Week==as.Date(input$Week), ]) + # data being used
+                                         dat.all.stack$Week==as.Date(input$Week) & 
+                                         dat.all.stack$Species==input$Species, ]) + # data being used
                ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, "on Week", input$Week,  sep=" ")) + # title
-               #facet_wrap(~Phenophase, ncol=2) + # lines for different species +
+               facet_wrap(~Phenophase, ncol=2) + # lines for different species +
                geom_point(aes(x=BgLatitude, y=BgLongitude, color=Phenophase.Status, shape=Obs.List,
                               text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
                                          'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
@@ -221,4 +275,4 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 
-#
+#very useful page on different types of dropdown in shiny: https://shiny.rstudio.com/gallery/selectize-examples.html 
