@@ -71,6 +71,13 @@ dat.all$collection <- as.factor(dat.all$collection)
 summary(dat.all)
 head(dat.all)
 
+roads <- readOGR("../data/spatial/roads/circ_veh_rd_2011-2020_ctrln.shp")
+paths <- readOGR("../data/spatial/trails/paths.shp")
+
+roads <- spTransform(roads, CRS("+proj=longlat"))
+paths <- spTransform(paths, CRS("+proj=longlat"))
+
+
 #Put a ton of packages just to make sure everything works in case
 library(plotly)
 library(car)
@@ -131,43 +138,49 @@ unique(dat.all.stack$Intensity.Status)
 unique(dat.all.stack$Phenophase.Status)
 unique(dat.all.stack$Intensity.Status[dat.all.stack$Phenophase.Status=="Yes"])
 
-for (i in 1:nrow(dat.all.stack)) {
-  if (dat.all.stack$Phenophase.Status[i]=="Yes") {
-    if (dat.all.stack$Intensity.Status[i]== NA | "0" | "0%" | "None") {
-      dat.all.stack$Intensity.Gradient[i] =
-    } else { if (dat.all.stack$Intensity.Status[i]== "<3" | "<5%") {
-      dat.all.stack$Intensity.Gradient[i] =
-    } else { if (dat.all.stack$Intensity.Status[i]== "Little" | "3-10" | "5-24%") {
-      dat.all.stack$Intensity.Gradient[i] =
-    } else { if (dat.all.stack$Intensity.Status[i]== "Some" | "11-100" | "25-49%") {
-      dat.all.stack$Intensity.Gradient[i] =
-    } else { if (dat.all.stack$Intensity.Status[i]== "101-1,000" | "50-74%") {
-      dat.all.stack$Intensity.Gradient[i] =
-    } else { if (dat.all.stack$Intensity.Status[i]== "Lots" | "1,001-10,000" | "75-94%") {
-      dat.all.stack$Intensity.Gradient[i] =
-    } else { if (dat.all.stack$Intensity.Status[i]== ">95" | ">10,000") {
-      dat.all.stack$Intensity.Gradient[i] =
-    }
-    }
-    }
-    }
-    }
-  } else { if (dat.all.stack$Phenophase.Status[i]=="No") {
-    dat.all.stack$Intensity.Gradient[i] ="red"
-    } else { if (dat.all.stack$Phenophase.Status[i]=="Unsure") {
-      dat.all.stack$Intensity.Gradient[i] ="orange" 
-    }
-      else { 
-        if (dat.all.stack$Phenophase.Status[i]=="No Observation") {
-          dat.all.stack$Intensity.Gradient[i] ="gray"
-        }
-        else { #Phenophase.Status is NA
-          dat.all.stack$Intensity.Gradient[i] ="black"
-        }
-      }
-    }
-  }
-}
+# for (i in 1:nrow(dat.all.stack)) {
+#   if (dat.all.stack$Phenophase.Status[i]=="Yes") {
+#     if (dat.all.stack$Intensity.Status[i]== NA | "0" | "0%" | "None") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     } else { if (dat.all.stack$Intensity.Status[i]== "<3" | "<5%") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     } else { if (dat.all.stack$Intensity.Status[i]== "Little" | "3-10" | "5-24%") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     } else { if (dat.all.stack$Intensity.Status[i]== "Some" | "11-100" | "25-49%") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     } else { if (dat.all.stack$Intensity.Status[i]== "101-1,000" | "50-74%") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     } else { if (dat.all.stack$Intensity.Status[i]== "Lots" | "1,001-10,000" | "75-94%") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     } else { if (dat.all.stack$Intensity.Status[i]== ">95" | ">10,000") {
+#       dat.all.stack$Intensity.Gradient[i] =
+#     }
+#     }
+#     }
+#     }
+#     }
+#   } else { if (dat.all.stack$Phenophase.Status[i]=="No") {
+#     dat.all.stack$Intensity.Gradient[i] ="red"
+#     } else { if (dat.all.stack$Phenophase.Status[i]=="Unsure") {
+#       dat.all.stack$Intensity.Gradient[i] ="orange" 
+#     }
+#       else { 
+#         if (dat.all.stack$Phenophase.Status[i]=="No Observation") {
+#           dat.all.stack$Intensity.Gradient[i] ="gray"
+#         }
+#         else { #Phenophase.Status is NA
+#           dat.all.stack$Intensity.Gradient[i] ="black"
+#         }
+#       }
+#     }
+#   }
+# }
+
+dat.all.stack$Intensity.Gradient <- ifelse(dat.all.stack$Phenophase.Status=="No", "Absent",
+       ifelse(dat.all.stack$Intensity.Status %in% c(NA, "0", "0%", "None"), "Present", dat.all.stack$Intensity.Status))
+dat.all.stack$Intensity.Gradient <- as.factor(dat.all.stack$Intensity.Gradient)
+summary(dat.all.stack)
+
 
 
 
@@ -221,7 +234,7 @@ ui <- fluidPage(
 #so far almost everything of the graph is working: Date Observed is now normal but it has to be repeated twice for it to work
 #Weirds that on scale_x_date I have to have the range as quercus
 #Not working with Obs.List as x
-
+  
 server <- function(input, output) {
   #selectInput("Species", "Choose a Species:", list(Species=as.list(paste(sort(unique(dat.all.stack$Species[dat.all.stack$collection=input$collection]))))))
   output$plot1 <- renderPlotly({
@@ -233,21 +246,31 @@ server <- function(input, output) {
     ggplotly(ggplot(data=dat.all.stack[dat.all.stack$collection==input$collection &  
                                          dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
                                          dat.all.stack$Week==as.Date(input$Week) & 
-                                         dat.all.stack$Species==input$Species, ]) + # data being used
+                                         dat.all.stack$Species %in% input$Species, ]) + # data being used
                ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, "on Week", input$Week,  sep=" ")) + # title
                facet_wrap(~Phenophase, ncol=2) + # lines for different species +
-               geom_point(aes(x=BgLatitude, y=BgLongitude, color=Phenophase.Status, shape=Obs.List,
+               geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=5, color="gray80") +
+               geom_path(data=paths, aes(x=long, y=lat, group=group), size=3, linetype="solid", color="brown") +
+               geom_point(aes(x=BgLongitude, y=BgLatitude, color=Intensity.Gradient,
                               text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
                                          'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.all.stack$Obs.List, 
                           binwidth=7) + # green filling & actual data
-               scale_color_manual(values = c("Yes"="palegreen2", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
+               #scale_color_manual(values = c("Yes"="palegreen2", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
                # if (dat.all.stack$Phenophase.Status=="Yes") {
                #   scale_color_gradient(dat.all.stack$Intensity.Status[], values = c(NA="black", "0"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
                #                                                                   "0%"="", "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94"="forestgreen", ">95%"="darkgreen",
                #                                                                   "None"="red", "Little"="palegreen", "Some"="palegreen3", "Lots"="darkgreen")) 
                #   } + #what should I do for "0" and NA as those are likely mistakes: have them listed as black and red now, also is there way to soft-code this?
-               coord_equal() + #makes scaling of graph 1:1
+               coord_equal(xlim=range(dat.all.stack[dat.all.stack$collection==input$collection &  
+                                                      dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
+                                                      dat.all.stack$Week==as.Date(input$Week) & 
+                                                      dat.all.stack$Species %in% input$Species, "BgLongitude"], na.rm=T), 
+             ylim=range(dat.all.stack[dat.all.stack$collection==input$collection &  
+                                        dat.all.stack$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
+                                        dat.all.stack$Week==as.Date(input$Week) & 
+                                        dat.all.stack$Species %in% input$Species, "BgLatitude"], na.rm=T)) +
+               #makes scaling of graph 1:1
                #scale_x_date(name="Date", limits = range(quercus$Date.Observed), expand=c(0,0)) + # x-axis and other stuff?, only works when range is quercus
                #scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
                #scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
