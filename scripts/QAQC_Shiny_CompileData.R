@@ -84,6 +84,8 @@ dat.int[,c("collection", "Obs.List", "Observer", "Date.Observed", "Species", "Pl
 
 dat.all.stack <- merge(dat.all.stack, dat.int, all=T)
 write.csv(dat.all.stack, "pheno_qaqc_shiny/pheno_compiled.csv", row.names=F)
+write.csv(dat.all.stack, "phenology_status_list/pheno_compiled.csv", row.names=F)
+write.csv(dat.all.stack, "phenology_status_map/pheno_compiled.csv", row.names=F)
 
 
 #getting shiny to work
@@ -95,3 +97,10 @@ library(htmltools)
 setwd("pheno_qaqc_shiny/")
 rsconnect::deployApp(forceUpdate = T, launch.browser = F)
 # shinyApp()
+
+# Commented out until I'm able to confirm the proper setup
+# setwd("../phenology_status_list/")
+# rsconnect::deployApp(forceUpdate = T, launch.browser = F)
+# 
+# setwd("../phenology_status_map/")
+# rsconnect::deployApp(forceUpdate = T, launch.browser = F)
