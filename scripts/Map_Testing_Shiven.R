@@ -221,9 +221,9 @@ ui <- fluidPage(
     "))),
   sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(dat.all.stack$Week), max = max(dat.all.stack$Week), value = max(dat.all.stack$Week)),
                selectInput("collection", "Choose a collection:", list(collection=as.list(paste(sort(unique(dat.all.stack$collection)))))),
-               selectizeInput("Phenophase", "Choose a Phenophase:", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), multiple = TRUE),
+               pickerInput("Phenophase", "Choose a Phenophase:", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), options = list(`actions-box` = TRUE),multiple = T),
                #pickerInput("Phenophase","Choose a Phenophase: ", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), options = list(`actions-box` = TRUE),multiple = T),
-               #pickerInput("Species", "Choose a Species", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), options = list(`actions-box` = TRUE),multiple = T)
+               #pickerInput("Species", "Choose a Species", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species[dat.all.stack$collection==input$collection]))))), options = list(`actions-box` = TRUE),multiple = T),
                uiOutput("select_Species")),
   #selectInput("Species", "Choose a Species:", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), selected = NULL, multiple = FALSE), #not filtering to only relevant species
   verbatimTextOutput("hover_info"),			    
@@ -240,26 +240,27 @@ server <- function(input, output) {
  
 #Used this website to create changing Species dropdown: https://www.davidsolito.com/post/conditional-drop-down-in-shiny/ 
 #Up to output plot is used to make Species dropdown reactive
-  Species.Choice <- reactive({ 
-    
-    dat.all.stack %>% 
-      filter(collection == input$collection)
-    
-  })
-  
+  # Species.Choice <- reactive({
+  # 
+  #   dat.all.stack %>%
+  #     filter(collection == input$collection)
+  # 
+  # })
+
   output$select_Species <- renderUI({
-    
-    choice_Species <- reactive({
-      dat.all.stack %>% 
-        filter(collection == input$collection) %>% 
-        pull(Species) %>% 
-        as.character()
-      
-    })
-    
+
+    # choice_Species <- reactive({
+    #   dat.all.stack %>%
+    #     filter(collection == input$collection) %>%
+    #     pull(Species) %>%
+    #     as.character()
+    spp.avail <- unique(paste(dat.all.stack$Species[dat.all.stack$collection==input$collection]))
+
+    #})
+
     #selectizeInput('Species', 'Select Species', choices = c("select" = "", choice_Species()), multiple=TRUE) # <- put the reactive element here
-    pickerInput('Species','Choose a Species: ', choices = c("select" = "", unique(choice_Species())), options = list(`actions-box` = TRUE),multiple = T)
-    
+    pickerInput('Species','Choose a Species: ', choices = c("select" = "", sort(spp.avail)), options = list(`actions-box` = TRUE, 'live-search' = TRUE),multiple = T)
+
   })
 
   
