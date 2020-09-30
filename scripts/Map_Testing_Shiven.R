@@ -92,6 +92,7 @@ library(shiny)
 library(shinydashboard)
 library(htmltools)
 library(stringr)
+library(shinyWidgets)
 
 #shiny usage from internet: https://gallery.shinyapps.io/093-plot-interaction-basic/?_ga=2.159045370.1313669618.1595826759-1262602594.1594961620
 #adding leaf.falling.intensity to dat.all so I can add intensity to dat.all.stack
@@ -218,17 +219,17 @@ ui <- fluidPage(
         font-size: smaller;
       }
     "))),
-  sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(dat.all.stack$Week), max = max(dat.all.stack$Week),
-                value = max(dat.all.stack$Week))),
-  selectInput("collection", "Choose a collection:", list(collection=as.list(paste(sort(unique(dat.all.stack$collection)))))),
-  selectizeInput("Phenophase", "Choose a Phenophase:", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), multiple = TRUE),
+  sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(dat.all.stack$Week), max = max(dat.all.stack$Week), value = max(dat.all.stack$Week)),
+               selectInput("collection", "Choose a collection:", list(collection=as.list(paste(sort(unique(dat.all.stack$collection)))))),
+               selectizeInput("Phenophase", "Choose a Phenophase:", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), multiple = TRUE),
+               #pickerInput("Phenophase","Choose a Phenophase: ", choices = list(Phenos=as.list(paste(unique(dat.all.stack$Phenophase)))), options = list(`actions-box` = TRUE),multiple = T),
+               #pickerInput("Species", "Choose a Species", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), options = list(`actions-box` = TRUE),multiple = T)
+               uiOutput("select_Species")),
   #selectInput("Species", "Choose a Species:", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), selected = NULL, multiple = FALSE), #not filtering to only relevant species
-  selectizeInput("Species", "Choose a Species", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), multiple = TRUE),
   verbatimTextOutput("hover_info"),			    
   mainPanel(plotlyOutput("plot1", width = 850, height = 750),
             # hover=hoverOpts(id="plot_hover")
   ))
-
 
 #goal: try to get a geom_bin2d graph to work in shiny
 #so far almost everything of the graph is working: Date Observed is now normal but it has to be repeated twice for it to work
@@ -236,7 +237,32 @@ ui <- fluidPage(
 #Not working with Obs.List as x
   
 server <- function(input, output) {
-  #selectInput("Species", "Choose a Species:", list(Species=as.list(paste(sort(unique(dat.all.stack$Species[dat.all.stack$collection=input$collection]))))))
+ 
+#Used this website to create changing Species dropdown: https://www.davidsolito.com/post/conditional-drop-down-in-shiny/ 
+#Up to output plot is used to make Species dropdown reactive
+  Species.Choice <- reactive({ 
+    
+    dat.all.stack %>% 
+      filter(collection == input$collection)
+    
+  })
+  
+  output$select_Species <- renderUI({
+    
+    choice_Species <- reactive({
+      dat.all.stack %>% 
+        filter(collection == input$collection) %>% 
+        pull(Species) %>% 
+        as.character()
+      
+    })
+    
+    #selectizeInput('Species', 'Select Species', choices = c("select" = "", choice_Species()), multiple=TRUE) # <- put the reactive element here
+    pickerInput('Species','Choose a Species: ', choices = c("select" = "", unique(choice_Species())), options = list(`actions-box` = TRUE),multiple = T)
+    
+  })
+
+  
   output$plot1 <- renderPlotly({
     # if (input$plot_type == "base") {
     # plot(mtcars$wt, mtcars$mpg)
@@ -257,7 +283,9 @@ server <- function(input, output) {
                                          'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.all.stack$Obs.List, 
                           binwidth=7) + # green filling & actual data
-               #scale_color_manual(values = c("Yes"="palegreen2", "No"="firebrick3", "Unsure"="gray50", "No Observation"="black"))  + # color scheme
+               scale_color_manual(values = c("Absent"="black", "Present"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
+                                                                                  "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94"="forestgreen", ">95%"="darkgreen",
+                                                                                  "Little"="palegreen1", "Some"="palegreen3", "Lots"="darkgreen"))  + # color scheme
                # if (dat.all.stack$Phenophase.Status=="Yes") {
                #   scale_color_gradient(dat.all.stack$Intensity.Status[], values = c(NA="black", "0"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
                #                                                                   "0%"="", "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94"="forestgreen", ">95%"="darkgreen",
@@ -294,3 +322,6 @@ server <- function(input, output) {
 shinyApp(ui, server)
 
 #very useful page on different types of dropdown in shiny: https://shiny.rstudio.com/gallery/selectize-examples.html 
+head(dat.all.stack[dat.all.stack$Intensity.Gradient != "Absent", ])
+unique(dat.all.stack$Intensity.Gradient)
+
