@@ -32,7 +32,12 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Present", 
                                                                 "Fruit - Ripe Fruit", 
                                                                 "Fruit - Recent Drop"))
-# summary(dat.pheno)
+dat.pheno$Status.Intensity <- ifelse(dat.pheno$status=="No", "Absent", ifelse(dat.pheno$status=="Unsure", "Unsure", ifelse(dat.pheno$status=="No Observation", "No Observation",
+                                     ifelse(dat.pheno$intensity %in% c(NA, "0", "0%", "None"), "Present", dat.pheno$intensity))))
+
+dat.pheno$Status.Intensity <- factor(dat.pheno$Status.Intensity, levels=c("Absent", "Present", "Unsure", "No Observation", "<3", "3-10", "11-100", "101-1,000", "1,001-10,000", ">10,000", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%", "Little", "Some", "Lots"))
+
+summary(dat.pheno$Status.Intensity)
 # dat.pheno <- quercus.stack
 
 function(input, output) {
@@ -61,8 +66,10 @@ function(input, output) {
     ggplot(data=dat.pheno[dat.subs, ]) + # data being used
       ggtitle(paste(input$Phenophase, "for", input$Collection, sep=" ")) + # title
       facet_grid(Species~., scales="free", space="free", switch="y") + # lines for different species +
-      geom_point(aes(x=Date.Observed, y=PlantNumber, color=status), size=5, alpha=0.8) + # green filling & actual data
-      scale_color_manual(values= c("No" = "gray50", "Yes"="green4", "Unsure"="blue3", "No Observation"="black"))  + # color scheme
+      geom_point(aes(x=Date.Observed, y=PlantNumber, color=Status.Intensity), size=5, alpha=0.8) + # green filling & actual data
+      scale_color_manual(values = c("No Observation"="gray50", "Absent"="black", "Unsure"="cadetblue",  "Present"="darkblue", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
+                                    "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94%"="forestgreen", ">95%"="darkgreen",
+                                    "Little"="palegreen1", "Some"="palegreen3", "Lots"="darkgreen"))  + # color scheme      
       scale_x_date(name="Date") + # x-axis and other stuff?
       # scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
       scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure

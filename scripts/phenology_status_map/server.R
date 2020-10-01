@@ -42,10 +42,10 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Recent Drop"))
 dat.pheno$Week <- lubridate::week(dat.pheno$Date.Observed)
 dat.pheno$Week.Date <- as.Date(paste(lubridate::year(dat.pheno$Date.Observed), dat.pheno$Week, 1, sep="-"), "%Y-%U-%u")
-dat.pheno$Status.Intensity <- ifelse(dat.pheno$status=="No", "Absent",
-                                           ifelse(dat.pheno$intensity %in% c(NA, "0", "0%", "None"), "Present", dat.pheno$intensity))
+dat.pheno$Status.Intensity <- ifelse(dat.pheno$status=="No", "Absent", ifelse(dat.pheno$status=="Unsure", "Unsure", ifelse(dat.pheno$status=="No Observation", "No Observation",
+                                                                                                                           ifelse(dat.pheno$intensity %in% c(NA, "0", "0%", "None"), "Present", dat.pheno$intensity))))
 
-dat.pheno$Status.Intensity <- as.factor(dat.pheno$Status.Intensity)
+dat.pheno$Status.Intensity <- factor(dat.pheno$Status.Intensity, levels=c("Absent", "Present", "Unsure", "No Observation", "<3", "3-10", "11-100", "101-1,000", "1,001-10,000", ">10,000", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%", "Little", "Some", "Lots"))
 summary(dat.pheno)
 
 # summary(dat.pheno)
@@ -85,7 +85,7 @@ server <- function(input, output) {
                               text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',status,'<br>', 'Intensity: ',intensity,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.pheno$Obs.List, 
                           binwidth=7) + # green filling & actual data
-               scale_color_manual(values = c("Absent"="gray50", "Present"="darkblue", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
+               scale_color_manual(values = c("No Observation"="gray50", "Absent"="black", "Unsure"="cadetblue",  "Present"="darkblue", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
                                              "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94%"="forestgreen", ">95%"="darkgreen",
                                              "Little"="palegreen1", "Some"="palegreen3", "Lots"="darkgreen"))  + # color scheme
 

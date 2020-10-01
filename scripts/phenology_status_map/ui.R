@@ -42,7 +42,7 @@ pheno.list <- levels(dat.pheno$pheno.label)
 
 fluidPage(
   # Some custom CSS for a smaller font for preformatted text
-  titlePanel("Customizable Map for QAQC Data"),
+  # titlePanel("Phenology Map for QAQC Data"),
   tags$head(
     tags$style(HTML("
       pre, table.table {
