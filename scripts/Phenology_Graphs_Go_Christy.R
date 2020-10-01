@@ -10,7 +10,7 @@ library(ggplot2); library(grid) # graphing packages
 
 library(car)
 library(shiny)
-
+library(shinyWidgets)
 # ----------------
 # get the data from each collection
 # ----------------
@@ -40,6 +40,9 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Present", 
                                                                 "Fruit - Ripe Fruit", 
                                                                 "Fruit - Recent Drop"))
+dat.pheno$Week <- lubridate::week(dat.pheno$Date.Observed)
+dat.pheno$Week.Date <- as.Date(paste(lubridate::year(dat.pheno$Date.Observed), dat.pheno$Week, 1, sep="-"), "%Y-%U-%u")
+
 # dat.pheno <- dat.pheno[dat.pheno$Date.Observed>=as.Date("2020-08-01") & dat.pheno$collection=="Quercus",]
 summary(dat.pheno)
 # https://stackoverflow.com/questions/27965931/tooltip-when-you-mouseover-a-ggplot-on-shiny
@@ -68,6 +71,7 @@ ui <- fluidPage(
     # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
     selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
     selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
+    # uiOutput("select_Species"),
     verbatimTextOutput("info"), style="position:fixed"), #, style="position:fixed"
   column(8,offset=4,mainPanel(uiOutput("plot.ui", click="plot_click")))
   ))			    
@@ -77,12 +81,20 @@ ui <- fluidPage(
 #so far almost everything of the graph is working: Date Observed is now normal but it has to be repeated twice for it to work
 server <- function(input, output) {
   nInd <- reactive({
-    length(unique(dat.pheno$PlantNumber[dat.pheno$collection==input$Collection]))
+    length(unique(dat.pheno$PlantNumber[dat.pheno$Collection==input$Collection]))
   })
   plotHeight <- reactive(15*nInd())
   
+  # output$select_Species <- renderUI({
+  #   
+  #   spp.avail <- unique(paste(dat.pheno$Species[dat.pheno$collection==input$Collection]))
+  #   #selectizeInput('Species', 'Select Species', choices = c("select" = "", choice_Species()), multiple=TRUE) # <- put the reactive element here
+  #   pickerInput('Species','Choose a Species: ', choices = c("select" = "", sort(spp.avail)), options = list(`actions-box` = TRUE, 'live-search' = TRUE),multiple = T)
+  #   
+  # })
+  # 
   output$plot1 <- renderPlot({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status) #& dat.pheno$Species %in% input$Species
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
