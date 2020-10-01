@@ -82,7 +82,7 @@ server <- function(input, output) {
                geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=5, color="gray80") +
                geom_path(data=paths, aes(x=long, y=lat, group=group), size=1.5, linetype="solid", color="brown") +
                geom_point(aes(x=BgLongitude, y=BgLatitude, color=Status.Intensity,
-                              text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',status,'<br>', 'Intensity: ',intensity,'<br>','<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
+                              text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',status,'<br>', 'Intensity: ',intensity,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.pheno$Obs.List, 
                           binwidth=7) + # green filling & actual data
                scale_color_manual(values = c("Absent"="gray50", "Present"="darkblue", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
