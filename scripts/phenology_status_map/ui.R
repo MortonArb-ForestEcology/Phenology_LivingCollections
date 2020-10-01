@@ -51,7 +51,7 @@ fluidPage(
     "))),
   sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(as.Date(dat.pheno$Week.Date)), max = max(as.Date(dat.pheno$Week.Date)), value = max(as.Date(dat.pheno$Week.Date)), step=7),
                selectInput("collection", "Choose a collection:", list(collection=coll.list)),
-               pickerInput("Phenophase", "Choose a Phenophase:", choices = list(Phenophase=pheno.list), options = list(`actions-box` = TRUE),multiple = T),
+               pickerInput("Phenophase", "Choose a Phenophase:", choices = list(Phenophase=pheno.list), select=pheno.list[1], options = list(`actions-box` = TRUE),multiple = T),
                uiOutput("select_Species")),
   #selectInput("Species", "Choose a Species:", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), selected = NULL, multiple = FALSE), #not filtering to only relevant species
   verbatimTextOutput("hover_info"),			    

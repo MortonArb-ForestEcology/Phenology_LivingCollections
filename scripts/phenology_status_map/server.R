@@ -66,7 +66,7 @@ server <- function(input, output) {
     
     spp.avail <- unique(paste(dat.pheno$Species[dat.pheno$collection==input$collection]))
     #selectizeInput('Species', 'Select Species', choices = c("select" = "", choice_Species()), multiple=TRUE) # <- put the reactive element here
-    pickerInput('Species','Choose a Species: ', choices = c("select" = "", sort(spp.avail)), options = list(`actions-box` = TRUE, 'live-search' = TRUE),multiple = T)
+    pickerInput('Species','Choose a Species: ', choices = c(sort(spp.avail)), select=sort(spp.avail), options = list(`actions-box` = TRUE, 'live-search' = TRUE),multiple = T)
     
   })
   
