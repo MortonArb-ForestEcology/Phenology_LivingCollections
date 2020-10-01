@@ -4,6 +4,7 @@ library(ggplot2)
 library(plotly)
 library(stringr)
 library(rgdal)
+library(shinyWidgets)
 
 roads <- readOGR("data_spatial/roads/circ_veh_rd_2011-2020_ctrln.shp")
 paths <- readOGR("data_spatial/trails/paths.shp")
@@ -39,6 +40,14 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Present", 
                                                                 "Fruit - Ripe Fruit", 
                                                                 "Fruit - Recent Drop"))
+dat.pheno$Week <- lubridate::week(dat.pheno$Date.Observed)
+dat.pheno$Week.Date <- as.Date(paste(lubridate::year(dat.pheno$Date.Observed), dat.pheno$Week, 1, sep="-"), "%Y-%U-%u")
+dat.pheno$Status.Intensity <- ifelse(dat.pheno$status=="No", "Absent",
+                                           ifelse(dat.pheno$intensity %in% c(NA, "0", "0%", "None"), "Present", dat.pheno$intensity))
+
+dat.pheno$Status.Intensity <- as.factor(dat.pheno$Status.Intensity)
+summary(dat.pheno)
+
 # summary(dat.pheno)
 # dat.pheno <- quercus.stack
 
@@ -64,21 +73,20 @@ server <- function(input, output) {
   
   output$plot1 <- renderPlotly({
     dat.subs <- dat.pheno$collection==input$collection &  
-      dat.pheno$Phenophase %in% input$Phenophase &  #allows multiple phenophases to show up
-      dat.pheno$Week==as.Date(input$Week) & 
+      dat.pheno$pheno.label %in% input$Phenophase &  #allows multiple phenophases to show up
+      dat.pheno$Week.Date==as.Date(input$Week) & 
       dat.pheno$Species %in% input$Species
     ggplotly(ggplot(data=dat.pheno[dat.subs, ]) + # data being used
                ggtitle(paste("Map of ", input$Phenophase, "for", input$collection, "on Week", input$Week,  sep=" ")) + # title
-               facet_wrap(~Phenophase, ncol=2) + # lines for different species +
+               facet_wrap(~pheno.label, ncol=2) + # lines for different species +
                geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=5, color="gray80") +
                geom_path(data=paths, aes(x=long, y=lat, group=group), size=1.5, linetype="solid", color="brown") +
-               geom_point(aes(x=BgLongitude, y=BgLatitude, color=Intensity.Gradient,
-                              text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',Phenophase.Status,'<br>', 'Intensity: ',Intensity,'<br>', 
-                                         'Intensity Status: ',Intensity.Status,'<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
+               geom_point(aes(x=BgLongitude, y=BgLatitude, color=Status.Intensity,
+                              text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',status,'<br>', 'Intensity: ',intensity,'<br>','<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.pheno$Obs.List, 
                           binwidth=7) + # green filling & actual data
-               scale_color_manual(values = c("Absent"="black", "Present"="red", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
-                                             "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94"="forestgreen", ">95%"="darkgreen",
+               scale_color_manual(values = c("Absent"="gray50", "Present"="black", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
+                                             "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94%"="forestgreen", ">95%"="darkgreen",
                                              "Little"="palegreen1", "Some"="palegreen3", "Lots"="darkgreen"))  + # color scheme
 
                coord_equal(xlim=range(dat.pheno$BgLongitude[dat.subs], na.rm=T), 

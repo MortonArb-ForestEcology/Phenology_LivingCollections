@@ -3,6 +3,7 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(stringr)
+library(shinyWidgets)
 
 dat.pheno <- read.csv("pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
@@ -48,6 +49,7 @@ fluidPage(
     # selectInput("Collection", "Choose a Collection:", choices=c(list(Collection=as.list(paste(unique(dat.pheno$collection))))), 
     selectInput("Collection", "Choose a Collection:", list(Collection=as.list(coll.list))), 
     selectInput("Phenophase", "Choose a Phenophase:", list(Phenophase=as.list(pheno.list))), 
+    uiOutput("select_Species"),
     mainPanel(uiOutput("plot.ui", click="plot_click"), height="100%"),
     verbatimTextOutput("info")
 )

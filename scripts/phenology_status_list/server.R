@@ -3,6 +3,7 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(stringr)
+library(shinyWidgets)
 
 dat.pheno <- read.csv("pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
@@ -40,8 +41,17 @@ function(input, output) {
   })
   plotHeight <- reactive(15*nInd())
   
+  output$select_Species <- renderUI({
+    
+    spp.avail <- unique(paste(dat.pheno$Species[dat.pheno$collection==input$collection]))
+    #selectizeInput('Species', 'Select Species', choices = c("select" = "", choice_Species()), multiple=TRUE) # <- put the reactive element here
+    pickerInput('Species','Choose a Species: ', choices = c("select" = "", sort(spp.avail)), options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = T)
+    
+  })
+  
   output$plot1 <- renderPlot({
-    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status)
+    dat.subs <- dat.pheno$Date.Observed>=min(input$DateRange) & dat.pheno$Date.Observed<=max(input$DateRange) & dat.pheno$collection==input$Collection & dat.pheno$pheno.label==input$Phenophase & !is.na(dat.pheno$status) & 
+      dat.pheno$Species %in% input$Species
     
     # cols.use <- colors.all$color.code[colors.all$pheno.status %in% dat.pheno$status[dat.subs]]
     
