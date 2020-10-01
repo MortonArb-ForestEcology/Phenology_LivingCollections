@@ -3,6 +3,8 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(stringr)
+library(shinyWidgets)
+
 
 dat.pheno <- read.csv("pheno_compiled.csv")
 dat.pheno$Date.Observed <- as.Date(dat.pheno$Date.Observed)
@@ -31,6 +33,9 @@ dat.pheno$pheno.label <- factor(dat.pheno$pheno.label, levels=c("Leaves - Presen
                                                                 "Fruit - Present", 
                                                                 "Fruit - Ripe Fruit", 
                                                                 "Fruit - Recent Drop"))
+dat.pheno$Week <- lubridate::week(dat.pheno$Date.Observed)
+dat.pheno$Week.Date <- as.Date(paste(lubridate::year(dat.pheno$Date.Observed), dat.pheno$Week, 1, sep="-"), "%Y-%U-%u")
+
 # dat.pheno$Timestamp <- strptime(dat.pheno$Timestamp, format="")
 coll.list <- paste(unique(dat.pheno$collection)[order(unique(dat.pheno$collection))])
 pheno.list <- levels(dat.pheno$pheno.label)
@@ -44,9 +49,9 @@ fluidPage(
         font-size: smaller;
       }
     "))),
-  sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(dat.all.stack$Week), max = max(dat.all.stack$Week), value = max(dat.all.stack$Week)),
+  sidebarPanel(sliderInput("Week", "Choose a Week:", min = min(as.Date(dat.pheno$Week.Date)), max = max(as.Date(dat.pheno$Week.Date)), value = max(as.Date(dat.pheno$Week.Date)), step=7),
                selectInput("collection", "Choose a collection:", list(collection=coll.list)),
-               pickerInput("Phenophase", "Choose a Phenophase:", choices = list(Phenos=pheno.list), options = list(`actions-box` = TRUE),multiple = T),
+               pickerInput("Phenophase", "Choose a Phenophase:", choices = list(Phenophase=pheno.list), options = list(`actions-box` = TRUE),multiple = T),
                uiOutput("select_Species")),
   #selectInput("Species", "Choose a Species:", choices = list(Species=as.list(paste(sort(unique(dat.all.stack$Species))))), selected = NULL, multiple = FALSE), #not filtering to only relevant species
   verbatimTextOutput("hover_info"),			    
