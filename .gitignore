@@ -32,3 +32,4 @@ pheno_compiled.csv
 */pheno_compiled.csv
 *.dcf
 *.dcf
+scripts/phenology_status_list/pheno_compiled.csv

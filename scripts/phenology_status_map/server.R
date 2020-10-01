@@ -85,13 +85,13 @@ server <- function(input, output) {
                               text=paste('Date Observed:',Date.Observed,'<br>','Obs.List:',Obs.List,'<br>','Observer: ',Observer,'<br>', 'Phenophase Status: ',status,'<br>', 'Intensity: ',intensity,'<br>','<br>','Plant Number: ', PlantNumber,'<br>','Species: ', Species,'<br>','Notes: ', Notes,'<br>','Latitude: ', BgLatitude,'<br>','Longitude: ', BgLongitude)), 
                           #shape=dat.pheno$Obs.List, 
                           binwidth=7) + # green filling & actual data
-               scale_color_manual(values = c("Absent"="gray50", "Present"="black", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
+               scale_color_manual(values = c("Absent"="gray50", "Present"="darkblue", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
                                              "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94%"="forestgreen", ">95%"="darkgreen",
                                              "Little"="palegreen1", "Some"="palegreen3", "Lots"="darkgreen"))  + # color scheme
 
                coord_equal(xlim=range(dat.pheno$BgLongitude[dat.subs], na.rm=T), 
                            ylim=range(dat.pheno$BgLatitude[dat.subs], na.rm=T)) +
-               theme(legend.position="bottom", #need to move legend position
+               theme(legend.position="top", #need to move legend position
                      legend.text = element_text(size=rel(1)),
                      legend.title=element_blank(),
                      plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center

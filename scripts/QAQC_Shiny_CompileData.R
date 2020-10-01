@@ -86,6 +86,31 @@ dat.all.stack <- merge(dat.all.stack, dat.int, all=T)
 
 
 # Merge in lat & lon data
+# Also merge in the observing lists and volunteer assignments
+quercus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Quercus.csv"))
+acer.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Acer.csv"))
+ulmus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Ulmus.csv"))
+quercus.list$collection <- "Quercus"
+acer.list$collection <- "Acer"
+ulmus.list$collection <- "Ulmus"
+quercus.list$Obs.List <- paste(quercus.list$collection, quercus.list$Obs.List, sep="-")
+acer.list$Obs.List <- paste(acer.list$collection, acer.list$Obs.List, sep="-")
+ulmus.list$Obs.List <- paste(ulmus.list$collection, ulmus.list$Obs.List, sep="-")
+
+# summary(quercus.list)
+# summary(acer.list)
+# summary(ulmus.list)
+# head(acer.list)
+
+obs.list <- rbind(quercus.list, acer.list, ulmus.list)
+# summary(obs.list)
+# head(obs.list)
+
+dat.all.stack <- merge(dat.all.stack, obs.list[,c("Obs.List", "collection", "PlantNumber", "BgLatitude", "BgLongitude")])
+dat.all.stack$Obs.List <- as.factor(dat.all.stack$Obs.List)
+dat.all.stack$collection <- as.factor(dat.all.stack$collection)
+# summary(dat.all.stack)
+# head(dat.all.stack)
 
 
 
