@@ -67,9 +67,13 @@ function(input, output) {
       ggtitle(paste(input$Phenophase, "for", input$Collection, sep=" ")) + # title
       facet_grid(Species~., scales="free", space="free", switch="y") + # lines for different species +
       geom_point(aes(x=Date.Observed, y=PlantNumber, color=Status.Intensity), size=5, alpha=0.8) + # green filling & actual data
-      scale_color_manual(values = c("No Observation"="gray50", "Absent"="black", "Unsure"="cadetblue",  "Present"="darkblue", "<3"="palegreen1", "3-10"="palegreen2", "11-100"="palegreen3", "101-1,000"="palegreen4", "1,001-10,000"="forestgreen", ">10,000"="darkgreen",
-                                    "<5%"="palegreen1", "5-24%"="palegreen2", "25-49%"="palegreen3", "50-74%"="palegreen4", "75-94%"="forestgreen", ">95%"="darkgreen",
-                                    "Little"="palegreen1", "Some"="palegreen3", "Lots"="darkgreen"))  + # color scheme      
+#       scale_color_manual(values = c("No Observation"="gray90", "Unsure"="#d95f02", "Absent"="#7570b3",  "Present"="#1b9e77", "<3"="#c51b7d", "3-10"="#e9a3c9", "11-100"="#fde0ef
+# ", "101-1,000"="#e6f5d0", "1,001-10,000"="#a1d76a", ">10,000"="#4d9221",
+#                                     "<5%"="#c51b7d", "5-24%"="#e9a3c9", "25-49%"="#fde0ef", "50-74%"="#e6f5d0", "75-94%"="#a1d76a", ">95%"="#4d9221",
+#                                     "Little"="#e6f5d0", "Some"="#a1d76a", "Lots"="#4d9221"))  + # color scheme      
+      scale_color_manual(values = c("No Observation"="gray90", "Unsure"="#fc8d62", "Absent"="#8da0cb",  "Present"="#66c2a5", "<3"="#ffffcc", "3-10"="#d9f0a3", "11-100"="#addd8e", "101-1,000"="#78c679", "1,001-10,000"="#31a354", ">10,000"="#006837",
+                                    "<5%"="#ffffcc", "5-24%"="#d9f0a3", "25-49%"="#addd8e", "50-74%"="#78c679", "75-94%"="#addd8e", ">95%"="#31a354",
+                                    "Little"="#f7fcb9", "Some"="#a1d76a", "Lots"="#4d9221"))  + # color scheme      
       scale_x_date(name="Date") + # x-axis and other stuff?
       # scale_y_discrete(expand=c(0,0)) + # fills in graph to make it solid
       scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +  # I'm not sure
@@ -79,7 +83,7 @@ function(input, output) {
             legend.key = element_rect(fill=NA),
             plot.title = element_text(size=rel(1), face="bold", hjust=1), #formats title to be bold and in center
             panel.grid = element_blank(),
-            panel.background=element_rect(fill=NA, color="black"), #divider lines in , makes background white
+            panel.background=element_rect(fill="gray30", color="black"), #divider lines in , makes background white
             panel.spacing=unit(0.05, "lines"), #connects all the individual trees together
             axis.text.x=element_text(size=rel(1)),
             axis.title.x=element_text(size=rel(1), face="bold"), #makes x axis name bolded
@@ -87,7 +91,8 @@ function(input, output) {
             axis.text.y=element_blank(), #makes it so that tree number is not displayed outside of gray part
             axis.ticks.y=element_blank(), #gets rid of ticks outside gray box of y-axis
             plot.margin=unit(c(0,5,0,0), "lines"),
-            strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0)) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
+            strip.text.y.left=element_text(margin=unit(c(1,0,1,0), "lines"), angle=0),
+            strip.background = element_rect(fill="gray80")) #gets rid of ticks outside gray box of y-axis, also puts y-axis upside down which I fixed by changing angle to 0
     
   })
   
