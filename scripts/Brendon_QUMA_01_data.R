@@ -103,6 +103,7 @@ head(quercus.lc)
 
 
 #finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
+#Note the na.rm=T which is removing N/A values
 min(quercus.lc$Date.Observed)
 max(quercus.lc$Date.Observed)
 range(quercus.lc$Date.Observed)
@@ -112,30 +113,44 @@ mean(quercus.lc$Date.Observed,na.rm=T)
 quercus.lc$yday <- lubridate::yday(quercus.lc$Date.Observed)
 summary(quercus.lc)
 
-#looking at year aas well
-quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
-summary(quercus.lc)
+#Also looking at year as well not as important but nice to have
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
 
 #only looking at trees that showed fall color in the last half of the year
 quercus.lf <- quercus.lc [quercus.lc$yday>=180,]
 summary(quercus.lf)
 
-head(first.tree)
-#aggregating quercus.lf
+
+#aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
 first.tree <- aggregate(yday ~ PlantNumber + Species + year, data=quercus.lf, FUN=min, na.rm=T)
 summary(first.tree)
-
+head(first.tree)
+# making a box plot of all of the species of oak earliest date of leaf color showing in that quercus.lf data frame
 ggplot(data=first.tree) +
   geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year)))
 
+#Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
 ggplot(data=first.tree[first.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
-   facet_grid(year~.) +
+   #the facet grid can be changedd to compare year~year(year to year) 
+    facet_grid(year~.) +
   geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year)))
 
 
-
+#aggregating the data so it only shows us the average of the first day leaves showed fall color per species
+#not per individual. So what is the average day per species that leaves showed fall color
 meanfirst.tree <- aggregate(yday ~ Species + year, data=first.tree, FUN=mean, na.rm=T)
 summary(meanfirst.tree)
 
+#Doing the same thing as above but at a species level the %in% part makes it take everything from the 
 meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa"),]
- 
+
+# messing aroung with some different plots
+ggplot(data=meanfirst.tree) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+  
+  
+
+ggplot(data=meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) 
