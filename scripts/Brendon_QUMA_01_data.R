@@ -72,3 +72,44 @@ ggplot(data=quma, aes(x=Date.Observed)) +
   geom_histogram(aes(fill=fruit.present.observed), binwidth=7) +
   ggtitle("Quercus Macrocarpa fruit present")
 dev.off()
+
+
+# Downloading 2019 data
+quercus19 <- clean.google(collection="Quercus", dat.yr=2019)
+quercus19$Collection <- as.factor("Quercus")
+quercus19$Year <- lubridate::year(quercus19$Date.Observed)
+summary(quercus19)
+
+# Downloading 2018 data
+quercus18 <- clean.google(collection="Quercus", dat.yr=2018)
+quercus18$Collection <- as.factor("Quercus")
+quercus18$Year <- lubridate::year(quercus18$Date.Observed)
+summary(quercus18)
+
+# Putting 2020, 2019 and 2018 into the same data frame to make working with it easier (in the long run; might be hard at first)
+quercus.all <- rbind(quercus18, quercus19, quercus)
+summary(quercus.all)
+
+# Creating a yday (day of year) column that you'll want to do all of your indexing
+quercus.all$yday <- lubridate::yday(quercus.all$Date.Observed)
+summary(quercus.all)
+
+#maybe this?
+quercus.fr <- subset(quercus.all [,c("PlantNumber","leaf.color.observed")], simplify = TRUE, drop = TRUE)
+summary (quercus.fr)
+
+#I can also try this
+quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Observer", "Date.Observed", "Species", "PlantNumber", "leaf.color.observed")]
+summary(quercus.lc)
+head(quercus.lc)
+
+
+#finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
+min(quercus.lc$Date.Observed)
+max(quercus.lc$Date.Observed)
+range(quercus.lc$Date.Observed)
+mean(quercus.lc$Date.Observed)
+
+#Now make my Yday
+quercus.lc$yday <- lubridate::yday(quercus.lc$Date.Observed)
+summary(quercus.lc)
