@@ -90,16 +90,14 @@ summary(quercus18)
 quercus.all <- rbind(quercus18, quercus19, quercus)
 summary(quercus.all)
 
-# Creating a yday (day of year) column that you'll want to do all of your indexing
-quercus.all$yday <- lubridate::yday(quercus.all$Date.Observed)
-summary(quercus.all)
 
 #maybe this?
 quercus.fr <- subset(quercus.all [,c("PlantNumber","leaf.color.observed")], simplify = TRUE, drop = TRUE)
 summary (quercus.fr)
 
 #I can also try this
-quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Observer", "Date.Observed", "Species", "PlantNumber", "leaf.color.observed")]
+quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "leaf.color.observed")]
+quercus.lc <- quercus.lc[!is.na(quercus.lc$PlantNumber),]
 summary(quercus.lc)
 head(quercus.lc)
 
@@ -108,8 +106,36 @@ head(quercus.lc)
 min(quercus.lc$Date.Observed)
 max(quercus.lc$Date.Observed)
 range(quercus.lc$Date.Observed)
-mean(quercus.lc$Date.Observed)
+mean(quercus.lc$Date.Observed,na.rm=T)
 
 #Now make my Yday
 quercus.lc$yday <- lubridate::yday(quercus.lc$Date.Observed)
 summary(quercus.lc)
+
+#looking at year aas well
+quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+summary(quercus.lc)
+
+#only looking at trees that showed fall color in the last half of the year
+quercus.lf <- quercus.lc [quercus.lc$yday>=180,]
+summary(quercus.lf)
+
+head(first.tree)
+#aggregating quercus.lf
+first.tree <- aggregate(yday ~ PlantNumber + Species + year, data=quercus.lf, FUN=min, na.rm=T)
+summary(first.tree)
+
+ggplot(data=first.tree) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year)))
+
+ggplot(data=first.tree[first.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+   facet_grid(year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year)))
+
+
+
+meanfirst.tree <- aggregate(yday ~ Species + year, data=first.tree, FUN=mean, na.rm=T)
+summary(meanfirst.tree)
+
+meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa"),]
+ 
