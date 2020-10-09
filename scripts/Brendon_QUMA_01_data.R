@@ -142,7 +142,7 @@ ggplot(data=first.tree[first.tree$Species %in% c("Quercus macrocarpa", "Quercus 
 meanfirst.tree <- aggregate(yday ~ Species + year, data=first.tree, FUN=mean, na.rm=T)
 summary(meanfirst.tree)
 
-#Doing the same thing as above but at a species level the %in% part makes it take everything from the 
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
 meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa"),]
 
 # messing aroung with some different plots
