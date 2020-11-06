@@ -96,7 +96,7 @@ quercus.fr <- subset(quercus.all [,c("PlantNumber","leaf.color.observed")], simp
 summary (quercus.fr)
 
 #I can also try this
-quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "leaf.color.observed")]
+quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
 quercus.lc <- quercus.lc[!is.na(quercus.lc$PlantNumber),]
 summary(quercus.lc)
 head(quercus.lc)
@@ -123,23 +123,23 @@ summary(quercus.lf)
 
 
 #aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-first.tree <- aggregate(yday ~ PlantNumber + Species + year, data=quercus.lf, FUN=min, na.rm=T)
+first.tree <- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.lf, FUN=min, na.rm=T)
 summary(first.tree)
 head(first.tree)
 # making a box plot of all of the species of oak earliest date of leaf color showing in that quercus.lf data frame
 ggplot(data=first.tree) +
-  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year)))
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
 #Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
 ggplot(data=first.tree[first.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
    #the facet grid can be changedd to compare year~year(year to year) 
-    facet_grid(year~.) +
-  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year)))
+    facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
 
 
 #aggregating the data so it only shows us the average of the first day leaves showed fall color per species
 #not per individual. So what is the average day per species that leaves showed fall color
-meanfirst.tree <- aggregate(yday ~ Species + year, data=first.tree, FUN=mean, na.rm=T)
+meanfirst.tree <- aggregate(yday ~ Species + Year, data=first.tree, FUN=mean, na.rm=T)
 summary(meanfirst.tree)
 
 #Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
@@ -147,13 +147,13 @@ meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa"),]
 
 # messing aroung with some different plots
 ggplot(data=meanfirst.tree) +
-  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
   
   
 
 ggplot(data=meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
-  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) 
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
 
 # Downloading 2020 data for acer
@@ -224,7 +224,7 @@ acer.fr <- subset(acer.all [,c("PlantNumber","leaf.color.observed")], simplify =
 summary (acer.fr)
 
 #I can also try this
-acer.lc <- acer.all[acer.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "leaf.color.observed")]
+acer.lc <- acer.all[acer.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
 acer.lc <- acer.lc[!is.na(acer.lc$PlantNumber),]
 summary(acer.lc)
 head(acer.lc)
@@ -251,24 +251,24 @@ summary(acer.lf)
 
 
 #aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-afirst.tree <- aggregate (yday ~ PlantNumber + Species + year, data=acer.lf, FUN=min, na.rm=T)
+afirst.tree <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.lf, FUN=min, na.rm=T)
 summary(afirst.tree)
 head(afirst.tree)
 
 # making a box plot of all of the species of maple earliest date of leaf color showing in that acer.lf data frame
 ggplot(data=afirst.tree) +
-  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year)))
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
 #Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
 ggplot(data=afirst.tree[afirst.tree$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
   #the facet grid can be changedd to compare year~year(year to year) 
-  facet_grid(year~.) +
-  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year)))
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
 
 
 #aggregating the data so it only shows us the average of the first day leaves showed fall color per species
 #not per individual. So what is the average day per species that leaves showed fall color
-ameanfirst.tree <- aggregate(yday ~ Species + year, data=afirst.tree, FUN=mean, na.rm=T)
+ameanfirst.tree <- aggregate(yday ~ Species + Year, data=afirst.tree, FUN=mean, na.rm=T)
 summary(ameanfirst.tree)
 
 #Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
@@ -276,13 +276,13 @@ ameanfirst.tree[ameanfirst.tree$Species %in% c("Acer saccharum"),]
 
 # messing aroung with some different plots
 ggplot(data=ameanfirst.tree) +
-  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
 
 
 
 ggplot(data=ameanfirst.tree[ameanfirst.tree$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
-  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) 
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
 
 #Adding in Ulmus
@@ -294,10 +294,10 @@ ulmus20$Year <- lubridate::year(ulmus20$Date.Observed)
 summary(ulmus20)
 
 # Putting 2020 into the a data frame to make working with it easier
-ulmus <- rbind(ulmus20)
-summary(ulmus) # makign sure this worked; check date & year columns to make sure they make sense
+ulmus.all <- rbind(ulmus20)
+summary(ulmus.all) # makign sure this worked; check date & year columns to make sure they make sense
 
-head(ulmus)
+head(ulmus.all)
 
 # start with just getting ulmus americana
 summary(ulmus$Species=="Ulmus americana")
@@ -343,7 +343,7 @@ ulmus.fr <- subset(ulmus.all [,c("PlantNumber","leaf.color.observed")], simplify
 summary (ulmus.fr)
 
 #I can also try this
-ulmus.lc <- ulmus.all[ulmus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "leaf.color.observed")]
+ulmus.lc <- ulmus.all[ulmus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
 ulmus.lc <- ulmus.lc[!is.na(ulmus.lc$PlantNumber),]
 summary(ulmus.lc)
 head(ulmus.lc)
@@ -370,36 +370,36 @@ summary(ulmus.lf)
 
 
 #aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-ufirst.tree <- aggregate(yday ~ PlantNumber + Species + year, data=quercus.lf, FUN=min, na.rm=T)
+ufirst.tree <- aggregate(yday ~ PlantNumber + Species + Year, data=ulmus.lf, FUN=min, na.rm=T)
 summary(ufirst.tree)
 head(ufirst.tree)
 # making a box plot of all of the species of oak earliest date of leaf color showing in that ulmus.lf data frame
 ggplot(data=ufirst.tree) +
-  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year)))
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
 #Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
 ggplot(data=first.tree[ufirst.tree$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   #the facet grid can be changedd to compare year~year(year to year) 
-  facet_grid(year~.) +
-  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(year)))
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
 
 
 #aggregating the data so it only shows us the average of the first day leaves showed fall color per species
 #not per individual. So what is the average day per species that leaves showed fall color
-umeanfirst.tree <- aggregate(yday ~ Species + year, data=ufirst.tree, FUN=mean, na.rm=T)
-summary(meanfirst.tree)
+umeanfirst.tree <- aggregate(yday ~ Species + Year, data=ufirst.tree, FUN=mean, na.rm=T)
+summary(umeanfirst.tree)
 
 #Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
 umeanfirst.tree[umeanfirst.tree$Species %in% c("Ulmus americana"),]
 
 # messing aroung with some different plots
 ggplot(data=umeanfirst.tree) +
-  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
 
 
 
 ggplot(data=umeanfirst.tree[umeanfirst.tree$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
-  geom_point(aes(x=Species, y=yday, fill=as.factor(year), color=as.factor(year))) 
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
 
