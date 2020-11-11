@@ -57,7 +57,7 @@ dat.ghcn <- read.csv(file.path(path.ghcn, "USC00115097_latest.csv"))
 dat.ghcn$DATE <- as.Date(dat.ghcn$DATE)
 summary(dat.ghcn)
 
-yr.min <- 9
+yr.min <- 2008
 yr.max <- lubridate::year(Sys.Date())
 dat.ghcn2 <- data.frame()
 for(YR in yr.min:yr.max){
