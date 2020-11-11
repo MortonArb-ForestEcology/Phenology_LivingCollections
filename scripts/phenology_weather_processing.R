@@ -3,7 +3,7 @@
 # ---------------------------------
 library(ggplot2)
 
-#path.out <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Phenology Forecasting"
+path.out <- "G://Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Phenology Forecasting"
 
 dir.met <- "../data_raw/meteorology"
 dir.create(dir.met, recursive=T, showWarnings = F)
@@ -86,7 +86,29 @@ summary(dat.ghcn5)
 
 #attemtption to generte a graph
 ggplot(data=dat.ghcn5) +
-  geom_line(aes(x=DATE, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))
+  geom_line(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year")
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn5) +
+  geom_smooth(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year")
+
+#doing the same thing as lines 73-83 above but for TMEAN
+dat.ghcn6 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
+summary(dat.ghcn6)
+
+#graph of Mean Temperature
+ggplot(data=dat.ghcn6) +
+  geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Average Daily Temperature", y="Temperature °C", x="Day of Year")
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn6) +
+  geom_smooth(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Average Daily Temperature", y="Temperature °C", x="Day of Year")
+
+
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
 #write.csv(dat.ghcn2, file.path(path.out, "data", "Weather_ArbCOOP_historical_latest.csv"), row.names=F)
