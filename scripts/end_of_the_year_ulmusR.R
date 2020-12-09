@@ -251,5 +251,122 @@ ggplot(data=uleaves.fall) +
 ggplot(data=uleaves.fall[uleaves.fall$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+####Getting other phenophases--ripe fruit
+ulmus.rf <- ulmus.all[ulmus.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
+ulmus.rf <- ulmus.rf[!is.na(ulmus.rf$PlantNumber),]
+summary(ulmus.rf)
+head(ulmus.rf)
+
+
+#finding the minimimum and maximum range and mean of the dates ripe fruit was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(ulmus.rf$Date.Observed)
+max(ulmus.rf$Date.Observed)
+range(ulmus.rf$Date.Observed)
+mean(ulmus.rf$Date.Observed,na.rm=T)
+
+#Now make my Yday
+ulmus.rf$yday <- lubridate::yday(ulmus.rf$Date.Observed)
+summary(ulmus.rf)
+
+#Ulmus can show fruit all year round so commenting this out
+#only looking at trees that showed leaves falling in the last half of the year
+#ulmus.rf <- ulmus.rf [ulmus.rf$yday>=180,]
+#summary(ulmus.fl)
+
+
+#aggregating quercus.rf so it shows me the date of first ripe fruit for  every plant number and species 
+uripe.fruit <- aggregate(yday ~ PlantNumber + Species + Year, data=ulmus.rf, FUN=min, na.rm=T)
+summary(uripe.fruit)
+head(uripe.fruit)
+# making a box plot of all of the species of elm earliest date of falling leaves in that ulmus.fb data frame
+ggplot(data=uripe.fruit) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and out as needed
+ggplot(data=uripe.fruit[uripe.fruit$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day ripe fruit per species
+#not per individual. So what is the average day per species that flower buds appeared
+uripe.fruit <- aggregate(yday ~ Species + Year, data=uripe.fruit, FUN=mean, na.rm=T)
+summary(uripe.fruit)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+uripe.fruit[uripe.fruit$Species %in% c("Ulmus americana"),]
+
+
+# messing aroung with some different plots
+ggplot(data=uripe.fruit) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=uripe.fruit[uripe.fruit$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+
+#####Getting other phenophases--fruit drop
+ulmus.fd <- ulmus.all[ulmus.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
+ulmus.fd <- ulmus.fd[!is.na(ulmus.fd$PlantNumber),]
+summary(ulmus.fd)
+head(ulmus.fd)
+
+
+#finding the minimimum and maximum range and mean of the dates fruit drop was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(ulmus.fd$Date.Observed)
+max(ulmus.fd$Date.Observed)
+range(ulmus.fd$Date.Observed)
+mean(ulmus.fd$Date.Observed,na.rm=T)
+
+#Now make my Yday
+ulmus.fd$yday <- lubridate::yday(ulmus.fd$Date.Observed)
+summary(ulmus.fd)
+
+#Ulmus can show fruit all year round so commenting this out
+#only looking at trees that showed leaves falling in the last half of the year
+#ulmus.rf <- ulmus.rf [ulmus.rf$yday>=180,]
+#summary(ulmus.fl)
+
+
+#aggregating quercus.rf so it shows me the date of first ripe fruit for  every plant number and species 
+ufruit.drop <- aggregate(yday ~ PlantNumber + Species + Year, data=ulmus.fd, FUN=min, na.rm=T)
+summary(ufruit.drop)
+head(ufruit.drop)
+# making a box plot of all of the species of elm earliest date of falling leaves in that ulmus.fb data frame
+ggplot(data=ufruit.drop) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and out as needed
+ggplot(data=ufruit.drop[ufruit.drop$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day ripe fruit per species
+#not per individual. So what is the average day per species that flower buds appeared
+ufruit.drop <- aggregate(yday ~ Species + Year, data=ufruit.drop, FUN=mean, na.rm=T)
+summary(ufruit.drop)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+ufruit.drop[ufruit.drop$Species %in% c("Ulmus americana"),]
+
+
+# messing aroung with some different plots
+ggplot(data=ufruit.drop) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=uripe.fruit[uripe.fruit$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+
+
 
 

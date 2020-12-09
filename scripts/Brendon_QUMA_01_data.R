@@ -101,7 +101,6 @@ quercus.lc <- quercus.lc[!is.na(quercus.lc$PlantNumber),]
 summary(quercus.lc)
 head(quercus.lc)
 
-
 #finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
 #Note the na.rm=T which is removing N/A values
 min(quercus.lc$Date.Observed)
@@ -155,112 +154,43 @@ ggplot(data=meanfirst.tree) +
 ggplot(data=meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+#########
+#subsetting out for individual phenophases- falling leaves
+quercus.lfl <- quercus.all[quercus.all$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
+quercus.lfl <- quercus.lfl[!is.na(quercus.lfl$PlantNumber),]
+summary(quercus.lfl)
+head(quercus.lfl)
 
-# Downloading 2020 data for acer
-acer20 <- clean.google(collection="Acer", dat.yr=2020)
-acer20$Collection <- as.factor("Acer")
-acer20$Year <- lubridate::year(acer20$Date.Observed)
-summary(acer20)
-
-# Putting 2020 into the a data frame to make working with it easier
-acer <- rbind(acer20)
-summary(acer) # makign sure this worked; check date & year columns to make sure they make sense
-
-head(acer)
-
-# start with a single species in this case Acer saccharum 
-summary(acer$Species=="Acer saccharum")
-asac <- acer[acer$Species=="Acer saccharum",]
-summary(asac)
-
-#Checking to make sure it is just Acer saccharum
-head(asac)
-
-#creating a data frame of just leaves present observed
-asac.lp <- asac[asac$leaf.present.observed=="Yes", c("Observer", "Date.Observed", "Species", "PlantNumber", "leaf.present.observed")]
-summary(asac.lp)
-dim(asac.lp)
-
-# When pulling one tree, don't forget double = to get T/F
-acer.solo <- asac.lp[asac.lp$PlantNumber=="332-72*4",]
-summary(acer.solo)
-acer.solo
-dim(acer.solo)
-
-#finding the minimimum and maximum of the dates leaves pesent was observed on our tree.
-min(acer.solo$Date.Observed)
-max(acer.solo$Date.Observed)
-range(acer.solo$Date.Observed)
-asolo.dates <- range(acer.solo$Date.Observed)
-
-summary(asolo.dates)
-
-# How to pull multiple trees for the same species
-
-acer.duo <- asac.lp[asac.lp$PlantNumber %in% c("332-72*4", "332-72*5") & asac.lp$Observer=="Reidy",]
-summary(acer.duo)
-
-#Plotting presence of fruit accoring to date in Quercus Marcocarpa
-ggplot(data=asac, aes(x=Date.Observed)) +
-  geom_histogram(aes(fill=fruit.present.observed), binwidth=7) +
-  ggtitle("Acer saccharum fruit present")
-dev.off()
-
-#Getting the data for all Acer
-# Downloading 2019 data
-acer19 <- clean.google(collection="Acer", dat.yr=2019)
-acer19$Collection <- as.factor("Acer")
-acer19$Year <- lubridate::year(acer19$Date.Observed)
-summary(acer19)
-
-
-# Putting 2020 and 2019 into the same data frame to make working with it easier (in the long run; might be hard at first)
-acer.all <- rbind(acer19, acer)
-summary(acer.all)
-
-
-#maybe this?
-acer.fr <- subset(acer.all [,c("PlantNumber","leaf.color.observed")], simplify = TRUE, drop = TRUE)
-summary (acer.fr)
-
-#I can also try this
-acer.lc <- acer.all[acer.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
-acer.lc <- acer.lc[!is.na(acer.lc$PlantNumber),]
-summary(acer.lc)
-head(acer.lc)
-
-
-#finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
 #Note the na.rm=T which is removing N/A values
-min(acer.lc$Date.Observed)
-max(acer.lc$Date.Observed)
-range(acer.lc$Date.Observed)
-mean(acer.lc$Date.Observed,na.rm=T)
+min(quercus.lfl$Date.Observed)
+max(quercus.lfl$Date.Observed)
+range(quercus.lfl$Date.Observed)
+mean(quercus.lfl$Date.Observed,na.rm=T)
 
 #Now make my Yday
-acer.lc$yday <- lubridate::yday(acer.lc$Date.Observed)
-summary(acer.lc)
+quercus.lfl$yday <- lubridate::yday(quercus.lfl$Date.Observed)
+summary(quercus.lfl)
 
 #Also looking at year as well not as important but nice to have
-#acer.lc$year <- lubridate::year(acer.lc$Date.Observed)
-#summary(acer.lc)
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
 
-#only looking at trees that showed fall color in the last half of the year
-acer.lf <- acer.lc [acer.lc$yday>=180,]
-summary(acer.lf)
+#only looking at trees that showed falling leaves in the last half of the year
+quercus.lfl <- quercus.lfl [quercus.lfl$yday>=180,]
+summary(quercus.lfl)
 
 
 #aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-afirst.tree <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.lf, FUN=min, na.rm=T)
-summary(afirst.tree)
-head(afirst.tree)
-
-# making a box plot of all of the species of maple earliest date of leaf color showing in that acer.lf data frame
-ggplot(data=afirst.tree) +
+falling.leaves <- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.lfl, FUN=min, na.rm=T)
+summary(falling.leaves)
+head(falling.leaves)
+# making a box plot of all of the species of oak earliest date of leaf color showing in that quercus.lf data frame
+ggplot(data=falling.leaves) +
   geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
 #Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
-ggplot(data=afirst.tree[afirst.tree$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+ggplot(data=falling.leaves[falling.leaves$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   #the facet grid can be changedd to compare year~year(year to year) 
   facet_grid(Year~.) +
   geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
@@ -268,138 +198,198 @@ ggplot(data=afirst.tree[afirst.tree$Species %in% c("Acr saccharum", "Acer rubrum
 
 #aggregating the data so it only shows us the average of the first day leaves showed fall color per species
 #not per individual. So what is the average day per species that leaves showed fall color
-ameanfirst.tree <- aggregate(yday ~ Species + Year, data=afirst.tree, FUN=mean, na.rm=T)
-summary(ameanfirst.tree)
+meanfalling.leaves <- aggregate(yday ~ Species + Year, data=falling.leaves, FUN=mean, na.rm=T)
+summary(meanfalling.leaves)
 
 #Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
-ameanfirst.tree[ameanfirst.tree$Species %in% c("Acer saccharum"),]
+meanfalling.leaves[meanfalling.leaves$Species %in% c("Quercus macrocarpa"),]
 
 # messing aroung with some different plots
-ggplot(data=ameanfirst.tree) +
+ggplot(data=meanfalling.leaves) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
 
 
 
-ggplot(data=ameanfirst.tree[ameanfirst.tree$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+ggplot(data=meanfalling.leaves[meanfalling.leaves$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+#########
+#subsetting out for individual phenophases fruit present
+quercus.fp <- quercus.all[quercus.all$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
+quercus.fp <- quercus.fp[!is.na(quercus.fp$PlantNumber),]
+summary(quercus.fp)
+head(quercus.fp)
 
-#Adding in Ulmus
-
-# Downloading 2020 data
-ulmus20 <- clean.google(collection="Ulmus", dat.yr=2020)
-ulmus20$Collection <- as.factor("Ulmus")
-ulmus20$Year <- lubridate::year(ulmus20$Date.Observed)
-summary(ulmus20)
-
-# Putting 2020 into the a data frame to make working with it easier
-ulmus.all <- rbind(ulmus20)
-summary(ulmus.all) # makign sure this worked; check date & year columns to make sure they make sense
-
-head(ulmus.all)
-
-# start with just getting ulmus americana
-summary(ulmus$Species=="Ulmus americana")
-umam <- ulmus[ulmus$Species=="Ulmus americana",]
-summary(umam)
-
-#Checking to make sure it is just Ulmus americana
-head(umam)
-
-#creating a data frame of just leaves present observed
-umam.lp <- umam[umam$leaf.present.observed=="Yes", c("Observer", "Date.Observed", "Species", "PlantNumber", "leaf.present.observed")]
-summary(umam.lp)
-dim(umam.lp)
-
-# When pulling one tree, don't forget double = to get T/F
-ulmus.solo <- umam.lp[umam.lp$PlantNumber=="1053-28*2",]
-summary(ulmus.solo)
-ulmus.solo
-dim(ulmus.solo)
-
-#finding the minimimum and maximum of the dates leaves pesent was observed on our tree.
-min(ulmus.solo$Date.Observed)
-max(ulmus.solo$Date.Observed)
-range(ulmus.solo$Date.Observed)
-usolo.dates <- range(ulmus.solo$Date.Observed)
-
-summary(usolo.dates)
-
-# How to pull multiple trees for the same species
-# quercus.duo <- quma.lp[quma.lp$PlantNumber=="2390-26*2" | quma.lp$PlantNumber=="132-2015*1",]
-ulmus.duo <- umam.lp[umam.lp$PlantNumber %in% c("2390-26*2", "604-25*1") & umam.lp$Observer=="Reidy",]
-summary(ulmus.duo)
-
-#Plotting presence of fruit accoring to date in Quercus Marcocarpa
-ggplot(data=umam, aes(x=Date.Observed)) +
-  geom_histogram(aes(fill=fruit.present.observed), binwidth=7) +
-  ggtitle("Ulmus americana fruit present")
-dev.off()
-
-
-#maybe this?
-ulmus.fr <- subset(ulmus.all [,c("PlantNumber","leaf.color.observed")], simplify = TRUE, drop = TRUE)
-summary (ulmus.fr)
-
-#I can also try this
-ulmus.lc <- ulmus.all[ulmus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
-ulmus.lc <- ulmus.lc[!is.na(ulmus.lc$PlantNumber),]
-summary(ulmus.lc)
-head(ulmus.lc)
-
-
-#finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
+#finding the minimimum and maximum range and mean of the dates fruits were observed on our trees.
 #Note the na.rm=T which is removing N/A values
-min(ulmus.lc$Date.Observed)
-max(ulmus.lc$Date.Observed)
-range(ulmus.lc$Date.Observed)
-mean(ulmus.lc$Date.Observed,na.rm=T)
+min(quercus.fp$Date.Observed)
+max(quercus.fp$Date.Observed)
+range(quercus.fp$Date.Observed)
+mean(quercus.fp$Date.Observed,na.rm=T)
 
 #Now make my Yday
-ulmus.lc$yday <- lubridate::yday(ulmus.lc$Date.Observed)
-summary(ulmus.lc)
+quercus.fp$yday <- lubridate::yday(quercus.fp$Date.Observed)
+summary(quercus.fp)
 
 #Also looking at year as well not as important but nice to have
-#ulmus.lc$year <- lubridate::year(ulmus.lc$Date.Observed)
-#summary(ulmus.lc)
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
 
-#only looking at trees that showed fall color in the last half of the year
-ulmus.lf <- ulmus.lc [ulmus.lc$yday>=180,]
-summary(ulmus.lf)
+#only looking at trees that showed fruit in the last half of the year
+quercus.lfp <- quercus.fp [quercus.fp$yday>=180,]
+summary(quercus.lfp)
 
 
-#aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-ufirst.tree <- aggregate(yday ~ PlantNumber + Species + Year, data=ulmus.lf, FUN=min, na.rm=T)
-summary(ufirst.tree)
-head(ufirst.tree)
-# making a box plot of all of the species of oak earliest date of leaf color showing in that ulmus.lf data frame
-ggplot(data=ufirst.tree) +
+#aggregating quercus.lfp so it shows me the date of first fruit presence for  every plant number and species 
+fruit.present<- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.lfp, FUN=min, na.rm=T)
+summary(fruit.present)
+head(falling.leaves)
+# making a box plot of all of the species of oak earliest date of fruit present showing in that quercus.lf data frame
+ggplot(data=fruit.present) +
   geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
 #Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
-ggplot(data=first.tree[ufirst.tree$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
+ggplot(data=fruit.present[fruit.present$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   #the facet grid can be changedd to compare year~year(year to year) 
   facet_grid(Year~.) +
   geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
 
 
-#aggregating the data so it only shows us the average of the first day leaves showed fall color per species
+#aggregating the data so it only shows us the average of the first day fruit was present per species
 #not per individual. So what is the average day per species that leaves showed fall color
-umeanfirst.tree <- aggregate(yday ~ Species + Year, data=ufirst.tree, FUN=mean, na.rm=T)
-summary(umeanfirst.tree)
+meanfruit.present <- aggregate(yday ~ Species + Year, data=fruit.present, FUN=mean, na.rm=T)
+summary(meanfruit.present)
 
 #Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
-umeanfirst.tree[umeanfirst.tree$Species %in% c("Ulmus americana"),]
+meanfruit.present[meanfruit.present$Species %in% c("Quercus macrocarpa"),]
 
 # messing aroung with some different plots
-ggplot(data=umeanfirst.tree) +
+ggplot(data=meanfruit.present) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
 
 
 
-ggplot(data=umeanfirst.tree[umeanfirst.tree$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
+ggplot(data=meanfruit.present[meanfruit.present$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+#########
+#subsetting out for individual phenophases fruit ripe
+quercus.fr <- quercus.all[quercus.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
+quercus.fr <- quercus.fr[!is.na(quercus.fr$PlantNumber),]
+summary(quercus.fr)
+head(quercus.fr)
 
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fr$Date.Observed)
+max(quercus.fr$Date.Observed)
+range(quercus.fr$Date.Observed)
+mean(quercus.fr$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.fr$yday <- lubridate::yday(quercus.fr$Date.Observed)
+summary(quercus.fr)
+
+#Also looking at year as well not as important but nice to have
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
+
+#only looking at trees that showed ripe fruit in the last half of the year
+quercus.lfr <- quercus.fr [quercus.fr$yday>=180,]
+summary(quercus.lfr)
+
+
+#aggregating quercus.lfp so it shows me the date of first ripe fruit presence for  every plant number and species 
+fruit.ripe<- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.lfr, FUN=min, na.rm=T)
+summary(fruit.ripe)
+head(fruit.ripe)
+# making a box plot of all of the species of oak earliest date of ripe fruit present showing in that quercus.lrf data frame
+ggplot(data=fruit.ripe) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
+ggplot(data=fruit.ripe[fruit.ripe$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day ripe fruit was present per species
+#not per individual. So what is the average day per species that leaves showed fall color
+meanfruit.ripe <- aggregate(yday ~ Species + Year, data=fruit.ripe, FUN=mean, na.rm=T)
+summary(meanfruit.ripe)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+meanfruit.ripe[meanfruit.ripe$Species %in% c("Quercus macrocarpa"),]
+
+# messing aroung with some different plots
+ggplot(data=meanfruit.ripe) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+ggplot(data=meanfruit.ripe[meanfruit.ripe$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#########
+#subsetting out for individual phenophases fruit drop
+quercus.fd <- quercus.all[quercus.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
+quercus.fd <- quercus.fd[!is.na(quercus.fd$PlantNumber),]
+summary(quercus.fd)
+head(quercus.fd)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fd$Date.Observed)
+max(quercus.fd$Date.Observed)
+range(quercus.fd$Date.Observed)
+mean(quercus.fd$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.fd$yday <- lubridate::yday(quercus.fd$Date.Observed)
+summary(quercus.fd)
+
+#Also looking at year as well not as important but nice to have
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
+
+#only looking at trees that showed ripe fruit in the last half of the year
+quercus.lfd <- quercus.fd [quercus.fr$yday>=180,]
+summary(quercus.lfd)
+
+
+#aggregating quercus.lfp so it shows me the date of first ripe fruit presence for  every plant number and species 
+fruit.drop<- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.lfd, FUN=min, na.rm=T)
+summary(fruit.drop)
+head(fruit.drop)
+# making a box plot of all of the species of oak earliest date of ripe fruit present showing in that quercus.lrf data frame
+ggplot(data=fruit.drop) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
+ggplot(data=fruit.drop[fruit.drop$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day ripe fruit was present per species
+#not per individual. So what is the average day per species that leaves showed fall color
+meanfruit.drop <- aggregate(yday ~ Species + Year, data=fruit.drop, FUN=mean, na.rm=T)
+summary(meanfruit.drop)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+meanfruit.drop[meanfruit.drop$Species %in% c("Quercus macrocarpa"),]
+
+# messing aroung with some different plots
+ggplot(data=meanfruit.drop) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=meanfruit.drop[meanfruit.drop$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+ 

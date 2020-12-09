@@ -1,4 +1,4 @@
-# End of the year phenology report for Ulmus
+# End of the year phenology report for Acer
 # install.packages("devtools")
 library('devtools')
 # devtools::install_github("usa-npn/rnpn")
@@ -159,4 +159,128 @@ ggplot(data=afalling.leaves) +
 
 
 ggplot(data=afalling.leaves[afalling.leaves$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#####
+#subseting out for individual phenophases- ripe fruit
+acer.rf <- acer.all[acer.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
+acer.rf <- acer.rf[!is.na(acer.rf$PlantNumber),]
+summary(acer.rf)
+head(acer.rf)
+
+
+#finding the minimimum and maximum range and mean of the dates ripe fruit was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.rf$Date.Observed)
+max(acer.rf$Date.Observed)
+range(acer.rf$Date.Observed)
+mean(acer.rf$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer.rf$yday <- lubridate::yday(acer.rf$Date.Observed)
+summary(acer.rf)
+
+#Also looking at year as well not as important but nice to have
+#acer.lc$year <- lubridate::year(acer.lc$Date.Observed)
+#summary(acer.lc)
+
+#only looking at trees that showed ripe fruit in the last half of the year
+#acer.arf <- acer.rf [acer.rf$yday>=180,]
+#summary(acer.arf)
+
+
+#aggregating acer.afl so it shows me the date of first ripe fruit  for  every plant number and species 
+aripe.fruit <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.rf, FUN=min, na.rm=T)
+summary(aripe.fruit)
+head(aripe.fruit)
+
+# making a box plot of all of the species of maple earliest date of ripe fruit showing in that acer.arf data frame
+ggplot(data=aripe.fruit) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and maple as needed
+ggplot(data=aripe.fruit[aripe.fruit %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day frit was ripe per species
+#not per individual. So what is the average day per species that fruit was ripe
+aripe.fruit <- aggregate(yday ~ Species + Year, data=aripe.fruit, FUN=mean, na.rm=T)
+summary(aripe.fruit)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+aripe.fruit[aripe.fruit$Species %in% c("Acer saccharum"),]
+
+# messing aroung with some different plots
+ggplot(data=aripe.fruit) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=afalling.leaves[afalling.leaves$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#####
+#subseting out for individual phenophases- fruit drop
+acer.fd <- acer.all[acer.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
+acer.fd <- acer.fd[!is.na(acer.fd$PlantNumber),]
+summary(acer.fd)
+head(acer.fd)
+
+
+#finding the minimimum and maximum range and mean of the dates fruit drop  was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.fd$Date.Observed)
+max(acer.fd$Date.Observed)
+range(acer.fd$Date.Observed)
+mean(acer.fd$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer.fd$yday <- lubridate::yday(acer.fd$Date.Observed)
+summary(acer.fd)
+
+#Also looking at year as well not as important but nice to have
+#acer.lc$year <- lubridate::year(acer.lc$Date.Observed)
+#summary(acer.lc)
+
+#only looking at trees that showed fruit drop in the last half of the year
+#acer.arf <- acer.rf [acer.rf$yday>=180,]
+#summary(acer.arf)
+
+
+#aggregating acer.fd so it shows me the date of first fruit drop  for  every plant number and species 
+afruit.drop <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.fd, FUN=min, na.rm=T)
+summary(afruit.drop)
+head(afruit.drop)
+
+# making a box plot of all of the species of maple earliest date of fruit drop showing in that acer.fd data frame
+ggplot(data=afruit.drop) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and maple as needed
+ggplot(data=afruit.drop[afruit.drop %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day frit was ripe per species
+#not per individual. So what is the average day per species that fruit was ripe
+afruit.drop <- aggregate(yday ~ Species + Year, data=afruit.drop, FUN=mean, na.rm=T)
+summary(afruit.drop)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+afruit.drop[afruit.drop$Species %in% c("Acer saccharum"),]
+
+# messing aroung with some different plots
+ggplot(data=afruit.drop) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=afruit.drop[afruit.drop$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
