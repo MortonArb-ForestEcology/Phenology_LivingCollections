@@ -134,6 +134,11 @@ ggplot(data=umeanfirst.tree) +
 ggplot(data=umeanfirst.tree[umeanfirst.tree$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+ggplot(data=umeanfirst.tree) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Leaf Color in the Ulmus Collection", x="Day of Year")
+
 ############
 #Getting other phenophases--flower buds
 ulmus.fb <- ulmus.all[ulmus.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
@@ -193,6 +198,8 @@ ggplot(data=umeanfirst.bud) +
 ggplot(data=umeanfirst.bud[umeanfirst.bud$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+
+
 ############
 #Getting other phenophases--falling leaves
 ulmus.fl <- ulmus.all[ulmus.all$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
@@ -250,6 +257,11 @@ ggplot(data=uleaves.fall) +
 
 ggplot(data=uleaves.fall[uleaves.fall$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+
+ggplot(data=uleaves.fall) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First falling leaves in the Ulmus Collection", x="Day of Year")
 
 ####Getting other phenophases--ripe fruit
 ulmus.rf <- ulmus.all[ulmus.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
@@ -309,6 +321,13 @@ ggplot(data=uripe.fruit) +
 ggplot(data=uripe.fruit[uripe.fruit$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+ggplot(data=uripe.fruit) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Ripe Fruit in the Ulmus Collection", x="Day of Year")
+
+
+
 #####Getting other phenophases--fruit drop
 ulmus.fd <- ulmus.all[ulmus.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
 ulmus.fd <- ulmus.fd[!is.na(ulmus.fd$PlantNumber),]
@@ -367,6 +386,7 @@ ggplot(data=ufruit.drop) +
 ggplot(data=uripe.fruit[uripe.fruit$Species %in% c("Ulmus americana", "Ulmus parvifolia", "Ulmus changii", "Ulmus serotina", "Ulmus alta"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
-
-
-
+ggplot(data=ufruit.drop) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Fruit Drop in the Ulmus Collection", x="Day of Year")

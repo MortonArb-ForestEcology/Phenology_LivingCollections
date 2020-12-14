@@ -214,6 +214,13 @@ ggplot(data=meanfalling.leaves) +
 ggplot(data=meanfalling.leaves[meanfalling.leaves$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+
+ggplot(data=meanfalling.leaves) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Falling Leaves", x="Day of Year")
+
+
 #########
 #subsetting out for individual phenophases fruit present
 quercus.fp <- quercus.all[quercus.all$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
@@ -274,6 +281,13 @@ ggplot(data=meanfruit.present) +
 ggplot(data=meanfruit.present[meanfruit.present$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
 
+
+ggplot(data=meanfruit.present) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Fruit Present", x="Day of Year")
+
+
 #########
 #subsetting out for individual phenophases fruit ripe
 quercus.fr <- quercus.all[quercus.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
@@ -332,6 +346,14 @@ ggplot(data=meanfruit.ripe) +
 
 ggplot(data=meanfruit.ripe[meanfruit.ripe$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+
+ggplot(data=meanfruit.ripe) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Ripe Fruit", x="Day of Year")
+
+
 
 #########
 #subsetting out for individual phenophases fruit drop
@@ -392,4 +414,68 @@ ggplot(data=meanfruit.drop) +
 
 ggplot(data=meanfruit.drop[meanfruit.drop$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+
+ggplot(data=meanfruit.drop) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Fruit Drop", x="Day of Year")
  
+####Getting broader information across years for phenophases
+quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
+quercus.lc <- quercus.lc[!is.na(quercus.lc$PlantNumber),]
+summary(quercus.lc)
+head(quercus.lc)
+
+#finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.lc$Date.Observed)
+max(quercus.lc$Date.Observed)
+range(quercus.lc$Date.Observed)
+mean(quercus.lc$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.lc$yday <- lubridate::yday(quercus.lc$Date.Observed)
+summary(quercus.lc)
+
+#Also looking at year as well not as important but nice to have
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
+
+#only looking at trees that showed fall color in the last half of the year
+quercus.lf <- quercus.lc [quercus.lc$yday>=180,]
+summary(quercus.lf)
+
+
+#aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
+first.tree <- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.lf, FUN=min, na.rm=T)
+summary(first.tree)
+head(first.tree)
+# making a box plot of all of the species of oak earliest date of leaf color showing in that quercus.lf data frame
+ggplot(data=first.tree) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
+ggplot(data=first.tree[first.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day leaves showed fall color per species
+#not per individual. So what is the average day per species that leaves showed fall color
+meanfirst.tree <- aggregate(yday ~ Species + Year, data=first.tree, FUN=mean, na.rm=T)
+summary(meanfirst.tree)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa"),]
+
+# messing aroung with some different plots
+ggplot(data=meanfirst.tree) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Leaf Color", x="Day of Year")
+
+
+
+ggplot(data=meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 

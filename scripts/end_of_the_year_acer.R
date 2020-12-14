@@ -99,6 +99,11 @@ ggplot(data=ameanfirst.tree) +
 ggplot(data=ameanfirst.tree[ameanfirst.tree$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
+ggplot(data=ameanfirst.tree) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Colored Leaves in the Acer Collection", x="Day of Year")
+
 #####
 #subseting out for individual phenophases- falling leaves
 acer.fl <- acer.all[acer.all$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
@@ -160,6 +165,11 @@ ggplot(data=afalling.leaves) +
 
 ggplot(data=afalling.leaves[afalling.leaves$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+ggplot(data=afalling.leaves) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Falling Leaves in the Acer Collection", x="Day of Year")
 
 #####
 #subseting out for individual phenophases- ripe fruit
@@ -223,6 +233,12 @@ ggplot(data=aripe.fruit) +
 ggplot(data=afalling.leaves[afalling.leaves$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
 
+
+ggplot(data=aripe.fruit) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Ripe Fruit in the Acer Collection", x="Day of Year")
+
 #####
 #subseting out for individual phenophases- fruit drop
 acer.fd <- acer.all[acer.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
@@ -284,3 +300,10 @@ ggplot(data=afruit.drop) +
 
 ggplot(data=afruit.drop[afruit.drop$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+
+ggplot(data=afruit.drop) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Fruit Drop in the Acer Collection", x="Day of Year")
+
