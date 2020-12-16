@@ -1,6 +1,6 @@
 # End of the year phenology report for Ulmus
 # install.packages("devtools")
-library('devtools')
+# library('devtools')
 # devtools::install_github("usa-npn/rnpn")
 
 library(googlesheets4); library(car); library(lubridate)
