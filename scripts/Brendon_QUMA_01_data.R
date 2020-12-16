@@ -479,3 +479,43 @@ ggplot(data=meanfirst.tree) +
 
 ggplot(data=meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
   geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+
+##Getting mean date of falling leaves just a single year
+#2020
+quercus.lfl <- quercus20[quercus20$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
+quercus.lfl <- quercus.lfl[!is.na(quercus.lfl$PlantNumber),]
+summary(quercus.lfl)
+head(quercus.lfl)
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.lfl$Date.Observed)
+max(quercus.lfl$Date.Observed)
+range(quercus.lfl$Date.Observed)
+mean(quercus.lfl$Date.Observed,na.rm=T)
+
+#2019
+quercus.lfl <- quercus19[quercus19$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
+quercus.lfl <- quercus.lfl[!is.na(quercus.lfl$PlantNumber),]
+summary(quercus.lfl)
+head(quercus.lfl)
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.lfl$Date.Observed)
+max(quercus.lfl$Date.Observed)
+range(quercus.lfl$Date.Observed)
+mean(quercus.lfl$Date.Observed,na.rm=T)
+
+#2018
+quercus.lfl <- quercus18[quercus18$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
+quercus.lfl <- quercus.lfl[!is.na(quercus.lfl$PlantNumber),]
+summary(quercus.lfl)
+head(quercus.lfl)
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.lfl$Date.Observed)
+max(quercus.lfl$Date.Observed)
+range(quercus.lfl$Date.Observed)
+mean(quercus.lfl$Date.Observed,na.rm=T)
