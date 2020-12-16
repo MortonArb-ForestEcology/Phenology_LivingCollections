@@ -186,6 +186,7 @@ max(acer.rf$Date.Observed)
 range(acer.rf$Date.Observed)
 mean(acer.rf$Date.Observed,na.rm=T)
 
+
 #Now make my Yday
 acer.rf$yday <- lubridate::yday(acer.rf$Date.Observed)
 summary(acer.rf)
@@ -203,6 +204,8 @@ summary(acer.rf)
 aripe.fruit <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.rf, FUN=min, na.rm=T)
 summary(aripe.fruit)
 head(aripe.fruit)
+
+
 
 # making a box plot of all of the species of maple earliest date of ripe fruit showing in that acer.arf data frame
 ggplot(data=aripe.fruit) +
@@ -306,4 +309,37 @@ ggplot(data=afruit.drop) +
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme_bw()+
   labs(title="Average Day of First Fruit Drop in the Acer Collection", x="Day of Year")
+
+##Getting mean date of falling leaves for individual leaves
+#2020
+acer.fl <- acer20[acer20$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
+acer.fl <- acer.fl[!is.na(acer.fl$PlantNumber),]
+summary(acer.fl)
+head(acer.fl)
+
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.fl$Date.Observed)
+max(acer.fl$Date.Observed)
+range(acer.fl$Date.Observed)
+mean(acer.fl$Date.Observed,na.rm=T)
+
+#2019
+acer.fl <- acer19[acer19$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed")]
+acer.fl <- acer.fl[!is.na(acer.fl$PlantNumber),]
+summary(acer.fl)
+head(acer.fl)
+
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.fl$Date.Observed)
+max(acer.fl$Date.Observed)
+range(acer.fl$Date.Observed)
+mean(acer.fl$Date.Observed,na.rm=T)
+
+
+
+
 

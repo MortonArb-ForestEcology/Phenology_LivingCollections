@@ -519,3 +519,83 @@ min(quercus.lfl$Date.Observed)
 max(quercus.lfl$Date.Observed)
 range(quercus.lfl$Date.Observed)
 mean(quercus.lfl$Date.Observed,na.rm=T)
+
+#Doing the above for Ripe Fruit
+#2020
+quercus.fr <- quercus20[quercus20$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
+quercus.fr <- quercus.fr[!is.na(quercus.fr$PlantNumber),]
+summary(quercus.fr)
+head(quercus.fr)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fr$Date.Observed)
+max(quercus.fr$Date.Observed)
+range(quercus.fr$Date.Observed)
+mean(quercus.fr$Date.Observed,na.rm=T)
+
+#2019
+quercus.fr <- quercus19[quercus19$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
+quercus.fr <- quercus.fr[!is.na(quercus.fr$PlantNumber),]
+summary(quercus.fr)
+head(quercus.fr)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fr$Date.Observed)
+max(quercus.fr$Date.Observed)
+range(quercus.fr$Date.Observed)
+mean(quercus.fr$Date.Observed,na.rm=T)
+
+#2018
+quercus.fr <- quercus18[quercus18$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.observed")]
+quercus.fr <- quercus.fr[!is.na(quercus.fr$PlantNumber),]
+summary(quercus.fr)
+head(quercus.fr)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fr$Date.Observed)
+max(quercus.fr$Date.Observed)
+range(quercus.fr$Date.Observed)
+mean(quercus.fr$Date.Observed,na.rm=T)
+
+#Doing the above but for fruit drop
+#2020
+quercus.fd <- quercus20[quercus20$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
+quercus.fd <- quercus.fd[!is.na(quercus.fd$PlantNumber),]
+summary(quercus.fd)
+head(quercus.fd)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fd$Date.Observed)
+max(quercus.fd$Date.Observed)
+range(quercus.fd$Date.Observed)
+mean(quercus.fd$Date.Observed,na.rm=T)
+
+#2019
+quercus.fd <- quercus19[quercus19$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
+quercus.fd <- quercus.fd[!is.na(quercus.fd$PlantNumber),]
+summary(quercus.fd)
+head(quercus.fd)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fd$Date.Observed)
+max(quercus.fd$Date.Observed)
+range(quercus.fd$Date.Observed)
+mean(quercus.fd$Date.Observed,na.rm=T)
+
+#2018
+quercus.fd <- quercus18[quercus18$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.observed")]
+quercus.fd <- quercus.fd[!is.na(quercus.fd$PlantNumber),]
+summary(quercus.fd)
+head(quercus.fd)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruits were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fd$Date.Observed)
+max(quercus.fd$Date.Observed)
+range(quercus.fd$Date.Observed)
+mean(quercus.fd$Date.Observed,na.rm=T)
