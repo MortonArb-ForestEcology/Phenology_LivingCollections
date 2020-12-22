@@ -599,3 +599,127 @@ min(quercus.fd$Date.Observed)
 max(quercus.fd$Date.Observed)
 range(quercus.fd$Date.Observed)
 mean(quercus.fd$Date.Observed,na.rm=T)
+
+
+#####
+###
+######Getting graphs of intensity for fruit phenophases#####
+###
+#####
+#fruit drop
+quercus.fri <- quercus.all[quercus.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.intensity", "fruit.ripe.observed")]
+quercus.fri <- quercus.fri[!is.na(quercus.fri$PlantNumber),]
+summary(quercus.fri)
+head(quercus.fri)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruit was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fri$Date.Observed)
+max(quercus.fri$Date.Observed)
+range(quercus.fri$Date.Observed)
+mean(quercus.fri$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.fri$yday <- lubridate::yday(quercus.fri$Date.Observed)
+summary(quercus.fri)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed ripe fruit in the last half of the year
+quercus.lfri <- quercus.fri [quercus.fri$yday>=180,]
+summary(quercus.lfri)
+
+
+#aggregating quercus.lfri so it shows me the date of first ripe fruit  for  every plant number and species 
+ifirst.fruit <- aggregate(yday ~ PlantNumber + Species + Year+ fruit.ripe.intensity, data=quercus.lfri, FUN=min, na.rm=T)
+summary(ifirst.fruit)
+head(ifirst.fruit)
+
+#aggregating the data so it only shows us the average of the first day there were ripe fruit per species
+#not per individual. So what is the average day per species that first ripe fruit appeared
+meanifirst.fruit <- aggregate(yday ~ Species + Year+ fruit.ripe.intensity, data=ifirst.fruit, FUN=mean, na.rm=T)
+summary(meanifirst.friuit)
+
+
+##mean fruit ripe instensit per year per indiviual 
+ggplot(data=ifirst.fruit) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.ripe.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Ripe Intensity", x="Day of Year")
+
+##mean fruit ripe instensit per year per species 
+ggplot(data=meanifirst.fruit) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.ripe.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Ripe Intensity", x="Day of Year")
+#####
+##
+######Doing the above but for fruit drop#########
+##
+####
+quercus.fdi <- quercus.all[quercus.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.drop.intensity", "fruit.drop.observed")]
+quercus.fdi <- quercus.fdi[!is.na(quercus.fdi$PlantNumber),]
+summary(quercus.fdi)
+head(quercus.fdi)
+
+#finding the minimimum and maximum range and mean of the dates fruit drop was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fdi$Date.Observed)
+max(quercus.fdi$Date.Observed)
+range(quercus.fdi$Date.Observed)
+mean(quercus.fdi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.fdi$yday <- lubridate::yday(quercus.fdi$Date.Observed)
+summary(quercus.fdi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fdi$year <- lubridate::year(quercus.fdi$Date.Observed)
+#summary(quercus.fdi)
+
+#only looking at trees that showed fruit drop in the last half of the year
+quercus.lfdi <- quercus.fdi [quercus.fdi$yday>=180,]
+summary(quercus.lfdi)
+
+
+#aggregating quercus.lfdi so it shows me the date of first fruit drop  for  every plant number and species 
+ifruit.drop <- aggregate(yday ~ PlantNumber + Species + Year+ fruit.drop.intensity, data=quercus.lfdi, FUN=min, na.rm=T)
+summary(ifruit.drop)
+head(ifruit.drop)
+
+#aggregating the data so it only shows us the average of the first day there was fruit drop per species
+#not per individual. So what is the average day per species that fruit drop first appeared
+meanifruit.drop <- aggregate(yday ~ Species + Year+ fruit.drop.intensity, data=ifruit.drop, FUN=mean, na.rm=T)
+summary(meanifruit.drop)
+
+
+##mean fruit ripe instensit per year per indiviual 
+ggplot(data=ifruit.drop) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.drop.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Drop Intensity", x="Day of Year")
+
+##mean fruit ripe instensit per year per species 
+ggplot(data=meanifruit.drop) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.drop.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Drop Intensity", x="Day of Year")
+
