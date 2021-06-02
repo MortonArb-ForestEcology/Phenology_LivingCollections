@@ -40,8 +40,8 @@ acer19$Year <- lubridate::year(acer19$Date.Observed)
 summary(acer19)
 
 
-# Putting 2020 and 2019 into the same data frame to make working with it easier (in the long run; might be hard at first)
-acer.all <- rbind(acer19, acer20)
+# Putting 2021, 2020 and 2019 into the same data frame to make working with it easier (in the long run; might be hard at first)
+acer.all <- rbind(acer19, acer20, acer21)
 summary(acer.all)
 
 #subseting out for individual phenophases
@@ -109,6 +109,212 @@ ggplot(data=ameanfirst.tree) +
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
   theme_bw()+
   labs(title="Average Day of First Colored Leaves in the Acer Collection", x="Day of Year")
+
+#####
+#subseting out for individual phenophases- flowering buds
+acer.fb <- acer.all[acer.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
+acer.fb <- acer.fb[!is.na(acer.fb$PlantNumber),]
+summary(acer.fb)
+head(acer.fb)
+
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.fb$Date.Observed)
+max(acer.fb$Date.Observed)
+range(acer.fb$Date.Observed)
+mean(acer.fb$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer.fb$yday <- lubridate::yday(acer.fb$Date.Observed)
+summary(acer.fb)
+
+#Also looking at year as well not as important but nice to have
+#acer.lc$year <- lubridate::year(acer.lc$Date.Observed)
+#summary(acer.lc)
+
+#only looking at trees that showed falling leaves in the last half of the year
+#acer.afl <- acer.fl [acer.fl$yday>=180,]
+#summary(acer.afl)
+
+
+#aggregating acer.afl so it shows me the date of first falling leaf  for  every plant number and species 
+aflower.buds <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.fb, FUN=min, na.rm=T)
+summary(aflower.buds)
+head(aflower.buds)
+
+# making a box plot of all of the species of maple earliest date of falling leaves showing in that acer.lf data frame
+ggplot(data=aflower.buds) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and maple as needed
+ggplot(data=aflower.buds[aflower.buds %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day leaves fell per species
+#not per individual. So what is the average day per species that leaves showed fall color
+aflower.buds <- aggregate(yday ~ Species + Year, data=aflower.buds, FUN=mean, na.rm=T)
+summary(aflower.buds)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+aflower.buds[aflower.buds$Species %in% c("Acer saccharum"),]
+
+# messing aroung with some different plots
+ggplot(data=aflower.buds) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=aflower.buds[aflower.buds$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+ggplot(data=aflower.buds) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Flower buds in the Acer Collection", x="Day of Year")
+
+
+
+
+#####
+#subseting out for individual phenophases- oper flowers
+acer.fo <- acer.all[acer.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
+acer.fo <- acer.fo[!is.na(acer.fo$PlantNumber),]
+summary(acer.fo)
+head(acer.fo)
+
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.fo$Date.Observed)
+max(acer.fo$Date.Observed)
+range(acer.fo$Date.Observed)
+mean(acer.fo$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer.fo$yday <- lubridate::yday(acer.fo$Date.Observed)
+summary(acer.fo)
+
+#Also looking at year as well not as important but nice to have
+#acer.lc$year <- lubridate::year(acer.lc$Date.Observed)
+#summary(acer.lc)
+
+#only looking at trees that showed falling leaves in the last half of the year
+#acer.afl <- acer.fl [acer.fl$yday>=180,]
+#summary(acer.afl)
+
+
+#aggregating acer.afl so it shows me the date of first falling leaf  for  every plant number and species 
+aflower.open <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.fo, FUN=min, na.rm=T)
+summary(aflower.open)
+head(aflower.open)
+
+# making a box plot of all of the species of maple earliest date of falling leaves showing in that acer.lf data frame
+ggplot(data=aflower.open) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and maple as needed
+ggplot(data=aflower.open[aflower.open %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day leaves fell per species
+#not per individual. So what is the average day per species that leaves showed fall color
+aflower.open <- aggregate(yday ~ Species + Year, data=aflower.open, FUN=mean, na.rm=T)
+summary(aflower.buds)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+aflower.open[aflower.open$Species %in% c("Acer saccharum"),]
+
+# messing aroung with some different plots
+ggplot(data=aflower.open) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=aflower.open[aflower.open$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+ggplot(data=aflower.open) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Open Flowers in the Acer Collection", x="Day of Year")
+
+
+
+#####
+#subseting out for individual phenophases- fruit present
+acer.fp <- acer.all[acer.all$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
+acer.fp <- acer.fp[!is.na(acer.fp$PlantNumber),]
+summary(acer.fp)
+head(acer.fp)
+
+
+#finding the minimimum and maximum range and mean of the dates falling leaves were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer.fp$Date.Observed)
+max(acer.fp$Date.Observed)
+range(acer.fp$Date.Observed)
+mean(acer.fp$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer.fp$yday <- lubridate::yday(acer.fp$Date.Observed)
+summary(acer.fp)
+
+#Also looking at year as well not as important but nice to have
+#acer.lc$year <- lubridate::year(acer.lc$Date.Observed)
+#summary(acer.lc)
+
+#only looking at trees that showed falling leaves in the last half of the year
+#acer.afl <- acer.fl [acer.fl$yday>=180,]
+#summary(acer.afl)
+
+
+#aggregating acer.afl so it shows me the date of first falling leaf  for  every plant number and species 
+afruit.present <- aggregate (yday ~ PlantNumber + Species + Year, data=acer.fp, FUN=min, na.rm=T)
+summary(afruit.present)
+head(afruit.present)
+
+# making a box plot of all of the species of maple earliest date of falling leaves showing in that acer.lf data frame
+ggplot(data=afruit.present) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and maple as needed
+ggplot(data=afruit.present[afruit.present %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day leaves fell per species
+#not per individual. So what is the average day per species that leaves showed fall color
+afruit.present <- aggregate(yday ~ Species + Year, data=afruit.present, FUN=mean, na.rm=T)
+summary(afruit.present)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+afruit.present[afruit.present %in% c("Acer saccharum"),]
+
+# messing aroung with some different plots
+ggplot(data=afruit.present) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=afruit.present[afruit.present$Species %in% c("Acr saccharum", "Acer rubrum", "Acer negundo", "Acer henryi", "Acer macrophyllum"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+ggplot(data=afruit.present) +
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme_bw()+
+  labs(title="Average Day of First Fruit appearing in the Acer Collection", x="Day of Year")
 
 #####
 #subseting out for individual phenophases- falling leaves

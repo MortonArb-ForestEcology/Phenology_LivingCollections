@@ -35,44 +35,6 @@ summary(quercus) # makign sure this worked; check date & year columns to make su
 
 head(quercus)
 
-# start with just getting QUMA
-summary(quercus$Species=="Quercus macrocarpa")
-quma <- quercus[quercus$Species=="Quercus macrocarpa",]
-summary(quma)
-
-#Checking to make sure it is just Quercus Macrocarpa
-head(quma)
-
-#creating a data frame of just leaves present observed
-quma.lp <- quma[quma$leaf.present.observed=="Yes", c("Observer", "Date.Observed", "Species", "PlantNumber", "leaf.present.observed")]
-summary(quma.lp)
-dim(quma.lp)
-
-# When pulling one tree, don't forget double = to get T/F
-quercus.solo <- quma.lp[quma.lp$PlantNumber=="2390-26*2",]
-summary(quercus.solo)
-quercus.solo
-dim(quercus.solo)
-
-#finding the minimimum and maximum of the dates leaves pesent was observed on our tree.
-min(quercus.solo$Date.Observed)
-max(quercus.solo$Date.Observed)
-range(quercus.solo$Date.Observed)
-solo.dates <- range(quercus.solo$Date.Observed)
-
-summary(solo.dates)
-
-# How to pull multiple trees for the same species
-# quercus.duo <- quma.lp[quma.lp$PlantNumber=="2390-26*2" | quma.lp$PlantNumber=="132-2015*1",]
-quercus.duo <- quma.lp[quma.lp$PlantNumber %in% c("2390-26*2", "132-2015*1") & quma.lp$Observer=="Reidy",]
-summary(quercus.duo)
-
-#Plotting presence of fruit accoring to date in Quercus Marcocarpa
-ggplot(data=quma, aes(x=Date.Observed)) +
-  geom_histogram(aes(fill=fruit.present.observed), binwidth=7) +
-  ggtitle("Quercus Macrocarpa fruit present")
-dev.off()
-
 # Downloading 2020 data
 quercus20 <- clean.google(collection="Quercus", dat.yr=2020)
 quercus20$Collection <- as.factor("Quercus")
@@ -95,10 +57,70 @@ summary(quercus18)
 quercus.all <- rbind(quercus18, quercus19, quercus)
 summary(quercus.all)
 
+###Subsetting according to leaf breaking buds
+quercus.bb <- quercus.all[quercus.all$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.breaking.buds.observed")]
+quercus.bb <- quercus.bb[!is.na(quercus.bb$PlantNumber),]
+summary(quercus.bb)
+head(quercus.bb)
 
+#finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.bb$Date.Observed)
+max(quercus.bb$Date.Observed)
+range(quercus.bb$Date.Observed)
+mean(quercus.bb$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.bb$yday <- lubridate::yday(quercus.bb$Date.Observed)
+summary(quercus.bb)
+
+#Also looking at year as well not as important but nice to have
+#quercus.lc$year <- lubridate::year(quercus.lc$Date.Observed)
+#summary(quercus.lc)
+
+#only looking at trees that showed fall color in the last half of the year
+#quercus.lf <- quercus.lc [quercus.lc$yday>=180,]
+#summary(quercus.lf)
+
+
+#aggregating quercus.bb so it shows me the date of first leaf color for  every plant number and species 
+first.tree <- aggregate(yday ~ PlantNumber + Species + Year, data=quercus.bb, FUN=min, na.rm=T)
+summary(first.tree)
+head(first.tree)
+# making a box plot of all of the species of oak earliest date of leaf color showing in that quercus.lf data frame
+ggplot(data=first.tree) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year)))
+
+#Generating the same box plot but only for a few select species, species can be swapped in and oak as needed
+ggplot(data=first.tree[first.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  #the facet grid can be changedd to compare year~year(year to year) 
+  facet_grid(Year~.) +
+  geom_boxplot(aes(x=Species, y=yday, fill=as.factor(Year)))
+
+
+#aggregating the data so it only shows us the average of the first day leaves showed fall color per species
+#not per individual. So what is the average day per species that leaves showed fall color
+meanfirst.tree <- aggregate(yday ~ Species + Year, data=first.tree, FUN=mean, na.rm=T)
+summary(meanfirst.tree)
+
+#Doing the same thing as above but at a species level the %in% part makes it take the specific thing in the data frame
+meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa"),]
+
+# messing aroung with some different plots
+ggplot(data=meanfirst.tree) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  theme(axis.text.x=element_text(size = 7, angle = 45, hjust = 1))
+
+
+
+ggplot(data=meanfirst.tree[meanfirst.tree$Species %in% c("Quercus macrocarpa", "Quercus montana", "Quercus bicolor", "Quercus alba", "Quercus rubra"),]) +
+  geom_point(aes(x=Species, y=yday, fill=as.factor(Year), color=as.factor(Year))) 
+
+
+###Subsetting according to leaf color
 #maybe this?
-quercus.fr <- subset(quercus.all [,c("PlantNumber","leaf.color.observed")], simplify = TRUE, drop = TRUE)
-summary (quercus.fr)
+#quercus.fr <- subset(quercus.all [,c("PlantNumber","leaf.color.observed")], simplify = TRUE, drop = TRUE)
+#summary (quercus.fr)
 
 #I can also try this
 quercus.lc <- quercus.all[quercus.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
@@ -608,9 +630,86 @@ mean(quercus.fd$Date.Observed,na.rm=T)
 
 #####
 ###
-######Getting graphs of intensity for fruit phenophases#####
+######Getting graphs of intensity for fruit and leaf phenophases#####
 ###
 #####
+#Breaking buds
+quercus.bbi <- quercus.all[quercus.all$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.breaking.buds.intensity", "leaf.breaking.buds.observed")]
+quercus.bbi <- quercus.bbi[!is.na(quercus.bbi$PlantNumber),]
+summary(quercus.bbi)
+head(quercus.bbi)
+
+#finding the minimimum and maximum range and mean of the dates Leaf Breaking Bud was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.bbi$Date.Observed)
+max(quercus.bbi$Date.Observed)
+range(quercus.bbi$Date.Observed)
+mean(quercus.bbi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.bbi$yday <- lubridate::yday(quercus.bbi$Date.Observed)
+summary(quercus.bbi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed ripe fruit in the last half of the year
+#quercus.lfri <- quercus.fri [quercus.fri$yday>=180,]
+#summary(quercus.lfri)
+
+
+#aggregating quercus.bbi so it shows me the date of first Leaf Breaking Bud for  every plant number and species 
+ifirst.bud <- aggregate(yday ~ PlantNumber + Species + Year+ leaf.breaking.buds.intensity, data=quercus.bbi, FUN=min, na.rm=T)
+summary(ifirst.bud)
+head(ifirst.bud)
+
+#aggregating the data so it only shows us the average of the first day there were leaf breaking buds per species
+#not per individual. So what is the average day per species that first leaf breaking buds appeared
+meanifirst.bud <- aggregate(yday ~ Species + Year+ leaf.breaking.buds.intensity, data=ifirst.bud, FUN=mean, na.rm=T)
+summary(meanifirst.bud)
+
+
+##mean Leaf Breaking Bud intensity per year per indiviual 
+ggplot(data=ifirst.bud) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=leaf.breaking.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaf Breaking Bud Intensity", x="Day of Year")
+
+##mean Leaf Breaking Bud intensity per year per species 
+ggplot(data=meanifirst.bud) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=leaf.breaking.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaf Breaking Bud", x="Day of Year")
+
+ggplot(data=meanifirst.bud) +
+  geom_histogram(alpha=1.5, aes(x=yday, fill=leaf.breaking.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaf Breaking Bud", x="Day of Year")
+
+ggplot(data=meanifirst.bud) +
+  geom_density(alpha=1.5, aes(x=yday, fill=leaf.breaking.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaf Breaking Bud", x="Day of Year")
+
+
+###########
 #fruit drop
 quercus.fri <- quercus.all[quercus.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.intensity", "fruit.ripe.observed")]
 quercus.fri <- quercus.fri[!is.na(quercus.fri$PlantNumber),]
