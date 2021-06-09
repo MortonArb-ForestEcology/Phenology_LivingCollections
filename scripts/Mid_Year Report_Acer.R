@@ -44,6 +44,10 @@ summary(acer19)
 acer.all <- rbind(acer19, acer20, acer21)
 summary(acer.all)
 
+# Putting only 2021, 2019 into the same data frame since 2020 is weird
+acer1920.all <- rbind(acer19, acer21)
+summary(acer.all)
+
 #subseting out for individual phenophases
 acer.lc <- acer.all[acer.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
 acer.lc <- acer.lc[!is.na(acer.lc$PlantNumber),]
@@ -552,6 +556,240 @@ range(acer.fl$Date.Observed)
 mean(acer.fl$Date.Observed,na.rm=T)
 
 
+###############################
+#doing this but for intensity
+############################
+#fruit present intensity
+acer1920.fpi <- acer1920.all[acer1920.all$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.intensity", "fruit.present.observed")]
+acer1920.fpi <- acer1920.fpi[!is.na(acer1920.fpi$PlantNumber),]
+summary(acer1920.fpi)
+head(acer1920.fpi)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruit was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer1920.fpi$Date.Observed)
+max(acer1920.fpi$Date.Observed)
+range(acer1920.fpi$Date.Observed)
+mean(acer1920.fpi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer1920.fpi$yday <- lubridate::yday(acer1920.fpi$Date.Observed)
+summary(acer1920.fpi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed first fruit in the first half of the year
+acer1920.fpi <- acer1920.fpi [acer1920.fpi$yday<=180,]
+summary(acer1920.fpi)
 
 
+#aggregating acer1920.fpi so it shows me the date of first fruit present  for  every plant number and species 
+ifirst.fruit <- aggregate(yday ~ PlantNumber + Species + Year+ fruit.present.intensity, data=acer1920.fpi, FUN=min, na.rm=T)
+summary(ifirst.fruit)
+head(ifirst.fruit)
 
+#aggregating the data so it only shows us the average of the first day there were ripe fruit per species
+#not per individual. So what is the average day per species that first ripe fruit appeared
+meanifirst.fruit <- aggregate(yday ~ Species + Year+ fruit.present.intensity, data=ifirst.fruit, FUN=mean, na.rm=T)
+summary(meanifirst.fruit)
+
+
+##mean fruit present intensity per year per indiviual 
+ggplot(data=ifirst.fruit) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.present.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Present Intensity", x="Day of Year")
+
+##mean fruit ripe intensity per year per species 
+ggplot(data=meanifirst.fruit) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.present.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Present Intensity", x="Day of Year")
+############
+###############################
+#doing this but for intensity
+############################
+#fruit ripe intensity
+acer1920.fri <- acer1920.all[acer1920.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.ripe.intensity", "fruit.ripe.observed")]
+acer1920.fri <- acer1920.fri[!is.na(acer1920.fri$PlantNumber),]
+summary(acer1920.fri)
+head(acer1920.fri)
+
+#finding the minimimum and maximum range and mean of the dates ripe fruit was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer1920.fri$Date.Observed)
+max(acer1920.fri$Date.Observed)
+range(acer1920.fri$Date.Observed)
+mean(acer1920.fri$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer1920.fri$yday <- lubridate::yday(acer1920.fri$Date.Observed)
+summary(acer1920.fri)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed first fruit in the first half of the year
+acer1920.fri <- acer1920.fri [acer1920.fri$yday<=180,]
+summary(acer1920.fri)
+
+
+#aggregating acer1920.fpi so it shows me the date of ripe fruit present  for  every plant number and species 
+iripe.fruit <- aggregate(yday ~ PlantNumber + Species + Year+ fruit.ripe.intensity, data=acer1920.fri, FUN=min, na.rm=T)
+summary(iripe.fruit)
+head(iripe.fruit)
+
+#aggregating the data so it only shows us the average of the first day there were ripe fruit per species
+#not per individual. So what is the average day per species that first ripe fruit appeared
+meaniripe.fruit <- aggregate(yday ~ Species + Year+ fruit.ripe.intensity, data=iripe.fruit, FUN=mean, na.rm=T)
+summary(meanifirst.fruit)
+
+
+##mean fruit ripe intensity per year per indiviual 
+ggplot(data=iripe.fruit) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.ripe.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Ripe Intensity", x="Day of Year")
+
+##mean fruit ripe intensity per year per species 
+ggplot(data=meaniripe.fruit) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=fruit.ripe.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Fruit Ripe Intensity", x="Day of Year")
+############
+#################
+#flower buds intensity
+acer1920.fbi <- acer1920.all[acer1920.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.intensity", "flower.buds.observed")]
+acer1920.fbi <- acer1920.fbi[!is.na(acer1920.fbi$PlantNumber),]
+summary(acer1920.fbi)
+head(acer1920.fbi)
+
+#finding the minimimum and maximum range and mean of the dates flower buds were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer1920.fbi$Date.Observed)
+max(acer1920.fbi$Date.Observed)
+range(acer1920.fbi$Date.Observed)
+mean(acer1920.fbi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer1920.fbi$yday <- lubridate::yday(acer1920.fbi$Date.Observed)
+summary(acer1920.fbi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed flower buds in the first half of the year
+acer1920.fbi <- acer1920.fbi [acer1920.fbi$yday<=180,]
+summary(acer1920.fbi)
+
+
+#aggregating acer1920.fbi so it shows me the date offlower buds present  for  every plant number and species 
+iflower.buds <- aggregate(yday ~ PlantNumber + Species + Year+ flower.buds.intensity, data=acer1920.fbi, FUN=min, na.rm=T)
+summary(iflower.buds)
+head(iflower.buds)
+
+#aggregating the data so it only shows us the average of the first day there were flower buds per species
+#not per individual. So what is the average day per species that first flower buds appeared
+meaniflower.buds <- aggregate(yday ~ Species + Year+ flower.buds.intensity, data=iflower.buds, FUN=mean, na.rm=T)
+summary(meaniflower.buds)
+
+
+##mean flower bud intensity per year per indiviual 
+ggplot(data=iflower.buds) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Flower Bud Intensity", x="Day of Year")
+
+##mean fruit ripe intensity per year per species 
+ggplot(data=meaniflower.buds) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Flower Buds Intensity", x="Day of Year")
+
+
+##########
+###############
+#Open flower intensity
+acer1920.foi <- acer1920.all[acer1920.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.intensity", "flower.open.observed")]
+acer1920.foi <- acer1920.foi[!is.na(acer1920.foi$PlantNumber),]
+summary(acer1920.foi)
+head(acer1920.foi)
+
+#finding the minimimum and maximum range and mean of the dates open flower were observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(acer1920.foi$Date.Observed)
+max(acer1920.foi$Date.Observed)
+range(acer1920.foi$Date.Observed)
+mean(acer1920.foi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+acer1920.foi$yday <- lubridate::yday(acer1920.foi$Date.Observed)
+summary(acer1920.foi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed open flower in the first half of the year
+acer1920.foi <- acer1920.foi [acer1920.foi$yday<=180,]
+summary(acer1920.foi)
+
+
+#aggregating acer1920.foi so it shows me the date of open flowers present  for  every plant number and species 
+iflower.open <- aggregate(yday ~ PlantNumber + Species + Year+ flower.open.intensity, data=acer1920.foi, FUN=min, na.rm=T)
+summary(iflower.open)
+head(iflower.open)
+
+#aggregating the data so it only shows us the average of the first day there were open flowers per species
+#not per individual. So what is the average day per species that first open flowers  appeared
+meaniflower.open <- aggregate(yday ~ Species + Year+ flower.open.intensity, data=iflower.open, FUN=mean, na.rm=T)
+summary(meaniflower.open)
+
+
+##mean Open flower intensity per year per indiviual 
+ggplot(data=iflower.open) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.open.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Open Flower Intensity", x="Day of Year")
+
+##mean Open Flower intensity per year per species 
+ggplot(data=meaniflower.open) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.open.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Open Flowers Intensity", x="Day of Year")
