@@ -47,7 +47,8 @@ summary(acer.all)
 # Putting only 2021, 2019 into the same data frame since 2020 is weird
 acer1920.all <- rbind(acer19, acer21)
 summary(acer.all)
-
+###################################################
+###################################################
 #subseting out for individual phenophases
 acer.lc <- acer.all[acer.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed")]
 acer.lc <- acer.lc[!is.na(acer.lc$PlantNumber),]
@@ -793,3 +794,57 @@ ggplot(data=meaniflower.open) +
   theme_bw()+
   theme(axis.text.y=element_blank())+
   labs(title="Mean Period of Open Flowers Intensity", x="Day of Year")
+
+
+#######################################################################################
+#Density Graphs with writing the file path out
+######################################################################################
+#Graphing densities
+### Flower buds ####
+#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+ggplot(data=iflower.buds) +
+  facet_grid(Year ~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
+  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  theme_bw()+
+  labs(title="Average Day Of Flower Bud Intensity", x="Day of Year")
+#dev.off()
+
+###########################
+### Open Flowers ###
+#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+ggplot(data=iflower.open) +
+  facet_grid(Year ~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=flower.open.intensity,)) +
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
+  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  theme_bw()+
+  labs(title="Average Day of Open Flower Intensity ", x="Day of Year")
+#dev.off()
+##############################
+### Fruit present ###
+#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+ggplot(data=ifirst.fruit) +
+  facet_grid(Year ~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity,)) +
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
+  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  theme_bw()+
+  labs(title="Average Day of Fruit Present Intensity ", x="Day of Year")
+#dev.off()
+##############################
+### Fruit Ripe ###
+#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+ggplot(data=iripe.fruit) +
+  facet_grid(Year ~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=fruit.ripe.intensity,)) +
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
+  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  theme_bw()+
+  labs(title="Average Day of Ripe Fruit Intensity ", x="Day of Year")
+#dev.off()
