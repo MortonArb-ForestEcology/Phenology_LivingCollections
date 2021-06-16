@@ -12,6 +12,9 @@ library(ggplot2)
 # If it's not, you'll need to set your working directory to be here
 # Once you do that, we can use the same file paths without having to worry about differences in where your github folder is vs. mine
 
+#dir.base<-"G://My Drive//LivingCollections_Phenology"
+#path.figs <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
+#if(!dir.exists(path.figs)) dir.create(path.figs, recursive=T)
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -801,50 +804,51 @@ ggplot(data=meaniflower.open) +
 ######################################################################################
 #Graphing densities
 ### Flower buds ####
-#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Acer_Flower_Bud_desnsity"), height=4, width=6, units="in", res=320)
 ggplot(data=iflower.buds) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
-  geom_density(alpha=0.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  geom_density(alpha=0.5, pos="stack", aes(x=yday, fill=flower.buds.intensity,)) +
   #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
   scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
   theme_bw()+
   labs(title="Average Day Of Flower Bud Intensity", x="Day of Year")
-#dev.off()
+dev.off()
 
 ###########################
 ### Open Flowers ###
-#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Acer_Flower_Bud_desnsity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=iflower.open) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
-  geom_density(alpha=0.5, aes(x=yday, fill=flower.open.intensity,)) +
+  geom_density(alpha=0.5, pos="stack", aes(x=yday, fill=flower.open.intensity,)) +
   #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
   scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
   theme_bw()+
   labs(title="Average Day of Open Flower Intensity ", x="Day of Year")
-#dev.off()
+dev.off()
 ##############################
 ### Fruit present ###
 #png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
 ggplot(data=ifirst.fruit) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity,)) +
+  geom_density(alpha=0.5,pos="stack", aes(x=yday, fill=fruit.present.intensity,)) +
   #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
   scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
   theme_bw()+
   labs(title="Average Day of Fruit Present Intensity ", x="Day of Year")
-#dev.off()
+dev.off()
 ##############################
 ### Fruit Ripe ###
-#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+#png("Acer_Flower_Bud_desnsity.png", height=4, width=6, units="in", res=320)
 ggplot(data=iripe.fruit) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.ripe.intensity,)) +
+  geom_density(alpha=0.5, pos="stack", aes(x=yday, fill=fruit.ripe.intensity,)) +
   #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet"))+
   scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
   theme_bw()+
   labs(title="Average Day of Ripe Fruit Intensity ", x="Day of Year")
-#dev.off()
+dev.off()
+
