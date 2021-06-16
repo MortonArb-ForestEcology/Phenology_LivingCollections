@@ -12,8 +12,8 @@ library(ggplot2)
 # If it's not, you'll need to set your working directory to be here
 # Once you do that, we can use the same file paths without having to worry about differences in where your github folder is vs. mine
 
-#dir.base<-"G://My Drive//LivingCollections_Phenology"
-#path.figs <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
+#dir.base<-"G://GooglDrive/My Drive//LivingCollections_Phenology"
+path.figs <- "G://My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
 #if(!dir.exists(path.figs)) dir.create(path.figs, recursive=T)
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
@@ -804,7 +804,7 @@ ggplot(data=meaniflower.open) +
 ######################################################################################
 #Graphing densities
 ### Flower buds ####
-#png(file.path(path.figs,"Acer_Flower_Bud_desnsity"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Acer_Flower_Bud_desnsity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=iflower.buds) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, pos="stack", aes(x=yday, fill=flower.buds.intensity,)) +
@@ -817,7 +817,7 @@ dev.off()
 
 ###########################
 ### Open Flowers ###
-#png(file.path(path.figs,"Acer_Flower_Bud_desnsity.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Acer_Open_Flower_desnsity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=iflower.open) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, pos="stack", aes(x=yday, fill=flower.open.intensity,)) +
@@ -827,9 +827,10 @@ ggplot(data=iflower.open) +
   theme_bw()+
   labs(title="Average Day of Open Flower Intensity ", x="Day of Year")
 dev.off()
+
 ##############################
 ### Fruit present ###
-#png("Acer_Flower_Bud_desnsity" height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Acer_Fruit_Present_desnsity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=ifirst.fruit) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5,pos="stack", aes(x=yday, fill=fruit.present.intensity,)) +
@@ -839,9 +840,10 @@ ggplot(data=ifirst.fruit) +
   theme_bw()+
   labs(title="Average Day of Fruit Present Intensity ", x="Day of Year")
 dev.off()
+
 ##############################
 ### Fruit Ripe ###
-#png("Acer_Flower_Bud_desnsity.png", height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Acer_Ripe_Fruit_desnsity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=iripe.fruit) +
   facet_grid(Year ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, pos="stack", aes(x=yday, fill=fruit.ripe.intensity,)) +
