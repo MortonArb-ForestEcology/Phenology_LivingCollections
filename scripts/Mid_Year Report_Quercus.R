@@ -910,3 +910,237 @@ ggplot(data=meanileaf.present) +
   labs(title="Mean Period of Leaves Present", x="Day of Year")
 dev.off()
 
+#######
+#Doing the above but for Leaves Increasing in size
+quercus.lii <- quercus.891[quercus.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
+quercus.lii <- quercus.lii[!is.na(quercus.lii$PlantNumber),]
+summary(quercus.lii)
+head(quercus.lii)
+
+#finding the minimimum and maximum range and mean of the dates Leaf Breaking Bud was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.lii$Date.Observed)
+max(quercus.lii$Date.Observed)
+range(quercus.lii$Date.Observed)
+mean(quercus.lii$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.lii$yday <- lubridate::yday(quercus.lii$Date.Observed)
+summary(quercus.lii)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed ripe fruit in the first half of the year
+quercus.lii <- quercus.lii [quercus.lii$yday<=180,]
+summary(quercus.lii)
+
+
+#aggregating quercus.bbi so it shows me the date of first Leaf Breaking Bud for  every plant number and species 
+ileaf.increasing <- aggregate(yday ~ PlantNumber + Species + Year+ leaf.increasing.intensity, data=quercus.lii, FUN=min, na.rm=T)
+summary(ileaf.increasing)
+head(ileaf.increasing)
+
+#aggregating the data so it only shows us the average of the first day there were leaf breaking buds per species
+#not per individual. So what is the average day per species that first leaf breaking buds appeared
+meanileaf.increasing <- aggregate(yday ~ Species + Year+ leaf.increasing.intensity, data=ileaf.increasing, FUN=mean, na.rm=T)
+summary(meanileaf.increasing)
+
+
+##mean Leaf Breaking Bud intensity per year per indiviual 
+ggplot(data=ileaf.increasing) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=leaf.increasing.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaf Increasing in Size Intensity", x="Day of Year")
+
+##mean Leaf Breaking Bud intensity per year per species 
+ggplot(data=meanileaf.increasing) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=leaf.increasing.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaves Increasing in Size", x="Day of Year")
+
+ggplot(data=meanileaf.increasing) +
+  geom_histogram(alpha=1.5, aes(x=yday, fill=leaf.increasing.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaves Increasing in Size", x="Day of Year")
+
+png(file.path(path.figs,"Quercus_Leaf_Increasing_in_Size_density.png"), height=4, width=6, units="in", res=320)
+ggplot(data=meanileaf.increasing) +
+  geom_density(alpha=1.5, aes(x=yday, fill=leaf.increasing.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Leaves Increasing in Size", x="Day of Year")
+dev.off()
+
+#######
+#Doing the above but for Flowers or flowering buds
+quercus.fbi <- quercus.891[quercus.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.intensity", "flower.buds.observed")]
+quercus.fbi <- quercus.fbi[!is.na(quercus.fbi$PlantNumber),]
+summary(quercus.fbi)
+head(quercus.fbi)
+
+#finding the minimimum and maximum range and mean of the dates Leaf Breaking Bud was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.fbi$Date.Observed)
+max(quercus.fbi$Date.Observed)
+range(quercus.fbi$Date.Observed)
+mean(quercus.fbi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.fbi$yday <- lubridate::yday(quercus.fbi$Date.Observed)
+summary(quercus.fbi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed ripe fruit in the first half of the year
+quercus.fbi <- quercus.fbi [quercus.fbi$yday<=180,]
+summary(quercus.fbi)
+
+
+#aggregating quercus.bbi so it shows me the date of first Leaf Breaking Bud for  every plant number and species 
+iflower.buds <- aggregate(yday ~ PlantNumber + Species + Year+ flower.buds.intensity, data=quercus.fbi, FUN=min, na.rm=T)
+summary(iflower.buds)
+head(iflower.buds)
+
+#aggregating the data so it only shows us the average of the first day there were leaf breaking buds per species
+#not per individual. So what is the average day per species that first leaf breaking buds appeared
+meaniflower.buds <- aggregate(yday ~ Species + Year+ flower.buds.intensity, data=iflower.buds, FUN=mean, na.rm=T)
+summary(meaniflower.buds)
+
+
+##mean Leaf Breaking Bud intensity per year per indiviual 
+ggplot(data=iflower.buds) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Flowers or Flowering Buds Intensity", x="Day of Year")
+
+##mean Leaf Breaking Bud intensity per year per species 
+ggplot(data=meaniflower.buds) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Flowers or Flowering buds", x="Day of Year")
+
+ggplot(data=meaniflower.buds) +
+  geom_histogram(alpha=1.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Flowers or Flowering buds", x="Day of Year")
+
+png(file.path(path.figs,"Quercus_Flower_or_Flowering_buds_density.png"), height=4, width=6, units="in", res=320)
+ggplot(data=meaniflower.buds) +
+  geom_density(alpha=1.5, aes(x=yday, fill=flower.buds.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Flowers or Flowering buds", x="Day of Year")
+dev.off()
+
+
+#######
+#Doing the above but for Open Flowers
+quercus.foi <- quercus.891[quercus.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.intensity", "flower.open.observed")]
+quercus.foi <- quercus.foi[!is.na(quercus.foi$PlantNumber),]
+summary(quercus.foi)
+head(quercus.foi)
+
+#finding the minimimum and maximum range and mean of the dates Leaf Breaking Bud was observed on our trees.
+#Note the na.rm=T which is removing N/A values
+min(quercus.foi$Date.Observed)
+max(quercus.foi$Date.Observed)
+range(quercus.foi$Date.Observed)
+mean(quercus.foi$Date.Observed,na.rm=T)
+
+#Now make my Yday
+quercus.foi$yday <- lubridate::yday(quercus.foi$Date.Observed)
+summary(quercus.foi)
+
+#Also looking at year as well not as important but nice to have
+#quercus.fri$year <- lubridate::year(quercus.fri$Date.Observed)
+#summary(quercus.fri)
+
+#only looking at trees that showed ripe fruit in the first half of the year
+quercus.foi <- quercus.foi [quercus.foi$yday<=180,]
+summary(quercus.foi)
+
+
+#aggregating quercus.bbi so it shows me the date of first Leaf Breaking Bud for  every plant number and species 
+iflower.open <- aggregate(yday ~ PlantNumber + Species + Year+ flower.open.intensity, data=quercus.foi, FUN=min, na.rm=T)
+summary(iflower.open)
+head(iflower.open)
+
+#aggregating the data so it only shows us the average of the first day there were leaf breaking buds per species
+#not per individual. So what is the average day per species that first leaf breaking buds appeared
+meaniflower.open <- aggregate(yday ~ Species + Year+ flower.open.intensity, data=iflower.open, FUN=mean, na.rm=T)
+summary(meaniflower.open)
+
+
+##mean Leaf Breaking Bud intensity per year per indiviual 
+ggplot(data=iflower.open) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.open.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Open Flowers Intensity", x="Day of Year")
+
+##mean Leaf Breaking Bud intensity per year per species 
+ggplot(data=meaniflower.open) +
+  geom_boxplot(alpha=1.5, aes(x=yday, fill=flower.open.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Open Flowers", x="Day of Year")
+
+ggplot(data=meaniflower.open) +
+  geom_histogram(alpha=1.5, aes(x=yday, fill=flower.open.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Open Flowers", x="Day of Year")
+
+png(file.path(path.figs,"Quercus_Open_Flower_density.png"), height=4, width=6, units="in", res=320)
+ggplot(data=meaniflower.open) +
+  geom_density(alpha=1.5, aes(x=yday, fill=flower.open.intensity,)) +
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Mean Period of Open Flowers", x="Day of Year")
+dev.off()
