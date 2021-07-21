@@ -47,7 +47,7 @@ summary(dat.all)
 
 ###########
 ###########
-#Getting a graph of breaking bud observations
+#Getting a graph of colored leaf observations
 ###########
 ###########
 dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed", "Collection")]
