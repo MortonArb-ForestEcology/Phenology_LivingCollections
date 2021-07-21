@@ -799,7 +799,7 @@ ggplot(data=meaniflower.open) +
   labs(title="Mean Period of Open Flowers Intensity", x="Day of Year")
 #####
 ###############
-#Breaking lead bud intensity
+#Breaking leaf bud intensity
 acer1920.bbi <- acer1920.all[acer1920.all$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.breaking.buds.intensity", "leaf.breaking.buds.observed")]
 acer1920.bbi <- acer1920.bbi[!is.na(acer1920.bbi$PlantNumber),]
 summary(acer1920.bbi)
@@ -837,6 +837,7 @@ summary(meanibreaking.buds)
 
 
 ##mean Open flower intensity per year per indiviual 
+png(file.path(path.figs,"Acer_Leaf_Breaking Bud_density.png"), height=4, width=6, units="in", res=320)
 ggplot(data=ibreaking.buds) +
   geom_boxplot(alpha=1.5, aes(x=yday, fill=leaf.breaking.buds.intensity,)) +
   facet_grid(~Year)+
@@ -845,6 +846,7 @@ ggplot(data=ibreaking.buds) +
   theme_bw()+
   theme(axis.text.y=element_blank())+
   labs(title="Mean Period of Breaking Bud Intensity per Individual ", x="Day of Year")
+dev.off()
 
 ##mean Open Flower intensity per year per species 
 ggplot(data=meanibreaking.buds) +

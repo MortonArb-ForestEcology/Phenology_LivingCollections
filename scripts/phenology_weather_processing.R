@@ -4,6 +4,9 @@
 library(ggplot2)
 
 path.out <- "G://Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Phenology Forecasting"
+path.figs <- "G://My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
+if(!dir.exists("../data")) dir.create("../data/")
+if(!dir.exists("../figures/")) dir.create("../figures/")
 
 dir.met <- "../data_raw/meteorology"
 dir.create(dir.met, recursive=T, showWarnings = F)
@@ -57,7 +60,7 @@ dat.ghcn <- read.csv(file.path(path.ghcn, "USC00115097_latest.csv"))
 dat.ghcn$DATE <- as.Date(dat.ghcn$DATE)
 summary(dat.ghcn)
 
-yr.min <- 2008
+yr.min <- 2018
 yr.max <- lubridate::year(Sys.Date())
 dat.ghcn2 <- data.frame()
 for(YR in yr.min:yr.max){
@@ -85,9 +88,11 @@ dat.ghcn5 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn5)
 
 #attemtption to generte a graph
+png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year")
+dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn5) +
@@ -99,9 +104,11 @@ dat.ghcn6 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn6)
 
 #graph of Mean Temperature
+png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Average Daily Temperature", y="Temperature °C", x="Day of Year")
+dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn6) +
