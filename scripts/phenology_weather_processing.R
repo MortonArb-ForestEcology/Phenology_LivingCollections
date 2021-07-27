@@ -79,7 +79,7 @@ summary(dat.ghcn3)
 head(dat.ghcn3)
 
 #Subsetting out uncecessary columns for the phenology report
-dat.ghcn4 <- dat.ghcn3[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum")]
+dat.ghcn4 <- dat.ghcn3[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
 summary(dat.ghcn4)
 head(dat.ghcn4)
 
@@ -115,7 +115,26 @@ ggplot(data=dat.ghcn6) +
   geom_smooth(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Average Daily Temperature", y="Temperature °C", x="Day of Year")
 
+#Just getting GDD5
+dat.ghcn7 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD5.cum")]
+summary(dat.ghcn7)
+
+dat.ghcn7 <- dat.ghcn7 [dat.ghcn7$YDAY<=180,]
+summary(dat.ghcn7)
+
+#attemtption to generte a graph
+png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcn7) +
+  geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year")
+dev.off()
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn7) +
+  geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year")
 
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
 #write.csv(dat.ghcn2, file.path(path.out, "data", "Weather_ArbCOOP_historical_latest.csv"), row.names=F)
+
