@@ -2,9 +2,12 @@
 # 0. Set up some general file paths
 # ---------------------------------
 library(ggplot2)
+# path.google <- "G:/My Drive" # Windows
+path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
 
-path.out <- "G://Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Phenology Forecasting"
-path.figs <- "G://My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
+
+path.out <- file.path(path.google, "LivingCollections_Phenology/Phenology Forecasting")
+path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021")
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -90,14 +93,17 @@ summary(dat.ghcn5)
 #attemtption to generte a graph
 png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
-  geom_line(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year")
+  geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
+  # scale_color_manual(name="Year") +
+  # scale_fill_manual(name="Year") +
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
+  theme_classic()
 dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn5) +
   geom_smooth(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year")
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year", fill="Year")
 
 #doing the same thing as lines 73-83 above but for TMEAN
 dat.ghcn6 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
@@ -107,13 +113,14 @@ summary(dat.ghcn6)
 png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Average Daily Temperature", y="Temperature °C", x="Day of Year")
+  labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
+  theme_classic()
 dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn6) +
   geom_smooth(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Average Daily Temperature", y="Temperature °C", x="Day of Year")
+  labs(title="Average Daily Temperature", y="Temperature ?C", x="Day of Year", fill="Year", color="Year")
 
 #Just getting GDD5
 dat.ghcn7 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD5.cum")]
@@ -123,16 +130,17 @@ dat.ghcn7 <- dat.ghcn7 [dat.ghcn7$YDAY<=180,]
 summary(dat.ghcn7)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn7) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year")
+  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
+  theme_classic()
 dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn7) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year")
+  labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
 
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
