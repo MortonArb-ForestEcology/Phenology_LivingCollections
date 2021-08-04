@@ -99,7 +99,7 @@ mean(quercus.li18$Date.Observed,na.rm=T)
 
 #leaves increasing 21,19 Acer
 #21
-acer.li21 <- acer21[acer.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
+acer.li21 <- acer21[acer21$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
 acer.li21 <- acer.li21[!is.na(acer.li21$PlantNumber),]
 summary(acer.li21)
 head(acer.li21)
@@ -139,7 +139,7 @@ mean(acer.li19$Date.Observed,na.rm=T)
 ##################
 #leaves 21,19,18 Quercus
 #21
-quercus.lp21 <- quercus21[quercus.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
+quercus.lp21 <- quercus21[quercus21$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
 quercus.lp21 <- quercus.lp21[!is.na(quercus.lp21$PlantNumber),]
 summary(quercus.lp21)
 head(quercus.lp21)
@@ -163,7 +163,7 @@ summary(quercus.lp21)
 
 ########################
 #19
-quercus.lp19 <- quercus19[quercus.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
+quercus.lp19 <- quercus19[quercus19$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
 quercus.lp19 <- quercus.lp19[!is.na(quercus.lp19$PlantNumber),]
 summary(quercus.lp19)
 head(quercus.lp19)
@@ -185,7 +185,7 @@ summary(quercus.lp19)
 
 ########################
 #18
-quercus.lp18 <- quercus18[quercus.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
+quercus.lp18 <- quercus18[quercus18$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
 quercus.lp18 <- quercus.lp18[!is.na(quercus.lp18$PlantNumber),]
 summary(quercus.lp18)
 head(quercus.lp18)
@@ -207,7 +207,7 @@ summary(quercus.lp18)
 
 #leaves 21,19 Acer
 #21
-acer.lp21 <- acer21[acer.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
+acer.lp21 <- acer21[acer21$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
 acer.lp21 <- acer.lp21[!is.na(acer.lp21$PlantNumber),]
 summary(acer.lp21)
 head(acer.lp21)
@@ -231,7 +231,7 @@ summary(quercus.lp21)
 
 ########################
 #19
-acer.lp19 <- acer19[acer.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
+acer.lp19 <- acer19[acer19$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed")]
 acer.lp19 <- acer.lp19[!is.na(acer.lp19$PlantNumber),]
 summary(acer.lp19)
 head(acer.lp19)
@@ -255,7 +255,7 @@ summary(acer.lp19)
 ##################
 #flowerbuds 21,19,18 Quercus
 #21
-quercus.fb21 <- quercus21[quercus.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
+quercus.fb21 <- quercus21[quercus21$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
 quercus.fb21 <- quercus.fb21[!is.na(quercus.lp21$PlantNumber),]
 summary(quercus.fb21)
 head(quercus.fb21)
@@ -272,7 +272,7 @@ summary(quercus.fb21)
 
 ############
 #19
-quercus.fb19 <- quercus19[quercus.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
+quercus.fb19 <- quercus19[quercus19$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
 quercus.fb19 <- quercus.fb19[!is.na(quercus.fb19$PlantNumber),]
 summary(quercus.fb19)
 head(quercus.fb19)
@@ -289,7 +289,7 @@ summary(quercus.fb19)
 
 ############
 #18
-quercus.fb18 <- quercus18[quercus.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
+quercus.fb18 <- quercus18[quercus18$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
 quercus.fb18 <- quercus.fb18[!is.na(quercus.fb18$PlantNumber),]
 summary(quercus.fb18)
 head(quercus.fb18)
@@ -307,7 +307,7 @@ summary(quercus.fb18)
 ###########################
 #flowerbuds 21,19 acer
 #21
-acer.fb21 <- acer21[acer.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
+acer.fb21 <- acer21[acer21$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
 acer.fb21 <- acer.fb21[!is.na(acer.fb21$PlantNumber),]
 summary(acer.fb21)
 head(acer.fb21)
@@ -324,7 +324,7 @@ summary(acer.fb21)
 
 ############
 #19
-acer.fb19 <- acer19[acer.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
+acer.fb19 <- acer19[acer19$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed")]
 acer.fb19 <- acer.fb19[!is.na(acer.fb19$PlantNumber),]
 summary(acer.fb19)
 head(acer.fb19)
@@ -343,7 +343,7 @@ summary(acer.fb19)
 ##################
 #open flowers 21,19,18 Quercus
 #21
-quercus.fo21 <- quercus21[quercus.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
+quercus.fo21 <- quercus21[quercus21$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
 quercus.fo21 <- quercus.fo21[!is.na(quercus.fo21$PlantNumber),]
 summary(quercus.fo21)
 head(quercus.fo21)
@@ -360,7 +360,7 @@ summary(quercus.fo21)
 
 ############
 #19
-quercus.fo19 <- quercus19[quercus.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
+quercus.fo19 <- quercus19[quercus19$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
 quercus.fo19 <- quercus.fo19[!is.na(quercus.fo19$PlantNumber),]
 summary(quercus.fo19)
 head(quercus.fo19)
@@ -377,7 +377,7 @@ summary(quercus.fo19)
 
 ############
 #18
-quercus.fo18 <- quercus18[quercus.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
+quercus.fo18 <- quercus18[quercus18$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
 quercus.fo18 <- quercus.fo18[!is.na(quercus.fo18$PlantNumber),]
 summary(quercus.fo18)
 head(quercus.fo18)
@@ -395,7 +395,7 @@ summary(quercus.fo18)
 ###########################
 #open flowers 21,19 acer
 #21
-acer.fo21 <- acer21[acer.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
+acer.fo21 <- acer21[acer21$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
 acer.fo21 <- acer.fo21[!is.na(acer.lp21$PlantNumber),]
 summary(acer.fo21)
 head(acer.fo21)
@@ -412,7 +412,7 @@ summary(acer.fo21)
 
 ############
 #19
-acer.fo19 <- acer19[acer.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
+acer.fo19 <- acer19[acer19$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed")]
 acer.fo19 <- acer.fo19[!is.na(acer.fo19$PlantNumber),]
 summary(acer.fo19)
 head(acer.fo19)
@@ -431,7 +431,7 @@ summary(acer.fo19)
 ##################
 #flower pollen 21,19,18 Quercus
 #21
-quercus.fp21 <- quercus21[quercus.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
+quercus.fp21 <- quercus21[quercus21$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
 quercus.fp21 <- quercus.fp21[!is.na(quercus.fp21$PlantNumber),]
 summary(quercus.fp21)
 head(quercus.fp21)
@@ -448,7 +448,7 @@ summary(quercus.fp21)
 
 ############
 #19
-quercus.fp19 <- quercus19[quercus.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
+quercus.fp19 <- quercus19[quercus19$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
 quercus.fp19 <- quercus.fp19[!is.na(quercus.fp19$PlantNumber),]
 summary(quercus.fp19)
 head(quercus.fp19)
@@ -465,7 +465,7 @@ summary(quercus.fp19)
 
 ############
 #18
-quercus.fp18 <- quercus18[quercus.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
+quercus.fp18 <- quercus18[quercus18$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
 quercus.fp18 <- quercus.fp18[!is.na(quercus.fp18$PlantNumber),]
 summary(quercus.fp18)
 head(quercus.fp18)
@@ -483,7 +483,7 @@ summary(quercus.fp18)
 ###########################
 #flower pollen 21,19 acer
 #21
-acer.fp21 <- acer21[acer.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
+acer.fp21 <- acer21[acer21$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
 acer.fp21 <- acer.fp21[!is.na(acer.fp21$PlantNumber),]
 summary(acer.fp21)
 head(acer.fp21)
@@ -500,7 +500,7 @@ summary(acer.fp21)
 
 ############
 #19
-acer.fp19 <- acer19[acer.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
+acer.fp19 <- acer19[acer19$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed")]
 acer.fp19 <- acer.fp19[!is.na(acer.fp19$PlantNumber),]
 summary(acer.fp19)
 head(acer.fp19)
@@ -519,14 +519,14 @@ summary(acer.fp19)
 ###########################
 #fruit present 21,19 acer
 #21
-acer.f21 <- acer21[acer.all$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
+acer.f21 <- acer21[acer21$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
 acer.f21 <- acer.f21[!is.na(acer.f21$PlantNumber),]
 summary(acer.f21)
 head(acer.f21)
 
 #Setting a yday
 acer.f21$yday <- lubridate::yday(acer.f21$Date.Observed)
-acer.f21 <- acer.f21 [acer.f211$yday<=180,]
+acer.f21 <- acer.f21 [acer.f21$yday<=180,]
 summary(acer.f21)
 
 #aggregating for just an individual tree
@@ -536,7 +536,7 @@ summary(acer.f21)
 
 ############
 #19
-acer.f19 <- acer19[acer.all$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
+acer.f19 <- acer19[acer19$fruit.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "fruit.present.observed")]
 acer.f19 <- acer.f19[!is.na(acer.f19$PlantNumber),]
 summary(acer.f19)
 head(acer.f19)
