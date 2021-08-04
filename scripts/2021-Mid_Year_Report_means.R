@@ -60,7 +60,7 @@ mean(quercus.li21$Date.Observed,na.rm=T)
 
 ########################
 #19
-quercus.li19 <- quercus19[quercus.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
+quercus.li19 <- quercus19[quercus19$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
 quercus.li19 <- quercus.li19[!is.na(quercus.li19$PlantNumber),]
 summary(quercus.li19)
 head(quercus.li19)
@@ -80,7 +80,7 @@ mean(quercus.li19$Date.Observed,na.rm=T)
 
 ########################
 #18
-quercus.li18 <- quercus18[quercus.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
+quercus.li18 <- quercus18[quercus18$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
 quercus.li18 <- quercus.li18[!is.na(quercus.li18$PlantNumber),]
 summary(quercus.li18)
 head(quercus.li18)
@@ -118,8 +118,8 @@ mean(acer.li21$Date.Observed,na.rm=T)
 
 ########################
 #19
-acer.li19 <-acer19[acer.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
-quercus.li19 <- quercus.li19[!is.na(acer.li19$PlantNumber),]
+acer.li19 <-acer19[acer19$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
+acer.li19 <- acer.li19[!is.na(acer.li19$PlantNumber),]
 summary(acer.li19)
 head(acer.li19)
 
