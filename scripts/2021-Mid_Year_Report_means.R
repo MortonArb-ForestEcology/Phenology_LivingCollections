@@ -1,6 +1,8 @@
 # A new script to see the mean of phenophases for each individual year per collection
 library(ggplot2)
+# path.figs <- "/Volumes/GoogleDrive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
 path.figs <- "G://My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
+
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -39,7 +41,7 @@ summary(quercus18)
 #####
 #leaves increasing 21,19,18 Quercus
 #21
-quercus.li21 <- quercus21[quercus.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
+quercus.li21 <- quercus21[quercus21$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.intensity", "leaf.increasing.observed")]
 quercus.li21 <- quercus.li21[!is.na(quercus.li21$PlantNumber),]
 summary(quercus.li21)
 head(quercus.li21)
