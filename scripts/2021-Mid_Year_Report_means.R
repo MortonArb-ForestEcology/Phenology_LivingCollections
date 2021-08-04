@@ -147,6 +147,11 @@ quercus.lp21$yday <- lubridate::yday(quercus.lp21$Date.Observed)
 quercus.lp21 <- quercus.lp21 [quercus.lp21$yday<=180,]
 summary(quercus.lp21)
 
+min(quercus.lp21$Date.Observed)
+max(quercus.lp21$Date.Observed)
+range(quercus.lp21$Date.Observed)
+mean(quercus.lp21$Date.Observed,na.rm=T)
+
 #aggregating for just an individual tree
 quercus.lp21 <- aggregate(yday ~ Species + PlantNumber, data=quercus.lp21, FUN=mean, na.rm=T)
 ####find the mean in the summary
@@ -166,6 +171,11 @@ quercus.lp19$yday <- lubridate::yday(quercus.lp19$Date.Observed)
 quercus.lp19 <- quercus.lp19 [quercus.lp19$yday<=180,]
 summary(quercus.lp19)
 
+min(quercus.lp19$Date.Observed)
+max(quercus.lp19$Date.Observed)
+range(quercus.lp19$Date.Observed)
+mean(quercus.lp19$Date.Observed,na.rm=T)
+
 #aggregating for just an individual tree
 quercus.lp19 <- aggregate(yday ~ Species + PlantNumber, data=quercus.lp19, FUN=mean, na.rm=T)
 ####find the mean in the summary
@@ -183,6 +193,11 @@ quercus.lp18$yday <- lubridate::yday(quercus.lp18$Date.Observed)
 quercus.lp18 <- quercus.lp18 [quercus.lp18$yday<=180,]
 summary(quercus.lp18)
 
+min(quercus.lp18$Date.Observed)
+max(quercus.lp18$Date.Observed)
+range(quercus.lp18$Date.Observed)
+mean(quercus.lp18$Date.Observed,na.rm=T)
+
 #aggregating for just an individual tree
 quercus.lp18 <- aggregate(yday ~ Species + PlantNumber, data=quercus.lp18, FUN=mean, na.rm=T)
 ####find the mean in the summary
@@ -199,6 +214,11 @@ head(acer.lp21)
 acer.lp21$yday <- lubridate::yday(acer.lp21$Date.Observed)
 acer.lp21 <-acer.lp21 [acer.lp21$yday<=180,]
 summary(acer.lp21)
+
+min(acer.lp21$Date.Observed)
+max(acer.lp21$Date.Observed)
+range(acer.lp21$Date.Observed)
+mean(acer.lp21$Date.Observed,na.rm=T)
 
 #aggregating for just an individual tree
 acer.lp21 <- aggregate(yday ~ Species + PlantNumber, data=acer.lp21, FUN=mean, na.rm=T)
@@ -218,6 +238,11 @@ head(acer.lp19)
 acer.lp19$yday <- lubridate::yday(acer.lp19$Date.Observed)
 acer.lp19 <- acer.lp19 [acer.lp19$yday<=180,]
 summary(acer.lp19)
+
+min(acer.lp19$Date.Observed)
+max(acer.lp19$Date.Observed)
+range(acer.lp19$Date.Observed)
+mean(acer.lp19$Date.Observed,na.rm=T)
 
 #aggregating for just an individual tree
 acer.lp19 <- aggregate(yday ~ Species + PlantNumber, data=acer.lp19, FUN=mean, na.rm=T)
