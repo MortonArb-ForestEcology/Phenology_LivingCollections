@@ -82,9 +82,9 @@ max(dat.mls$observation_date)
 range(dat.mls$observation_date)
 mean(dat.mls$observation_date,na.rm=T)
 
-#Seperating observation date into weeks using lubridate
-dat.wmls <- dat.mls$week <- lubridate::week(dat.mls$observation_date)
-summary(dat.wmls)
+#Seperating observation date into yday using lubridate
+dat.mls$week <- lubridate::week(dat.mls$observation_date)
+summary(dat.mls)
 
 
 #I know I need to make it so the weeks are renamed 1,2 etc instead of week 22, 23, etc Trying to do that here
@@ -95,7 +95,7 @@ summary(dat.wmls)
 #dat.mls2 <- dat.mls[dat.mls$week(week=cut.Date(order_by(week),breaks = "1 week", labels = FALSE))]
 #arrange(order_by(week))
 
-ggplot(data=dat.wmls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
+ggplot(data=dat.mls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
   theme_bw()+
   labs(title="Observations of the Meadow Lake by Week", x="Week")
 
@@ -118,12 +118,12 @@ ggplot(data=dat.cgs,aes(x=yday,fill=(common_name)))+geom_bar()+
 ################################
 
 #Seperating observation date into weeks using lubridate
-dat.mls$week <- lubridate::week(dat.mls$observation_date)
+dat.mls$yday <- lubridate::yday(dat.mls$observation_date)
 summary(dat.mls)
 
-ggplot(data=dat.dmls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
+ggplot(data=dat.mls,aes(x=yday,fill=(common_name)))+geom_bar()+
   theme_bw()+
-  labs(title="Observations of the Meadow Lake by Week", x="Week")
+  labs(title="Observations of Meadow Lake by Date", x="Day of Year")
 
 ################
 ###Graphing just one species
@@ -131,3 +131,18 @@ ggplot(data=dat.dmls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+ge
 #Getting the one species from both lists can be done with only one list if needed by just eliminating the rbind function
 dat.all <- rbind(dat.cg, dat.ml)
 summary(dat.all)
+
+# Creating a data frame of just Quercus macrocarpa
+dat.bo <- dat.all[dat.all$common_name=="bur oak"]
+summary(dat.bo)
+
+#creating a Yday
+dat.bo$yday <- lubridate::yday(dat.bo$observation_date)
+
+#Subsetting out for observations that have an observation
+dat.bp <- dat.bo[dat.bo$phenophase_status=="1"]
+summary(dat.bp)
+
+ggplot(data=dat.bp, aes(x=yday,))+ geom_histogram()+
+  theme_bw()+
+  labs(title = "Youth Volunteer Querucs macrocarpa Observations by Date", x="Day of Year")
