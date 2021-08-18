@@ -143,6 +143,27 @@ dat.bo$yday <- lubridate::yday(dat.bo$observation_date)
 dat.bp <- dat.bo[dat.bo$phenophase_status=="1"]
 summary(dat.bp)
 
+#graphing
 ggplot(data=dat.bp, aes(x=yday,))+ geom_histogram()+
   theme_bw()+
   labs(title = "Youth Volunteer Querucs macrocarpa Observations by Date", x="Day of Year")
+
+#############
+#Doing the above but for one individual
+#############
+#Creating a data frame of just one individual
+dat.1 <- dat.all[dat.all$individual_id=="230051"]
+summary(dat.1)
+
+#creating a Yday
+dat.1$yday <- lubridate::yday(dat.1$observation_date)
+
+#Subsetting out for observations that have an observation
+dat.1p <- dat.1[dat.1$phenophase_status=="1"]
+summary(dat.1p)
+
+#graphing
+ggplot(data=dat.1p, aes(x=yday,))+ geom_histogram()+
+  theme_bw()+
+  labs(title = "Youth Volunteer Observations by Date For Individual 230051", x="Day of Year")
+
