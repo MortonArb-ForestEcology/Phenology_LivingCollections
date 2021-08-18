@@ -3,15 +3,15 @@ library(ggplot2)
 library(lubridate)
 library(dplyr)
 
-source("../../NPN_Data_Utils/R/npn_get_obs.R")
-source("../../NPN_Data_Utils/R/npn_enter_observation.R")
-source("clean_google_form.R")
+#source("../../NPN_Data_Utils/R/npn_get_obs.R")
+#source("../../NPN_Data_Utils/R/npn_enter_observation.R")
+#source("clean_google_form.R")
 # npn_creds <- readLines("../data/NPN/.NPN_creds")
-user_id <- strsplit(npn_creds[1], ":")[[1]][2]
-user_pw <- strsplit(npn_creds[2], ":")[[1]][2]
+#user_id <- strsplit(npn_creds[1], ":")[[1]][2]
+#user_pw <- strsplit(npn_creds[2], ":")[[1]][2]
 # Loop through collections
-sites.push <- c("Oak", "Maple", "Elm")
-yrs.push <- c(lubridate::year(Sys.Date()))
+#sites.push <- c("Oak", "Maple", "Elm")
+#yrs.push <- c(lubridate::year(Sys.Date()))
 
 stat.arb <- read.csv("../data/NPN/NPN_TheMortonArboretum_Stations_All.csv")
 
@@ -26,6 +26,7 @@ dat.cg <- dat.npn[dat.npn$site_id == 37197,]
 # Meadow Lake Data
 dat.ml <- dat.npn[dat.npn$site_id == 37196,]
 
+
 View(dat.cg)
 
 # Weekly Challenge Graphs:
@@ -33,7 +34,7 @@ View(dat.cg)
 # Week 2. # phenophases observed in each list; bonus points: break down through time
 
 #Subsetting out columns in Childen's Garden to make this easier to work with. 
-dat.cgs <- subset(dat.cg, select=c(11,14:18))
+dat.cgs <- subset(dat.cg, select=c("common_name", "individual_id","phenophase_id", "phenophase_description", "observation_date", "day_of_year", "phenophase_status"))
 summary(dat.cgs)
 #View(dat.cgs)
 
@@ -45,8 +46,8 @@ range(dat.cgs$observation_date)
 mean(dat.cgs$observation_date,na.rm=T)
 
 #Seperating observation date into weeks using lubridate
-dat.cgs$week <- lubridate::week(dat.cgs$observation_date)
-summary(dat.cgs)
+dat.wcgs <- dat.cgs$week <- lubridate::week(dat.cgs$observation_date)
+summary(dat.wcgs)
 
 
 #I know I need to make it so the weeks are renamed 1,2 etc instead of week 22, 23, etc Trying to do that here
@@ -57,7 +58,9 @@ summary(dat.cgs)
 #dat.cgs2 <- dat.cgs[dat.cgs$week(week=cut.Date(order_by(week),breaks = "1 week", labels = FALSE))]
 #arrange(order_by(week))
 
-ggplot(data=dat.cgs,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
+# or dat.cgs2$week.kids <- dat.cgs2$week-min(dat.cgs$week) +1
+
+ggplot(data=dat.wcgs,aes(x=week,fill=(common_name)))+geom_bar()+
 theme_bw()+
   labs(title="Observations of the Childrens Garden by Week", x="Week")
  
@@ -67,12 +70,12 @@ theme_bw()+
 #Doing this for Meadow Lake
 ###############
 ################################
-#Subsetting out columns in Childen's Garden to make this easier to work with. 
-dat.mls <- subset(dat.ml, select=c(11,14:18))
+#Subsetting out columns in Meadow Lake to make this easier to work with. 
+dat.mls <- subset(dat.ml, select=c("common_name", "individual_id","phenophase_id", "phenophase_description", "observation_date", "day_of_year", "phenophase_status"))
 summary(dat.mls)
 #View(dat.cgs)
 
-#finding the minimimum and maximum range and mean of the dates observations were taken in the Childrens Garden.
+#finding the minimimum and maximum range and mean of the dates observations were taken in Meadow Lake.
 #Note the na.rm=T which is removing N/A values
 min(dat.mls$observation_date)
 max(dat.mls$observation_date)
@@ -80,8 +83,8 @@ range(dat.mls$observation_date)
 mean(dat.mls$observation_date,na.rm=T)
 
 #Seperating observation date into weeks using lubridate
-dat.mls$week <- lubridate::week(dat.mls$observation_date)
-summary(dat.mls)
+dat.wmls <- dat.mls$week <- lubridate::week(dat.mls$observation_date)
+summary(dat.wmls)
 
 
 #I know I need to make it so the weeks are renamed 1,2 etc instead of week 22, 23, etc Trying to do that here
@@ -92,9 +95,39 @@ summary(dat.mls)
 #dat.mls2 <- dat.mls[dat.mls$week(week=cut.Date(order_by(week),breaks = "1 week", labels = FALSE))]
 #arrange(order_by(week))
 
-ggplot(data=dat.mls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
+ggplot(data=dat.wmls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
   theme_bw()+
-  labs(title="Observations of the Childrens Garden by Week", x="Week")
+  labs(title="Observations of the Meadow Lake by Week", x="Week")
+
+###################
+#Doing above but by observation date not by week
+###################
+#Seperating observation date into observation date using lubridate
+dat.cgs$yday <- lubridate::yday(dat.cgs$observation_date)
+summary(dat.cgs)
+
+ggplot(data=dat.cgs,aes(x=yday,fill=(common_name)))+geom_bar()+
+  theme_bw()+
+  labs(title="Observations of the Childrens Garden by Date", x="Day of Year")
 
 
+################################
+###############
+#Doing this for Meadow Lake
+###############
+################################
 
+#Seperating observation date into weeks using lubridate
+dat.mls$week <- lubridate::week(dat.mls$observation_date)
+summary(dat.mls)
+
+ggplot(data=dat.dmls,aes(x=week,fill=as.factor(week), color=as.factor(week)))+geom_bar()+
+  theme_bw()+
+  labs(title="Observations of the Meadow Lake by Week", x="Week")
+
+################
+###Graphing just one species
+################
+#Getting the one species from both lists can be done with only one list if needed by just eliminating the rbind function
+dat.all <- rbind(dat.cg, dat.ml)
+summary(dat.all)
