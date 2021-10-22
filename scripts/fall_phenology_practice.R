@@ -135,3 +135,87 @@ ggplot(data=falling.leaves) +
   theme_bw()+
   labs(title="Average Day of First Falling Leaves", x="Day of Year")
 
+######
+##getting a picture of intensity
+######
+#biding only oak data
+dat.qu <- rbind(quercus18, quercus19, quercus20, quercus21)
+summary(dat.qu)
+
+#setting yday
+dat.qu$yday <- lubridate::yday(dat.qu$Date.Observed)
+summary(dat.qu)
+
+#subsetting out for fruit intensity
+dat.fr <- dat.qu[dat.qu$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.intensity")]
+summary(dat.fr)
+dat.fr <- dat.fr[!is.na(dat.fr$PlantNumber),]
+summary(dat.fr)
+
+#Checking to make sure date ranges are correct
+min(dat.fr$Date.Observed)
+max(dat.fr$Date.Observed)
+mean(dat.fr$Date.Observed)
+range(dat.fr$Date.Observed)
+
+#Setting my yday
+dat.fr$yday <- lubridate::yday(dat.fr$Date.Observed)
+summary(dat.fr)
+
+#setting my yday to only show dates later in the season and the current date
+dat.fr <- dat.fr [dat.fr$yday>=180,]
+dat.fr <- dat.fr [dat.fr$yday<=Sys.Date(),]
+summary(dat.fr)
+
+#removing "0 and NA's
+#dat.fr <-dat.fr[(dat.fr$fruit.present.intensity!="NA"),]
+#summary(dat.fr)
+
+ggplot(data=dat.fr) +
+  geom_histogram(alpha=1.5, binwidth = 15, aes(x=yday, fill=fruit.present.intensity, NA.rm = TRUE))+
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  #scale_color_manual(name="Year", values=cc("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Fruit Present Intensity", x="Day of Year")
+
+
+############################
+######Looking at leaf color intense across all collections
+###########################
+
+
+#subsetting out for fruit intensity
+dat.lci <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.intensity")]
+summary(dat.lci)
+dat.lci <- dat.lci[!is.na(dat.lci$PlantNumber),]
+summary(dat.lci)
+
+#Checking to make sure date ranges are correct
+min(dat.lci$Date.Observed)
+max(dat.lci$Date.Observed)
+mean(dat.lci$Date.Observed)
+range(dat.lci$Date.Observed)
+
+#Setting my yday
+dat.lci$yday <- lubridate::yday(dat.lci$Date.Observed)
+summary(dat.lci)
+
+#setting my yday to only show dates later in the season and the current date
+dat.lci <- dat.lci [dat.lci$yday>=180,]
+dat.lci <- dat.lci [dat.lci$yday<=Sys.Date(),]
+summary(dat.lci)
+
+#removing "0 and NA's
+#dat.lci <-dat.lci[(dat.lci$leaf.color.intensity!="NA"),]
+#summary(dat.lci)
+
+ggplot(data=dat.lci) +
+  geom_histogram(alpha=1.5, binwidth = 15, aes(x=yday, fill=leaf.color.intensity, NA.rm = TRUE))+
+  facet_grid(~Year)+
+  #scale_fill_manual(name="Year", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  #scale_color_manual(name="Year", values=cc("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  theme_bw()+
+  theme(axis.text.y=element_blank())+
+  labs(title="Fruit Present Intensity", x="Day of Year")
