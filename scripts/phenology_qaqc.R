@@ -364,6 +364,17 @@ summary(droplevels(pheno.now[pheno.now$collection=="Acer" & pheno.now$leaf.buds.
 #----------------------------
 # -------------------------------------------------------------
 
+# getting exact numbers
+
+summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.increasing.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.color.observed=="Yes",])
+summary(pheno.now[pheno.now$leaf.falling.observed=="Yes",])
+summary(pheno.now[pheno.now$fruit.present.observed=="Yes",])
+summary(pheno.now[pheno.now$fruit.ripe.observed=="Yes",])
+summary(pheno.now[pheno.now$fruit.drop.observed=="Yes",])
+
 # -------------------------------------------------------------
 # Additional QAQC: Options
 # - maps showing patterns of activity
