@@ -14,9 +14,9 @@ library(lubridate)
 # Source my cleaning function
 source("clean_google_form.R")
 
-#dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
+dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
-dir.base<-"G://My Drive//LivingCollections_Phenology"
+#dir.base<-"G://My Drive//LivingCollections_Phenology"
 
 path.dat <- file.path(dir.base, "Observing Lists/2020_Quercus")
 maps.out <- file.path(path.dat)
