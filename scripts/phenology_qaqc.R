@@ -10,7 +10,7 @@ library(googlesheets4)
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
 library(lubridate)
-
+library(car)
 # Source my cleaning function
 source("clean_google_form.R")
 
@@ -220,7 +220,7 @@ obs.all
 obs.check <- aggregate(dat.all$Date.Observed, by=list(dat.all$Observer), FUN=max)
 names(obs.check) <- c("Observer", "Observation.Last")
 obs.check
-obs.check[obs.check$Observation.Last < Sys.Date()-8,] # Return anybody that's more than 8 days old
+obs.check[obs.check$Observation.Last < Sys.Date()-10,] # Return anybody that's more than 8 days old
 
 # See if anybody has not enetered at all
 obs.all[!obs.all$Observer.ID %in% obs.check$Observer,]
@@ -282,7 +282,7 @@ pheno.now[pheno.now$leaf.present.observed=="?",]
 pheno.now[pheno.now$leaf.buds.observed %in% c("No", "Did not look for") & !pheno.now$leaf.buds.intensity %in% c("0", NA),]
 pheno.now[pheno.now$leaf.present.observed %in% c("No", "Did not look for") & !pheno.now$leaf.present.intensity %in% c("0%", NA),]
 pheno.now[pheno.now$leaf.increasing.observed %in% c("No", "Did not look for") & !pheno.now$leaf.increasing.intensity %in% c("0%", NA),]
-pheno.now[pheno.now$leaf.color.observed %in% c("No", "Did not look for") & !pheno.now$leaf.color.intensity %in% c("0%", NA),]
+pheno.now[pheno.now$leaf.color.observed %in% c("No", "Did not look for") & !pheno.now$leaf.color.observed %in% c("0%", NA),]
 pheno.now[!pheno.now$leaf.falling.observed %in% c("No", "Did not look for"),]
 summary(pheno.now[!pheno.now$leaf.color.observed %in% c("No", "Did not look for"),])
 pheno.now[pheno.now$leaf.color.observed %in% c("Yes") & pheno.now$leaf.color.intensity %in% (">95%"),]
@@ -378,6 +378,18 @@ summary(pheno.now[pheno.now$fruit.present.observed=="Yes",])
 summary(pheno.now[pheno.now$fruit.ripe.observed=="Yes",])
 summary(pheno.now[pheno.now$fruit.drop.observed=="Yes",])
 
+
+summary(pheno.now[pheno.now$leaf.buds.observed=="?",])
+summary(pheno.now[pheno.now$leaf.present.observed=="?",])
+summary(pheno.now[pheno.now$leaf.increasing.observed=="?",])
+summary(pheno.now[pheno.now$leaf.color.observed=="?",])
+summary(pheno.now[pheno.now$leaf.falling.observed=="?",])
+summary(pheno.now[pheno.now$flower.buds.observed=="?",])
+summary(pheno.now[pheno.now$flower.open.observed=="?",])
+summary(pheno.now[pheno.now$flower.pollen.observed=="?",])
+summary(pheno.now[pheno.now$fruit.present.observed=="?",])
+summary(pheno.now[pheno.now$fruit.ripe.observed=="?",])
+summary(pheno.now[pheno.now$fruit.drop.observed=="?",])
 # -------------------------------------------------------------
 # Additional QAQC: Options
 # - maps showing patterns of activity
