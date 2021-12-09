@@ -2,12 +2,14 @@
 # 0. Set up some general file paths
 # ---------------------------------
 library(ggplot2)
+library(gghighlight)
+
 # path.google <- "G:/My Drive" # Windows
 path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
 
 
 path.out <- file.path(path.google, "LivingCollections_Phenology/Phenology Forecasting")
-path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021")
+path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_02_EndOfYear_Report/figures_2021_end")
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -63,7 +65,7 @@ dat.ghcn <- read.csv(file.path(path.ghcn, "USC00115097_latest.csv"))
 dat.ghcn$DATE <- as.Date(dat.ghcn$DATE)
 summary(dat.ghcn)
 
-yr.min <- 2018
+yr.min <- 2007
 yr.max <- lubridate::year(Sys.Date())
 dat.ghcn2 <- data.frame()
 for(YR in yr.min:yr.max){
@@ -141,6 +143,76 @@ dev.off()
 ggplot(data=dat.ghcn7) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
+
+################# Graphing for everything since 2007#################
+dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2007,]
+summary(dat.ghcn13)
+head(dat.ghcn13)
+
+#Subsetting out uncecessary columns for the phenology report
+dat.ghcn14 <- dat.ghcn13[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
+summary(dat.ghcn14)
+head(dat.ghcn14)
+
+#Just getting daily percipitation
+dat.ghcn15 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
+summary(dat.ghcn15)
+
+#attemtption to generte a graph
+png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcn15) +
+  geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
+  gghighlight::gghighlight(YEAR== "2021")     +
+  # scale_color_manual(name="Year") +
+  # scale_fill_manual(name="Year") +
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
+  theme_classic()
+dev.off()
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn15) +
+  geom_smooth(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year", fill="Year")
+
+#doing the same thing as lines 73-83 above but for TMEAN
+dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
+summary(dat.ghcn16)
+
+#graph of Mean Temperature
+png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcn16) +
+  geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  gghighlight::gghighlight(YEAR== "2021") +
+  labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
+  theme_classic()
+dev.off()
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn16) +
+  geom_smooth(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Average Daily Temperature", y="Temperature ?C", x="Day of Year", fill="Year", color="Year")
+
+#Just getting GDD5
+dat.ghcn17 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD5.cum")]
+summary(dat.ghcn17)
+
+dat.ghcn17 <- dat.ghcn17 [dat.ghcn17$YDAY<=180,]
+summary(dat.ghcn17)
+
+#attemtption to generte a graph
+png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcn17) +
+  geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  gghighlight::gghighlight(YEAR== "2021") +
+  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
+  theme_classic()
+dev.off()
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn17) +
+  geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
+
 
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
