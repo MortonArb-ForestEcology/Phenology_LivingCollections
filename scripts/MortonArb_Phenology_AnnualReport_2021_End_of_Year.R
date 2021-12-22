@@ -50,7 +50,7 @@ summary(quercus18)
 
 ulmus21 <- clean.google(collection="Ulmus", dat.yr=2021)
 ulmus21$Collection <- as.factor("Ulmus")
-ulmus21$Year <- lubridate::year(ulmus20$Date.Observed)
+ulmus21$Year <- lubridate::year(ulmus21$Date.Observed)
 summary(ulmus21)
 
 
@@ -59,10 +59,14 @@ ulmus20$Collection <- as.factor("Ulmus")
 ulmus20$Year <- lubridate::year(ulmus20$Date.Observed)
 summary(ulmus20)
 
-
-dat.all <- rbind(quercus18, quercus19, quercus21, acer19, acer21)
+dat.all <- rbind(ulmus20, ulmus21, quercus18, quercus19, quercus20, quercus21, acer19, acer20, acer21)
 dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
 summary(dat.all)
+
+##### creating dat.spring which only contains quercus and acer, because ulmus data has not been collected for spring as of yet
+dat.spring <- rbind(quercus18, quercus19, quercus20, quercus21, acer19, acer20, acer21)
+dat.spring$yday <- lubridate::yday(dat.spring$Date.Observed)
+summary(dat.spring)
 
 ###########
 ###########
@@ -99,10 +103,19 @@ head(leaf.color)
 ggplot(data=leaf.color) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2020"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2020"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
+#doing histogram
+ggplot(data=leaf.color) +
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_freqpoly(alpha=0.5, aes(x=yday,fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of First Leaf Color", x="Day of Year")
+
 
 ##########
 ##########
@@ -138,8 +151,8 @@ head(falling.leaves)
 ggplot(data=falling.leaves) +
   facet_grid(Collection ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2020"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2020"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Falling Leaves", x="Day of Year")
 
@@ -148,7 +161,7 @@ ggplot(data=falling.leaves) +
 #Getting a graph of breaking leaf bud observations
 ###########
 ###########
-dat.lb <- dat.all[dat.all$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.breaking.buds.observed", "Collection")]
+dat.lb <- dat.spring[dat.spring$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.breaking.buds.observed", "Collection")]
 dat.lb <- dat.lb[!is.na(dat.lb$PlantNumber),]
 summary(dat.lb)
 head(dat.lb)
@@ -175,12 +188,12 @@ summary(breaking.buds)
 head(breaking.buds)
 
 #Graphing
-png(file.path(path.figs,"All_Leaf_Breaking_Buds.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"All_Leaf_Breaking_Buds.png"), height=4, width=6, units="in", res=320)
 ggplot(data=breaking.buds) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Breaking Lead Buds", x="Day of Year")
 dev.off()
@@ -189,7 +202,7 @@ dev.off()
 #Getting a graph of leaves present observations
 ###########
 ###########
-dat.lp <- dat.all[dat.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed", "Collection")]
+dat.lp <- dat.spring[dat.spring$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed", "Collection")]
 dat.lp <- dat.lp[!is.na(dat.lp$PlantNumber),]
 summary(dat.lp)
 head(dat.lp)
@@ -216,7 +229,7 @@ summary(leaves.present)
 head(leaves.present)
 
 #Graphing
-png(file.path(path.figs,"All_Leaf_Present.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"All_Leaf_Present.png"), height=4, width=6, units="in", res=320)
 ggplot(data=leaves.present) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
@@ -231,7 +244,7 @@ dev.off()
 #Getting a graph of leaves increasing in size observations
 ###########
 ###########
-dat.li <- dat.all[dat.all$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.observed", "Collection")]
+dat.li <- dat.spring[dat.spring$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.observed", "Collection")]
 dat.li <- dat.li[!is.na(dat.li$PlantNumber),]
 summary(dat.li)
 head(dat.li)
@@ -262,8 +275,8 @@ png(file.path(path.figs,"All_Leaf_Increasing.png"), height=4, width=6, units="in
 ggplot(data=leaves.increasing) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Leaves Increasing in Size Observed", x="Day of Year")
 dev.off()
