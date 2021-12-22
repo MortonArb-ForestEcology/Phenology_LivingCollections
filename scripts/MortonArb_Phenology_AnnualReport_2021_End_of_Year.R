@@ -113,7 +113,17 @@ ggplot(data=leaf.color) +
 ggplot(data=leaf.color) +
   png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
-  geom_histogram(alpha=0.5, bins = 15, aes(x=yday,color=as.factor(Year), fill=as.factor(Year))) +
+  geom_histogram(alpha=0.5, bins = 90, aes(x=yday,color=as.factor(Year), fill=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of First Leaf Color", x="Day of Year")
+
+#doing freq
+ggplot(data=leaf.color) +
+  png(file.path(path.figs,"All_First_Leaf_Color_freqpoly.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_freqpoly(alpha=0.5, bins = 45, aes(x=yday,color=as.factor(Year), fill=as.factor(Year))) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
