@@ -64,7 +64,7 @@ dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
 summary(dat.all)
 
 ##### creating dat.spring which only contains quercus and acer, because ulmus data has not been collected for spring as of yet
-dat.spring <- rbind(quercus18, quercus19, quercus20, quercus21, acer19, acer20, acer21)
+dat.spring <- rbind(quercus18, quercus19, quercus21, acer19,acer21)
 dat.spring$yday <- lubridate::yday(dat.spring$Date.Observed)
 summary(dat.spring)
 
@@ -101,13 +101,14 @@ head(leaf.color)
 
 #Graphing
 ggplot(data=leaf.color) +
-  #png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
+  png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
+dev.off()
 
 #doing histogram
 ggplot(data=leaf.color) +
@@ -118,6 +119,7 @@ ggplot(data=leaf.color) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
+dev.off()
 
 #doing freq
 ggplot(data=leaf.color) +
@@ -128,6 +130,7 @@ ggplot(data=leaf.color) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
+dev.off()
 
 
 ##########
@@ -162,13 +165,14 @@ head(falling.leaves)
 
 #Graphing
 ggplot(data=falling.leaves) +
+  png(file.path(path.figs,"All_First_Falling_Leaf_dens.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Falling Leaves", x="Day of Year")
-
+dev.off()
 ###########
 ###########
 #Getting a graph of breaking leaf bud observations
@@ -201,15 +205,16 @@ summary(breaking.buds)
 head(breaking.buds)
 
 #Graphing
-#png(file.path(path.figs,"All_Leaf_Breaking_Buds.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Leaf_Breaking_Buds_dens.png"), height=4, width=6, units="in", res=320)
 ggplot(data=breaking.buds) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Breaking Lead Buds", x="Day of Year")
 dev.off()
+
 ###########
 ###########
 #Getting a graph of leaves present observations
@@ -233,8 +238,8 @@ summary(dat.lp)
 
 
 #only looking at trees that showed leaf present in the first half of the year
-dat.lp <- dat.lp [dat.lp$yday<=180,]
-summary(dat.lp)
+#dat.lp <- dat.lp [dat.lp$yday<=180,]
+#summary(dat.lp)
 
 #aggregating quercus.lf so it shows me the date of first leaf present for  every plant number and species 
 leaves.present <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.lp, FUN=min, na.rm=T)
@@ -242,12 +247,12 @@ summary(leaves.present)
 head(leaves.present)
 
 #Graphing
-#png(file.path(path.figs,"All_Leaf_Present.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Leaf_Present_dens.png"), height=4, width=6, units="in", res=320)
 ggplot(data=leaves.present) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Leaves Present", x="Day of Year")
 dev.off()
@@ -284,7 +289,7 @@ summary(leaves.increasing)
 head(leaves.increasing)
 
 #Graphing
-png(file.path(path.figs,"All_Leaf_Increasing.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Leaf_Increasing_dens.png"), height=4, width=6, units="in", res=320)
 ggplot(data=leaves.increasing) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
@@ -299,7 +304,7 @@ dev.off()
 #Getting a graph of flower buds observations
 ##########
 ###########
-dat.fb <- dat.all[dat.all$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed", "Collection")]
+dat.fb <- dat.spring[dat.spring$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed", "Collection")]
 dat.fb <- dat.fb[!is.na(dat.fb$PlantNumber),]
 summary(dat.fb)
 head(dat.fb)
@@ -330,8 +335,8 @@ png(file.path(path.figs,"All_Flowers_or_Flower_Buds.png"), height=4, width=6, un
 ggplot(data=flower.buds) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Flower Buds or Flowers Observed", x="Day of Year")
 dev.off()
@@ -359,13 +364,16 @@ summary(dat.fo)
 
 
 #only looking at trees that showed open flowers in the first half of the year
-dat.fo <- dat.fo [dat.li$yday<=180,]
-summary(dat.fo)
+#dat.fo <- dat.fo [dat.li$yday<=180,]
+#summary(dat.fo)
 
 #aggregating quercus.lf so it shows me the date of open flowers for  every plant number and species 
 flower.open <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fo, FUN=min, na.rm=T)
 summary(flower.open)
 head(flower.open)
+#removing 2020 because there were no spring observations
+flower.open <- flower.open[!flower.open$Year=="2020",]
+summary(flower.open)
 
 #Graphing
 png(file.path(path.figs,"All_Flowers_Open.png"), height=4, width=6, units="in", res=320)
@@ -401,13 +409,15 @@ summary(dat.fp)
 
 
 #only looking at trees that showed pollen in the first half of the year
-dat.fp <- dat.fp [dat.li$yday<=180,]
-summary(dat.fp)
+#dat.fp <- dat.fp [dat.li$yday<=180,]
+#summary(dat.fp)
 
 #aggregating quercus.lf so it shows me the date of first pollen for  every plant number and species 
 flower.pollen <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fp, FUN=min, na.rm=T)
 summary(flower.pollen)
 head(flower.pollen)
+#removing 2020 because there were no spring observations
+flower.pollen <- flower.pollen[!flower.pollen$Year=="2020",]
 
 #Graphing
 png(file.path(path.figs,"All_Flowers_Pollen.png"), height=4, width=6, units="in", res=320)
@@ -420,3 +430,5 @@ ggplot(data=flower.pollen) +
   labs(title="Average Day of Flower Pollen Observed", x="Day of Year")
 dev.off()
 
+
+######## Need to add fruit phenophases Now
