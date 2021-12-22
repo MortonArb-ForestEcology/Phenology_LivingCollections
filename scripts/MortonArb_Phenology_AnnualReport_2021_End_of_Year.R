@@ -3,7 +3,7 @@ library(ggplot2)
 ###setting the file path to mac or windows##
 path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
 path.out <- file.path(path.google, "LivingCollections_Phenology/Phenology Forecasting")
-path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_02_EndOfYear_Report/figigures_2021_end")
+path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_02_EndOfYear_Report/figures_2021_end")
 # this is for google -> path.figs <- "G://My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
@@ -101,16 +101,19 @@ head(leaf.color)
 
 #Graphing
 ggplot(data=leaf.color) +
+  #png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
+
 #doing histogram
 ggplot(data=leaf.color) +
+  png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
-  geom_freqpoly(alpha=0.5, aes(x=yday,fill=as.factor(Year), color=as.factor(Year))) +
+  geom_histogram(alpha=0.5, bins = 15, aes(x=yday,color=as.factor(Year), fill=as.factor(Year))) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
   theme_bw()+
