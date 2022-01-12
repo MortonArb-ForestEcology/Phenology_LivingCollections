@@ -432,3 +432,122 @@ dev.off()
 
 
 ######## Need to add fruit phenophases Now
+
+#########subsetting out for fruit present
+dat.fr <- dat.spring[dat.spring$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed", "Collection")]
+summary(dat.fr)
+dat.fr <- dat.fr[!is.na(dat.fr$PlantNumber),]
+summary(dat.fr)
+
+#Checking to make sure date ranges are correct
+min(dat.fr$Date.Observed)
+max(dat.fr$Date.Observed)
+mean(dat.fr$Date.Observed)
+range(dat.fr$Date.Observed)
+
+#Setting my yday
+dat.fr$yday <- lubridate::yday(dat.fr$Date.Observed)
+summary(dat.fr)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.fr <- dat.fr [dat.fr$yday>=180,]
+#dat.fr <- dat.fr [dat.fr$yday<=Sys.Date(),]
+#summary(dat.fr)
+
+#aggregating to only show me observations that are present
+fruit.present <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fr, FUN=min, na.rm=T)
+summary(fruit.present)
+head(fruit.present)
+#removing 2020 because there were no spring observations
+fruit.present <- fruit.present[!fruit.present$Year=="2020",]
+
+
+ggplot(data=fruit.present) +
+  png(file.path(path.figs,"Fruit_present_Oak_Maple.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of Fruit Present Observed", x="Day of Year")
+dev.off()
+
+########
+#subsetting out for ripe fruit
+dat.rf <- dat.all[dat.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed", "Collection")]
+summary(dat.rf)
+dat.rf <- dat.rf[!is.na(dat.rf$PlantNumber),]
+summary(dat.rf)
+
+#Checking to make sure date ranges are correct
+min(dat.rf$Date.Observed)
+max(dat.rf$Date.Observed)
+mean(dat.rf$Date.Observed)
+range(dat.rf$Date.Observed)
+
+#Setting my yday
+dat.rf$yday <- lubridate::yday(dat.rf$Date.Observed)
+summary(dat.rf)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.rf <- dat.rf [dat.rf$yday>=180,]
+#dat.rf <- dat.rf [dat.rf$yday<=Sys.Date(),]
+#summary(dat.rf)
+
+#aggregating to only show me observations that are present
+ripe.fruit <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.rf, FUN=min, na.rm=T)
+summary(ripe.fruit)
+head(ripe.fruit)
+#removing 2020 because there were no spring observations
+#ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
+
+
+ggplot(data=ripe.fruit) +
+  png(file.path(path.figs,"Ripe_Fruit_Present_All.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="grey", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73","2020"="grey", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of Ripe Fruit Observed", x="Day of Year")
+dev.off()
+
+##############
+#subsetting out for ripe fruit
+dat.fd <- dat.all[dat.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed", "Collection")]
+summary(dat.fd)
+dat.fd <- dat.fd[!is.na(dat.fd$PlantNumber),]
+summary(dat.fd)
+
+#Checking to make sure date ranges are correct
+min(dat.fd$Date.Observed)
+max(dat.fd$Date.Observed)
+mean(dat.fd$Date.Observed)
+range(dat.fd$Date.Observed)
+
+#Setting my yday
+dat.fd$yday <- lubridate::yday(dat.fd$Date.Observed)
+summary(dat.fd)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.fd <- dat.fd [dat.fd$yday>=180,]
+#dat.fd <- dat.fd [dat.fd$yday<=Sys.Date(),]
+#summary(dat.fd)
+
+#aggregating to only show me observations that are present
+fruit.drop <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fd, FUN=min, na.rm=T)
+summary(fruit.drop)
+head(fruit.drop)
+#removing 2020 because there were no spring observations
+#ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
+
+
+ggplot(data=fruit.drop) +
+  png(file.path(path.figs,"Fruit__Drop_Present_All.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="grey", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73","2020"="grey", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of Fruit Drop Observed", x="Day of Year")
+dev.off()
