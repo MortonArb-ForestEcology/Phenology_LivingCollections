@@ -322,7 +322,7 @@ summary(dat.fb)
 
 
 #only looking at trees that showed flower buds in the first half of the year
-dat.fb <- dat.fb [dat.li$yday<=180,]
+dat.fb <- dat.fb [dat.fb$yday<=180,]
 summary(dat.fb)
 
 #aggregating quercus.lf so it shows me the date of first flower buds for  every plant number and species 
@@ -340,6 +340,7 @@ ggplot(data=flower.buds) +
   theme_bw()+
   labs(title="Average Day of Flower Buds or Flowers Observed", x="Day of Year")
 dev.off()
+
 
 ###########
 ###########
@@ -364,8 +365,8 @@ summary(dat.fo)
 
 
 #only looking at trees that showed open flowers in the first half of the year
-#dat.fo <- dat.fo [dat.li$yday<=180,]
-#summary(dat.fo)
+dat.fo <- dat.fo [dat.fo$yday<=180,]
+summary(dat.fo)
 
 #aggregating quercus.lf so it shows me the date of open flowers for  every plant number and species 
 flower.open <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fo, FUN=min, na.rm=T)
@@ -409,8 +410,8 @@ summary(dat.fp)
 
 
 #only looking at trees that showed pollen in the first half of the year
-#dat.fp <- dat.fp [dat.li$yday<=180,]
-#summary(dat.fp)
+dat.fp <- dat.fp [dat.fp$yday<=180,]
+summary(dat.fp)
 
 #aggregating quercus.lf so it shows me the date of first pollen for  every plant number and species 
 flower.pollen <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fp, FUN=min, na.rm=T)
@@ -418,7 +419,7 @@ summary(flower.pollen)
 head(flower.pollen)
 #removing 2020 because there were no spring observations
 flower.pollen <- flower.pollen[!flower.pollen$Year=="2020",]
-
+ 
 #Graphing
 png(file.path(path.figs,"All_Flowers_Pollen.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.pollen) +
