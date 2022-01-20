@@ -104,8 +104,8 @@ ggplot(data=leaf.color) +
   png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
 dev.off()
@@ -168,8 +168,8 @@ ggplot(data=falling.leaves) +
   png(file.path(path.figs,"All_First_Falling_Leaf_dens.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Falling Leaves", x="Day of Year")
 dev.off()
@@ -212,7 +212,7 @@ ggplot(data=breaking.buds) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
-  labs(title="Average Day of First Breaking Lead Buds", x="Day of Year")
+  labs(title="Average Day of First Breaking Leaf Buds", x="Day of Year")
 dev.off()
 
 ###########
@@ -293,8 +293,8 @@ png(file.path(path.figs,"Leaf_Increasing_dens.png"), height=4, width=6, units="i
 ggplot(data=leaves.increasing) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Leaves Increasing in Size Observed", x="Day of Year")
 dev.off()
@@ -346,7 +346,7 @@ dev.off()
 #Getting a graph of open flowers observations
 ###########
 ###########
-dat.fo <- dat.all[dat.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed", "Collection")]
+dat.fo <- dat.spring[dat.spring$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed", "Collection")]
 dat.fo <- dat.fo[!is.na(dat.fo$PlantNumber),]
 summary(dat.fo)
 head(dat.fo)
@@ -380,8 +380,8 @@ png(file.path(path.figs,"All_Flowers_Open.png"), height=4, width=6, units="in", 
 ggplot(data=flower.open) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Open Flower Observed", x="Day of Year")
 dev.off()
@@ -391,7 +391,7 @@ dev.off()
 #Getting a graph of pollen observations
 ###########
 ###########
-dat.fp <- dat.all[dat.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed", "Collection")]
+dat.fp <- dat.[dat.spring$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed", "Collection")]
 dat.fp <- dat.fp[!is.na(dat.fp$PlantNumber),]
 summary(dat.fp)
 head(dat.fp)
@@ -424,8 +424,8 @@ png(file.path(path.figs,"All_Flowers_Pollen.png"), height=4, width=6, units="in"
 ggplot(data=flower.pollen) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Flower Pollen Observed", x="Day of Year")
 dev.off()
@@ -474,7 +474,7 @@ dev.off()
 
 ########
 #subsetting out for ripe fruit
-dat.rf <- dat.all[dat.all$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed", "Collection")]
+dat.rf <- dat.spring[dat.spring$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed", "Collection")]
 summary(dat.rf)
 dat.rf <- dat.rf[!is.na(dat.rf$PlantNumber),]
 summary(dat.rf)
@@ -514,7 +514,7 @@ dev.off()
 
 ##############
 #subsetting out for ripe fruit
-dat.fd <- dat.all[dat.all$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed", "Collection")]
+dat.fd <- dat.spring[dat.spring$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed", "Collection")]
 summary(dat.fd)
 dat.fd <- dat.fd[!is.na(dat.fd$PlantNumber),]
 summary(dat.fd)
