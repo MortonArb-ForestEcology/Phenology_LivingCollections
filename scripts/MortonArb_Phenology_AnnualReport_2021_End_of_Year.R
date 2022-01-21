@@ -256,6 +256,61 @@ ggplot(data=leaves.present) +
   theme_bw()+
   labs(title="Average Day of Leaves Present", x="Day of Year")
 dev.off()
+###########
+###########
+#Getting a graph of leaves present intensity 
+###########
+###########
+dat.lpi <- dat.spring[dat.spring$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.present.intensity", "Collection")]
+summary(dat.lpi)
+dat.lpi <- dat.lpi[!is.na(dat.lpi$PlantNumber),]
+summary(dat.lpi)
+
+#Checking to make sure date ranges are correct
+min(dat.lpi$Date.Observed)
+max(dat.lpi$Date.Observed)
+mean(dat.lpi$Date.Observed)
+range(dat.lpi$Date.Observed)
+
+#Setting my yday
+dat.lpi$yday <- lubridate::yday(dat.lpi$Date.Observed)
+summary(dat.lpi)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.lpi <- dat.lpi [dat.lpi$yday>=180,]
+#dat.lpi <- dat.lpi [dat.lpi$yday<=Sys.Date(),]
+#summary(dat.lpi)
+
+#removing "0 and NA's
+dat.lpi <- aggregate(yday ~ PlantNumber + Species + Year + Collection + leaf.present.intensity + Date.Observed , dat=dat.lpi, FUN=min, NA.rm=T)
+summary(dat.lpi)
+head(dat.lpi)
+
+dat.lpi$yday <- lubridate::yday(dat.lpi$Date.Observed)
+summary(dat.lpi)
+
+#leaves.present.intensity <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.lpi, FUN=min, NA.rm=T)
+#summary(leaves.present.intensity)
+#head(leaves.present.intensity)
+
+#png(file.path(path.figs,"Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.lpi) +
+  geom_histogram(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.present.intensity,))+
+  facet_grid(Collection~Year)+
+  #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  theme_bw()+
+  labs(title="Leaves Present Intensity", x="Day of Year",)
+dev.off()
+
+ggplot(data=dat.lpi) +
+  geom_boxplot(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.present.intensity,))+
+  facet_grid(Collection~Year)+
+  #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  theme_bw()+
+  labs(title="Leaves Present Intensity", x="Day of Year",)
+dev.off()
 
 ###########
 ###########
