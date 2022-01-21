@@ -303,14 +303,6 @@ ggplot(data=dat.lpi) +
   labs(title="Leaves Present Intensity", x="Day of Year",)
 dev.off()
 
-ggplot(data=dat.lpi) +
-  geom_boxplot(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.present.intensity,))+
-  facet_grid(Collection~Year)+
-  #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
-  #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
-  theme_bw()+
-  labs(title="Leaves Present Intensity", x="Day of Year",)
-dev.off()
 
 ###########
 ###########
@@ -555,21 +547,21 @@ ripe.fruit <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=
 summary(ripe.fruit)
 head(ripe.fruit)
 #removing 2020 because there were no spring observations
-#ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
+ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
 
 
 ggplot(data=ripe.fruit) +
   png(file.path(path.figs,"Ripe_Fruit_Present_All.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="grey", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73","2020"="grey", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Ripe Fruit Observed", x="Day of Year")
 dev.off()
 
 ##############
-#subsetting out for ripe fruit
+#subsetting out for fruit drop
 dat.fd <- dat.spring[dat.spring$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed", "Collection")]
 summary(dat.fd)
 dat.fd <- dat.fd[!is.na(dat.fd$PlantNumber),]
@@ -595,15 +587,59 @@ fruit.drop <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=
 summary(fruit.drop)
 head(fruit.drop)
 #removing 2020 because there were no spring observations
-#ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
+ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
 
 
 ggplot(data=fruit.drop) +
   png(file.path(path.figs,"Fruit__Drop_Present_All.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="grey", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73","2020"="grey", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Fruit Drop Observed", x="Day of Year")
 dev.off()
+
+############
+#getting averages for date of  phenophases occurace in certain years
+###########
+####Open flowers quercus
+dat.ofa18 <- quercus18[quercus18$flower.open.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.of)
+#####Fruit Present quercus & acer
+#2018 quercus
+dat.fpa18 <- quercus18[quercus18$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa18)
+#2019 quercus
+dat.fpa19 <- quercus19[quercus19$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa19)
+#2021 quercus
+dat.fpa21 <- quercus21[quercus21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa21)
+#2019 acer
+dat.afpa19 <- acer19[acer19$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.afpa19)
+#2021 acer
+dat.afpa21 <- acer21[acer21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.afpa21)
+##### Ripe fruit####
+#quercus 21
+dat.rfa21 <- quercus21[quercus21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.rfa21)
+#2019 acer
+dat.arfa19 <- acer19[acer19$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.arfa19)
+#2021 acer
+dat.arfa21 <- acer21[acer21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.arfa21)
+
+### Fruit Drop
+#quercus 21
+dat.fda21 <- quercus21[quercus21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.rfa21)
+#2019 acer
+dat.afda19 <- acer19[acer19$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.arfa19)
+#2021 acer
+dat.afda21 <- acer21[acer21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.arfa21)
