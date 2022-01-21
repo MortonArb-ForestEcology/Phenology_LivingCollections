@@ -145,8 +145,8 @@ ggplot(data=dat.ghcn7) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
 
-################# Graphing for everything since 2007#################
-dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2007,]
+################# Graphing for everything since 200#################
+dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
 summary(dat.ghcn13)
 head(dat.ghcn13)
 
