@@ -1,6 +1,6 @@
 
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
-library(ggplot2); library(grid) # graphing packages
+library(ggplot2); library(grid);library(googlesheets4) # graphing packages
 
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 #setwd(dir.base)
@@ -15,19 +15,21 @@ npn <- c("americana", "cordata", "tomentosa")
 length(npn)
 spp.keep <- c("amurensis", "dasystyla", "euchlora", "europaea", "flavescens", "japonica", "mandshurica","mongolica", "oliveri", "orbicularis","paucicostata","platyphyllos", "zamoyskiana")
  
+getwd()
+
  #################I don't think I need this because there are no missing Tilia, and I have alreay subset out the Tilia we will be observing
  # Querying the googlesheet for missing trees up front to make it easier
-#sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
-#sheet.gone # Prints all the metadata
+sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
+sheet.gone # Prints all the metadata
 
 # Get the particular sheet & coerce it into a data frame rather than something special
-#df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
-#summary(df.gone)
+df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
+summary(df.gone)
 
 # ----------------------------
 # Narrowing down the phenology observering lists
 # ----------------------------
-#acer <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData.csv")
+acer <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData.csv")
 #acer <- acer[grep("Acer", acer$Taxon),] # Get rid of all non-acers
 #acer$Taxon2 <- acer$Taxon
 #acer$Taxon2 <- gsub("'", "", acer$Taxon2) # Get rid of '' for names
@@ -36,8 +38,9 @@ spp.keep <- c("amurensis", "dasystyla", "euchlora", "europaea", "flavescens", "j
 #dim(acer)
 
 
+tilia<- read.csv("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_1.csv")
 
-tilia<- read.csv("./Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_1.csv")
+tilia<- read_sheet("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_all")
 
 head(tilia)
 
