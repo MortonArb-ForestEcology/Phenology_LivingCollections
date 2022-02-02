@@ -15,21 +15,21 @@ npn <- c("americana", "cordata", "tomentosa")
 length(npn)
 spp.keep <- c("amurensis", "dasystyla", "euchlora", "europaea", "flavescens", "japonica", "mandshurica","mongolica", "oliveri", "orbicularis","paucicostata","platyphyllos", "zamoyskiana")
  
-getwd()
+
 
  #################I don't think I need this because there are no missing Tilia, and I have alreay subset out the Tilia we will be observing
  # Querying the googlesheet for missing trees up front to make it easier
-sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
-sheet.gone # Prints all the metadata
+#sheet.gone <- gs_title("Removed Trees - Phenology_LivingCollections")
+#sheet.gone # Prints all the metadata
 
 # Get the particular sheet & coerce it into a data frame rather than something special
-df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
-summary(df.gone)
+#df.gone <- data.frame(gs_read(sheet.gone, ws="Removed Trees"))
+#summary(df.gone)
 
 # ----------------------------
 # Narrowing down the phenology observering lists
 # ----------------------------
-acer <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData.csv")
+tilia <- read.csv("../data/ObservingLists/Tilia_v_1.csv")
 #acer <- acer[grep("Acer", acer$Taxon),] # Get rid of all non-acers
 #acer$Taxon2 <- acer$Taxon
 #acer$Taxon2 <- gsub("'", "", acer$Taxon2) # Get rid of '' for names
@@ -37,24 +37,24 @@ acer <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData
 #summary(acer)
 #dim(acer)
 
+###This didn't work
+#tilia<- read.csv("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_1.csv")
 
-tilia<- read.csv("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_1.csv")
-
-tilia<- read_sheet("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_all")
+#tilia<- read_sheet("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_all")
 
 head(tilia)
 
 # Removing for double entries
 
-for(PLANT in unique(acer$PlantNumber)){
-  acer <- acer[c(which(acer$PlantNumber!=PLANT), which(acer$PlantNumber==PLANT)[1]), ]
+for(PLANT in unique(tilia$PlantNumber)){
+  tilia <- tilia[c(which(tilia$PlantNumber!=PLANT), which(tilia$PlantNumber==PLANT)[1]), ]
 }
-summary(acer)
+summary(tilia)
 
-unique(acer$Taxon)
-length(unique(acer$Taxon)) # 89 unique entries
+unique(tilia$Taxon)
+length(unique(acer$Taxon)) # 98 unique entries
 
-# Looping through to add genus and species to the acer form
+# Looping through to add genus and species to the tilia form
 taxa.split <- strsplit(paste(acer$Taxon), split=" ")
 for(i in 1:nrow(acer)){
   acer[i,"genus"] <- taxa.split[[i]][1]
