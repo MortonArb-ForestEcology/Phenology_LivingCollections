@@ -1,20 +1,17 @@
 
-library(googlesheets)
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
 library(ggplot2); library(grid) # graphing packages
-
 
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 #setwd(dir.base)
 
-path.google <- "/Volumes/GoogleDrive/My Drive/"
 path.dat <- file.path(dir.base, "Observing Lists/Tilia")
-maps.out <- file.path(path.dat)
+.maps.out <- file.path(path.dat)
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 dir.create(path.dat, recursive = T, showWarnings = F)
 
 # Species in the NPN database
-npn <- c("americana", "cordata", "tomentosa",)
+npn <- c("americana", "cordata", "tomentosa")
 length(npn)
 spp.keep <- c("amurensis", "dasystyla", "euchlora", "europaea", "flavescens", "japonica", "mandshurica","mongolica", "oliveri", "orbicularis","paucicostata","platyphyllos", "zamoyskiana")
  
@@ -40,7 +37,8 @@ spp.keep <- c("amurensis", "dasystyla", "euchlora", "europaea", "flavescens", "j
 
 
 
-tilia<- read.csv("/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_v_1.csv")
+tilia<- read.csv("./Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/Tilia_1.csv")
+
 head(tilia)
 
 # Removing for double entries
