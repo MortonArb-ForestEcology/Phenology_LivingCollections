@@ -1,11 +1,12 @@
 
 library(raster); library(rgdal); library(rgeos) # spatial analysis packages
-library(ggplot2); library(grid);library(googlesheets4) # graphing packages
+library(ggplot2); library(grid);# graphing packages
 
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 #setwd(dir.base)
 
-path.dat <- file.path(dir.base, "Observing Lists/Tilia")
+path.dat <- file.path(dir.base, "Observing Lists")
+path.out <- "Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists"
 .maps.out <- file.path(path.dat)
 path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 dir.create(path.dat, recursive = T, showWarnings = F)
@@ -52,38 +53,41 @@ for(PLANT in unique(tilia$PlantNumber)){
 summary(tilia)
 
 unique(tilia$Taxon)
-length(unique(acer$Taxon)) # 98 unique entries
+length(unique(tilia$Taxon)) # 98 unique entries
 
 # Looping through to add genus and species to the tilia form
-taxa.split <- strsplit(paste(acer$Taxon), split=" ")
-for(i in 1:nrow(acer)){
-  acer[i,"genus"] <- taxa.split[[i]][1]
-  acer[i,"species"] <- taxa.split[[i]][2]
+taxa.split <- strsplit(paste(tilia$Taxon), split=" ")
+for(i in 1:nrow(tilia)){
+  tilia[i,"genus"] <- taxa.split[[i]][1]
+  tilia[i,"species"] <- taxa.split[[i]][2]
 }
-summary(as.factor(acer$species))
-dim(acer)
+summary(as.factor(tilia$species))
+dim(tilia)
 
 # Checking for how many species overlap with NPN
-length(which(unique(acer$species) %in% npn))
+length(which(unique(tilia$species) %in% npn))
 
 # Getting rid of a tree that's really far away from everything else 
 # I think I/Christy may monitor this one myself for forecasting based on Matt Lobdell's suggestion
-trees.exclude <- acer[acer$BgLatitude==max(acer$BgLatitude),"PlantNumber"] 
+trees.exclude <- tilia[tilia$BgLongitude==max(tilia$BgLongitude),] 
 
 # Provenance Codes: G = garden source; U = Unknown (for us, often natural recruit); W = wild source accession; Z = propagule from wild source
-acer2 <- acer[(acer$species %in% npn | acer$ProvenanceType %in% c("U", "W", "Z")) & !is.na(acer$species) & !acer$PlantNumber %in% trees.exclude,]
-summary(acer2)
-dim(acer2)
-dim(acer)
+tilia2 <- tilia[(tilia$species %in% npn) & !is.na(tilia$species) & !tilia$PlantNumber %in% trees.exclude,]
+summary(tilia2)
+dim(tilia2)
+dim(tilia)
 
+## writig to see what me missed
 
-unique(acer2$Taxon)
+#write.csv(tilia2,"/Users/breidy/Documents/tilacheck2.csv", row.names = FALSE)
 
-unique(acer[!acer$PlantNumber %in% acer2$PlantNumber, "Taxon"])
-unique(acer[!acer$PlantNumber %in% acer2$PlantNumber, "species"])
-unique(acer2$Taxon)
-unique(acer2$species)
-summary(as.factor(acer2$species))
+unique(tilia2$Taxon)
+
+unique(tilia[!tilia$PlantNumber %in% tilia2$PlantNumber, "Taxon"])
+unique(tilia[!tilia$PlantNumber %in% tilia2$PlantNumber, "species"])
+unique(tilia2$Taxon)
+unique(tilia2$species)
+summary(as.factor(tilia2$species))
 # ----------------------------
 
 
@@ -91,77 +95,77 @@ summary(as.factor(acer2$species))
 # Doing some clustering and mapping
 # ----------------------------
 # Compute a euclidean distance matrix
-acer.dist <- dist(acer2[,c("BgLongitude", "BgLatitude")])
-summary(acer.dist)
+tilia.dist <- dist(tilia[,c("BgLongitude", "BgLatitude")])
+summary(tilia.dist)
 
 # Go through and add in the closest group so that groups are between 20 & 30 trees
-max.trees <- 25
-min.trees <- 15
-n.groups <- round(nrow(acer2)/mean(max.trees, min.trees))
+max.trees <- 18
+min.trees <- 13
+n.groups <- round(nrow(tilia)/mean(max.trees, min.trees))
 
 # ---------
 # Option 1: Group groups based on distance
 # ---------
 # k-means clustering
-# nrow(acer2)/18
+# nrow(tilia2)/18
 # set.seed(30141038)
 # set.seed(30141103)
 set.seed(201901) # Good, but we'll cut group
 
-acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=n.groups*3) # Starting with our desired end point x ~5 so we have small clusters that get added
-# acer.kmeans <- kmeans(acer2[,c("BgLongitude", "BgLatitude")], centers=12) # Starting with an average of paired trees
-summary(summary(as.factor(acer.kmeans$cluster))) # Looking at average number of members when pairing
-acer.kmeans$centers
-acer2$group.kmean <- as.factor(acer.kmeans$cluster)
+tilia.kmeans <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=n.groups*3) # Starting with our desired end point x ~5 so we have small clusters that get added
+# tilia.kmeans <- kmeans(tilia2[,c("BgLongitude", "BgLatitude")], centers=12) # Starting with an average of paired trees
+summary(summary(as.factor(tilia.kmeans$cluster))) # Looking at average number of members when pairing
+tilia.kmeans$centers
+tilia$group.kmean <- as.factor(tilia.kmeans$cluster)
 
 # Next step is doing clustering trying to balance number + distance
-dist.kmeans <- as.matrix(dist(acer.kmeans$centers))
+dist.kmeans <- as.matrix(dist(tilia.kmeans$centers))
 summary(dist.kmeans)
 
 
 
 # Finding a way to pair clusters that balances number and distance
-acer.groups <- data.frame(clust1 = as.factor(1:nrow(acer.kmeans$centers)),
-                          acer.kmeans$centers)
-for(i in 1:nrow(acer.groups)){
-  acer.groups[i, "n.clust1"] <- length(which(acer.kmeans$cluster==i))
+tilia.groups <- data.frame(clust1 = as.factor(1:nrow(tilia.kmeans$centers)),
+                          tilia.kmeans$centers)
+for(i in 1:nrow(tilia.groups)){
+  tilia.groups[i, "n.clust1"] <- length(which(tilia.kmeans$cluster==i))
 }
-summary(acer.groups)
+summary(tilia.groups)
 
 # Sort our groupings from most to least
-acer.groups <- acer.groups[order(acer.groups$n.clust1, acer.groups$BgLongitude, acer.groups$BgLatitude, decreasing=T),]
-head(acer.groups)
+tilia.groups <- tilia.groups[order(tilia.groups$n.clust1, tilia.groups$BgLongitude, tilia.groups$BgLatitude, decreasing=T),]
+head(tilia.groups)
 
 # Initialize with cluster 1
 clust.new = 1
-acer.groups[1, "clust2"] <- clust.new
+tilia.groups[1, "clust2"] <- clust.new
 
 # Loop through and combine groups
 set.seed(201901)
-pb <- txtProgressBar(min=0, max=nrow(acer.groups), style=3)
-for(i in 1:nrow(acer.groups)){
+pb <- txtProgressBar(min=0, max=nrow(tilia.groups), style=3)
+for(i in 1:nrow(tilia.groups)){
   
   setTxtProgressBar(pb, i)
-  if(i > 1 & !is.na(acer.groups[i, "clust2"])) next # Skip over already assigned groups
+  if(i > 1 & !is.na(tilia.groups[i, "clust2"])) next # Skip over already assigned groups
   
   # find how many are in this group
-  group1 <- acer.groups[i, "clust1"]
-  acer.groups[i,"clust2"] <- clust.new
+  group1 <- tilia.groups[i, "clust1"]
+  tilia.groups[i,"clust2"] <- clust.new
   
-  n.group <- sum(acer.groups$n.clust1[which(acer.groups$clust2==clust.new)])
+  n.group <- sum(tilia.groups$n.clust1[which(tilia.groups$clust2==clust.new)])
   
   # Find the unassigned rows
-  groups.open <- acer.groups[is.na(acer.groups$clust2), "clust1"]
+  groups.open <- tilia.groups[is.na(tilia.groups$clust2), "clust1"]
   
   # When we have less than our minimum numebr of trees in the group, add the next closest group
   while(n.group<min.trees & length(groups.open)>0){
-    groups.open <- acer.groups[is.na(acer.groups$clust2), "clust1"] # Update this in our loop
+    groups.open <- tilia.groups[is.na(tilia.groups$clust2), "clust1"] # Update this in our loop
     
     # Find the closest trees(s) to the existing groups
     dist.closest <- min(dist.kmeans[groups.open,group1], na.rm=T)
     
     # If the group is further than the average distance among current groups, just skip over it
-    grps.now <- which(acer.groups$clust2==clust.new)
+    grps.now <- which(tilia.groups$clust2==clust.new)
     if(length(grps.now)>1 & dist.closest>sd(dist.kmeans[grps.now,grps.now])*1.5) break
     # Make sure we're not adding an oddball group:
     # dist.grp <- 
@@ -173,25 +177,25 @@ for(i in 1:nrow(acer.groups)){
     #  1. adding all groups of closest trees keeps us under the maximum, add them all
     # #  2a. if adding the group with the most trees keeps us under 15, add that one
     # #  2b. add the first one in the list
-    if(sum(n.group, acer.groups[acer.groups$clust1 %in% group.closest, "n.clust1"]) <= max.trees) {
-      acer.groups[acer.groups$clust1 %in% group.closest, "clust2"] <- clust.new
+    if(sum(n.group, tilia.groups[tilia.groups$clust1 %in% group.closest, "n.clust1"]) <= max.trees) {
+      tilia.groups[tilia.groups$clust1 %in% group.closest, "clust2"] <- clust.new
     } else if(length(group.closest)>1) {
-      acer.groups[acer.groups$clust1 %in% group.closest[1], "clust2"] <- clust.new
+      tilia.groups[tilia.groups$clust1 %in% group.closest[1], "clust2"] <- clust.new
     } 
-    n.group <- sum(acer.groups$n.clust1[which(acer.groups$clust2==clust.new)])
-    # group1 <- acer.groups$clust1[which(acer.groups$clust2==clust.new)] # Update group1 with the new cluster
+    n.group <- sum(tilia.groups$n.clust1[which(tilia.groups$clust2==clust.new)])
+    # group1 <- tilia.groups$clust1[which(tilia.groups$clust2==clust.new)] # Update group1 with the new cluster
   } # end while
   
   # If we have a less than full group, add the component groups to the closest group
-  if(n.group < min.trees & i==nrow(acer.groups)){
+  if(n.group < min.trees & i==nrow(tilia.groups)){
     # Find the groups we're lumping
-    clust.redo <- acer.groups[acer.groups$clust2==clust.new, "clust1"]
+    clust.redo <- tilia.groups[tilia.groups$clust2==clust.new, "clust1"]
     
     for(j in clust.redo){
-      groups.open <- acer.groups[acer.groups$clust1!=j & acer.groups$clust2!=clust.new, "clust1"]
+      groups.open <- tilia.groups[tilia.groups$clust1!=j & tilia.groups$clust2!=clust.new, "clust1"]
       # if this is our last group, add it to the closest cluster
       group.closest <- groups.open[which(dist.kmeans[groups.open, j]==min(dist.kmeans[groups.open,j], na.rm=T))]
-      acer.groups[acer.groups$clust1==j, "clust2"] <- acer.groups[acer.groups$clust1==group.closest, "clust2"]
+      tilia.groups[tilia.groups$clust1==j, "clust2"] <- tilia.groups[tilia.groups$clust1==group.closest, "clust2"]
     }
     
     
@@ -199,84 +203,84 @@ for(i in 1:nrow(acer.groups)){
   
   clust.new=clust.new+1
 } # End loop
-acer.groups$clust2 <- as.factor(acer.groups$clust2)
-summary(acer.groups)
+tilia.groups$clust2 <- as.factor(tilia.groups$clust2)
+summary(tilia.groups)
 
 # This looks pretty good, but needs just a bit of re-tweaking
 # Manually moving the tiny south cluster from group 9 to group 10
-# acer.groups[acer.groups$clust2==9,]
+# tilia.groups[tilia.groups$clust2==9,]
 
-acer.group2 <- aggregate(acer.groups$n.clust1, by=list(acer.groups$clust2), sum)
-names(acer.group2) <- c("group1", "n")
-summary(acer.group2)
-acer.group2
-# clust.kmeans <- hclust(acer.dist)
+tilia.group2 <- aggregate(tilia.groups$n.clust1, by=list(tilia.groups$clust2), sum)
+names(tilia.group2) <- c("group1", "n")
+summary(tilia.group2)
+tilia.group2
+# clust.kmeans <- hclust(tilia.dist)
 # plot(clust.kmeans)
 
 # Assigning groups from our re-clustering
-for(i in 1:nrow(acer2)){
-  group1 <- acer2$group.kmean[i]
-  acer2[i, "group1"] <- acer.groups[acer.groups$clust1==paste(group1),"clust2"]
+for(i in 1:nrow(tilia2)){
+  group1 <- tilia2$group.kmean[i]
+  tilia2[i, "group1"] <- tilia.groups[tilia.groups$clust1==paste(group1),"clust2"]
 }
-acer2$group1 <- as.factor(acer2$group1)
-summary(acer2$group1)
+tilia2$group1 <- as.factor(tilia2$group1)
+summary(tilia2$group1)
 
-groups.n <- aggregate(acer2$BgLatitude, by=list(acer2$group1), FUN=length)
+groups.n <- aggregate(tilia2$BgLatitude, by=list(tilia2$group1), FUN=length)
 names(groups.n) <- c("group1", "n.trees")
 
 # Getting rid of group 10 because we can't make it cooperate
-acer2 <- acer2[acer2$group1!=10,]
+tilia2 <- tilia2[tilia2$group1!=10,]
 
-acer2$priority <- as.factor(ifelse(acer2$species %in% npn, "NPN", NA))
-summary(acer2)
+tilia2$priority <- as.factor(ifelse(tilia2$species %in% npn, "NPN", NA))
+summary(tilia2)
 
-acer.prior <- aggregate(acer2$priority, by=list(acer2$group1), FUN=function(x){length(which(!is.na(x)))})
-names(acer.prior) <- c("group1", "n.trees")
+tilia.prior <- aggregate(tilia2$priority, by=list(tilia2$group1), FUN=function(x){length(which(!is.na(x)))})
+names(tilia.prior) <- c("group1", "n.trees")
 
 # re-assign numbers to align with priority
-acer.prior[order(acer.prior$n.trees, decreasing=T),"Priority"] <- 1:nrow(acer.prior)
+tilia.prior[order(tilia.prior$n.trees, decreasing=T),"Priority"] <- 1:nrow(tilia.prior)
 
 # Merge priority assignments back into master list
-acer2 <- merge(acer2, acer.prior[,c("group1", "Priority")], all.x=T)
-summary(acer2)
+tilia2 <- merge(tilia2, tilia.prior[,c("group1", "Priority")], all.x=T)
+summary(tilia2)
 
 # ---------
 
-# acer.clust <- hclust(acer.dist) # Perform hierarchical clustering with the distance matrix
-# acer2$group <- as.factor(cutree(acer.clust, k=18))
+# tilia.clust <- hclust(tilia.dist) # Perform hierarchical clustering with the distance matrix
+# tilia2$group <- as.factor(cutree(tilia.clust, k=18))
 # ---------
 
 # Assiging 
-# acer2$group <- as.factor(acer.kmeans$cluster)
-summary(acer2)
+# tilia2$group <- as.factor(tilia.kmeans$cluster)
+summary(tilia2)
 
-acer.groups$group.kmean = acer.groups$clust1
+tilia.groups$group.kmean = tilia.groups$clust1
 
 # Remove plants that no longer exist
-acer[acer$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-acer2[acer2$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
-acer2 <- acer2[!is.na(acer2$BgLatitude),]
+tilia[tilia$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+tilia2[tilia2$PlantNumber %in% df.gone$PlantNumber, c("BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")] <- NA
+tilia2 <- tilia2[!is.na(tilia2$BgLatitude),]
 
-summary(acer2)
-dim(acer2)
+summary(tilia2)
+dim(tilia2)
 
 
-groups.n <- aggregate(acer2$BgLatitude, by=list(acer2$Priority), FUN=length)
+groups.n <- aggregate(tilia2$BgLatitude, by=list(tilia2$Priority), FUN=length)
 names(groups.n) <- c("Priority", "n.trees")
 
 
 library(ggplot2)
-png(file.path(path.dat, "CollectionAssignments_Acer.png"), height=8, width=12, units="in", res=320)
-ggplot(data=acer2[,]) +
-  ggtitle("Phenology Monitoring Lists:\nAcer Collection") +
+png(file.path(path.dat, "CollectionAssignments_tilia.png"), height=8, width=12, units="in", res=320)
+ggplot(data=tilia2[,]) +
+  ggtitle("Phenology Monitoring Lists:\ntilia Collection") +
   labs(x="Longitude", y="Latitude") +
   coord_equal() +
   facet_wrap(~Priority) +
-  geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
-  geom_point(data=acer2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
+  geom_point(data=tilia[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.1, color="black", alpha=0.2) +
+  geom_point(data=tilia2[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=0.25, color="black") +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(Priority))) + 
-  # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
-  geom_text(data=groups.n, x=quantile(acer$BgLongitude, 0.95, na.rm=T), y=max(acer$BgLatitude, 0.995, na.rm=T), aes(label=paste0("n = ", n.trees)), fontface="bold") +
+  # geom_text(data=tilia.groups, x=quantile(tilia2$BgLongitude, 0.05), y=quantile(tilia2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
+  geom_text(data=groups.n, x=quantile(tilia$BgLongitude, 0.95, na.rm=T), y=max(tilia$BgLatitude, 0.995, na.rm=T), aes(label=paste0("n = ", n.trees)), fontface="bold") +
   guides(color=F) +
   theme_bw() +
   theme(plot.title=element_text(hjust=0.5, face="bold"),
@@ -284,11 +288,11 @@ ggplot(data=acer2[,]) +
         axis.text = element_blank())
 dev.off()
 
-png(file.path(path.dat, "Acer_all.png"), height=6, width=9, units="in", res=320)
-ggplot(data=acer2) +
-  # ggtitle("Phenology Monitoring Lists 2018:\nAcer Collection") +
+png(file.path(path.dat, "tilia_all.png"), height=6, width=9, units="in", res=320)
+ggplot(data=tilia2) +
+  # ggtitle("Phenology Monitoring Lists 2018:\ntilia Collection") +
   labs(x="Longitude", y="Latitude") +
-  geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=2.5, color="gray50") +
+  geom_point(data=tilia[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=2.5, color="gray50") +
   geom_point(aes(x=BgLongitude, y=BgLatitude), color="darkgreen", size=5) + 
   coord_equal() +
   theme_bw() +
@@ -296,30 +300,30 @@ ggplot(data=acer2) +
 dev.off()
 
 
-png(file.path(path.dat, "Acer_NPN.png"), height=8, width=12, units="in", res=320)
-ggplot(data=acer2) +
-  # ggtitle("Phenology Monitoring Lists 2018:\nAcer Collection") +
+png(file.path(path.dat, "tilia_NPN.png"), height=8, width=12, units="in", res=320)
+ggplot(data=tilia2) +
+  # ggtitle("Phenology Monitoring Lists 2018:\ntilia Collection") +
   labs(x="Longitude", y="Latitude") +
-  geom_point(data=acer[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=1, color="black", alpha=0.2) +
+  geom_point(data=tilia[,c("BgLongitude", "BgLatitude")], aes(x=BgLongitude, y=BgLatitude), size=1, color="black", alpha=0.2) +
   geom_point(aes(x=BgLongitude, y=BgLatitude), size=2, color="black") +
-  geom_point(data=acer2[acer2$species %in% npn,], aes(x=BgLongitude, y=BgLatitude, color="NPN Species"), size=3) + 
+  geom_point(data=tilia2[tilia2$species %in% npn,], aes(x=BgLongitude, y=BgLatitude, color="NPN Species"), size=3) + 
   scale_color_manual(values="green4") +
   guides(color=F) +
-  # geom_text(data=acer.groups, x=quantile(acer2$BgLongitude, 0.05), y=quantile(acer2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
+  # geom_text(data=tilia.groups, x=quantile(tilia2$BgLongitude, 0.05), y=quantile(tilia2$BgLatitude, 0.005), aes(label=paste0("n = ", n.clust1)), fontface="bold") +
   coord_equal() +
   theme_bw() +
   theme(plot.title=element_text(hjust=0.5, face="bold"))
 dev.off()
 
 
-summary(acer2)
+summary(tilia2)
 
-acer.list <- acer2[,c("Priority", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
-acer.list <- acer.list[order(acer.list$Priority, acer.list$Taxon, acer.list$PlantNumber),]
-names(acer.list)[1] <- "Obs.List"
-summary(acer.list)
-head(acer.list)
-write.csv(acer.list[!is.na(acer.list$BgLatitude),], file.path(path.dat, "ObservingLists_Acer.csv"), row.names=F)
+tilia.list <- tilia2[,c("Priority", "PlantNumber", "Taxon", "Vernacular", "BgLatitude", "BgLongitude", "GardenGrid", "GardenSubGrid")]
+tilia.list <- tilia.list[order(tilia.list$Priority, tilia.list$Taxon, tilia.list$PlantNumber),]
+names(tilia.list)[1] <- "Obs.List"
+summary(tilia.list)
+head(tilia.list)
+write.csv(tilia.list[!is.na(tilia.list$BgLatitude),], file.path(path.dat, "ObservingLists_tilia.csv"), row.names=F)
 # ----------------------------
 
 
@@ -335,19 +339,19 @@ library(ggplot2); library(grid) # graphing packages
 # setwd(dir.base)
 
 
-# path.dat <- file.path(dir.base, "Observing Lists/2018_Acer")
+# path.dat <- file.path(dir.base, "Observing Lists/2018_tilia")
 # maps.out <- file.path(path.dat)
 # path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
 
 # ---------------
-# Read in data about the acer collection
-acers.all <- read.csv("../data/collections/Acer_2019-03-12_190650301-BRAHMSOnlineData.csv")
-summary(acers.all)
+# Read in data about the tilia collection
+tilias.all <- read.csv("../data/collections/tilia_2019-03-12_190650301-BRAHMSOnlineData.csv")
+summary(tilias.all)
 
-acer.list <- read.csv(file.path(path.dat, "ObservingLists_Acer.csv"))
-acer.list$Obs.List <- as.factor(acer.list$Obs.List)
-summary(acer.list); 
-dim(acer.list)
+tilia.list <- read.csv(file.path(path.dat, "ObservingLists_tilia.csv"))
+tilia.list$Obs.List <- as.factor(tilia.list$Obs.List)
+summary(tilia.list); 
+dim(tilia.list)
 
 
 # ---------------
@@ -401,7 +405,7 @@ morton.grid <- spTransform(morton.grid, CRS("+proj=longlat"))
 # names(labs.x)[4:5] <- c("long", "lat")
 # names(labs.y)[4:5] <- c("long", "lat")
 
-extent.map <- c(range(acer.list$BgLongitude, na.rm=T)+c(-0.0005,+0.0005), range(acer.list$BgLatitude, na.rm=T)+c(-0.0005, 0.0005))
+extent.map <- c(range(tilia.list$BgLongitude, na.rm=T)+c(-0.0005,+0.0005), range(tilia.list$BgLatitude, na.rm=T)+c(-0.0005, 0.0005))
 grid.crop <- crop(morton.grid, extent.map)
 
 # ---------------
@@ -410,10 +414,10 @@ grid.crop <- crop(morton.grid, extent.map)
 
 # cols.save <- c("observer", "Taxon", "")
 
-for(ID in unique(acer.list$Obs.List) ){
-  dat.tmp <- acer.list[acer.list$Obs.List==ID & !is.na(acer.list$BgLatitude), !names(acer.list)=="observer"]
+for(ID in unique(tilia.list$Obs.List) ){
+  dat.tmp <- tilia.list[tilia.list$Obs.List==ID & !is.na(tilia.list$BgLatitude), !names(tilia.list)=="observer"]
   
-  png(file.path(path.dat, paste0("ObservingList_Acer_", stringr::str_pad(ID, 2, side="left", "0"), ".png")), height=8, width=10, units="in", res=120)
+  png(file.path(path.dat, paste0("ObservingList_tilia_", stringr::str_pad(ID, 2, side="left", "0"), ".png")), height=8, width=10, units="in", res=120)
   print(
     ggplot() +
       coord_equal(xlim=extent.map[1:2], ylim=extent.map[3:4]) +
@@ -421,13 +425,13 @@ for(ID in unique(acer.list$Obs.List) ){
       geom_path(data=roads[roads$name=="main route east side",], aes(x=long, y=lat, group=group), size=5, color="gray80") +
       geom_path(data=paths, aes(x=long, y=lat, group=group), size=3, linetype="solid", color="brown") +
       geom_path(data=grid.crop, aes(x=long, y=lat, group=group), size=0.25, linetype="dotted", color="gray30") +
-      geom_point(data=acers.all, aes(x=BgLongitude, y=BgLatitude), color="black", size=1.5) +
-      geom_point(data=acer.list, aes(x=BgLongitude, y=BgLatitude), color="gray50", size=3) +
+      geom_point(data=tilias.all, aes(x=BgLongitude, y=BgLatitude), color="black", size=1.5) +
+      geom_point(data=tilia.list, aes(x=BgLongitude, y=BgLatitude), color="gray50", size=3) +
       geom_point(data=dat.tmp, aes(x=BgLongitude, y=BgLatitude), color="darkgreen", size=5) +
       # geom_text(data=labs.x[2:nrow(labs.x),], aes(x=long, y=lat+0.0002, label=x.lab), color="black", fontface="bold") +
       # geom_text(data=labs.y[2:nrow(labs.y),], aes(x=long+0.0005, y=lat, label=y.lab), color="black", fontface="bold") +
       # scale_color_manual(values=c("gray50", "darkolivegreen3", "green4")) +
-      ggtitle(paste0("The Morton Arboretum\nAcer Phenology: ", stringr::str_pad(ID, 2, side="left", "0"))) +
+      ggtitle(paste0("The Morton Arboretum\ntilia Phenology: ", stringr::str_pad(ID, 2, side="left", "0"))) +
       # labs(x="x (meters)", y="y (meters)") +
       theme(panel.grid=element_blank(),
             plot.background=element_blank(),
@@ -443,7 +447,7 @@ for(ID in unique(acer.list$Obs.List) ){
   )
   dev.off()
   
-  write.csv(dat.tmp, file.path(path.dat, paste0("ObservingList_Acer_", stringr::str_pad(ID, 2, side="left", "0"), ".csv")), row.names=F)
+  write.csv(dat.tmp, file.path(path.dat, paste0("ObservingList_tilia_", stringr::str_pad(ID, 2, side="left", "0"), ".csv")), row.names=F)
 }
 
 
