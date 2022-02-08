@@ -5,7 +5,7 @@ setwd("~/Google Drive/My Drive/LivingCollections_Phenology")
 dir.base <- "Google Drive/My Drive/LivingCollections_Phenology"
 
 
-path.out <- "Google Drive/My Drive/LivingCollections_Phenology/Observing Lists"
+path.out <- "Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/Quercus"
 
 
 #Batch loading trees from the Quercus tree observation lists and placing them in data frame dat.all
@@ -13,7 +13,7 @@ dat.all <- read_bulk(directory = "../LivingCollections_Phenology/Observing Lists
 head(dat.all)
 
 #Up dating col name from V1, V2, etc to reflect the information in those columns 
-colnames(dat.all)<- c("Obs.List", "PlantNumber", "Taxon", "Vernacular","BgLatitude", "BgLongitude","GardenGrid", "GardenSubGrid", "File")
+colnames(dat.all)<- c("Obs.List", "PlantNumber", "Taxon", "Vernacular","BgLatitude", "BgLongitude","GardenGrid", "GardenSubGrid", "Spacer")
 
 summary(dat.all)
 head(dat.all)
@@ -28,10 +28,6 @@ head(df.gone)
 #between dat.all and df.gone and placing them in the new data frame new.dat
 new.dat <- anti_join(dat.all, df.gone, by=("PlantNumber"))
 summary(new.dat)
-
-#Renaming colums to make things a little easier
-colnames(new.dat)<- c("Obs.List", "PlantNumber", "Taxon", "Vernacular","BgLatitude", "BgLongitude","GardenGrid", "GardenSubGrid", "Spacer")
-head(new.dat)
 
 # Splitting the new.dat dataframe by names in the the "Spacer" column, splits the data into
 # the updated observations lists, and the list containing all oaks. 
