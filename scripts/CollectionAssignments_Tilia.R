@@ -1,6 +1,6 @@
 
-library(raster); library(rgdal); library(rgeos) # spatial analysis packages
-library(ggplot2); library(grid);# graphing packages
+library(raster); library(rgdal); library(rgeos); library(dplyr); library(factoextra); # spatial analysis packages
+library(ggplot2); library(grid);library(gridExtra); # graphing packages
 
 dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 #setwd(dir.base)
@@ -53,7 +53,7 @@ for(PLANT in unique(tilia$PlantNumber)){
 summary(tilia)
 
 unique(tilia$Taxon)
-length(unique(tilia$Taxon)) # 98 unique entries
+length(unique(tilia$Taxon)) # 29 unique entries
 
 # Looping through to add genus and species to the tilia form
 taxa.split <- strsplit(paste(tilia$Taxon), split=" ")
@@ -67,41 +67,96 @@ dim(tilia)
 # Checking for how many species overlap with NPN
 length(which(unique(tilia$species) %in% npn))
 
-# Getting rid of a tree that's really far away from everything else 
-# I think I/Christy may monitor this one myself for forecasting based on Matt Lobdell's suggestion
-trees.exclude <- tilia[tilia$BgLongitude==max(tilia$BgLongitude),] 
+# Getting rid of trees that are may be difficult to ovserve  
 
-# Provenance Codes: G = garden source; U = Unknown (for us, often natural recruit); W = wild source accession; Z = propagule from wild source
-tilia2 <- tilia[(tilia$species %in% npn) & !is.na(tilia$species) & !tilia$PlantNumber %in% trees.exclude,]
-summary(tilia2)
-dim(tilia2)
-dim(tilia)
+trees.exclude1 <- tilia[tilia$BgLongitude<=-88.068438001,] 
 
-## writig to see what me missed
+trees.exclude2 <- tilia[tilia$BgLatitude>=41.818238,]
 
-#write.csv(tilia2,"/Users/breidy/Documents/tilacheck2.csv", row.names = FALSE)
+trees.exclude <- rbind(trees.exclude1,trees.exclude2)
 
-unique(tilia2$Taxon)
+#Creating a new list composed of all trees except those listed in tree.exclude
+tilia <- anti_join(tilia, trees.exclude)
 
-unique(tilia[!tilia$PlantNumber %in% tilia2$PlantNumber, "Taxon"])
-unique(tilia[!tilia$PlantNumber %in% tilia2$PlantNumber, "species"])
-unique(tilia2$Taxon)
-unique(tilia2$species)
-summary(as.factor(tilia2$species))
+
+# Not sure if I need this right now
+#Provenance Codes: G = garden source; U = Unknown (for us, often natural recruit); W = wild source accession; Z = propagule from wild source
+#tilia2 <- tilia[(tilia$species %in% npn) & !is.na(tilia$species) & !tilia$PlantNumber %in% trees.exclude,]
+#summary(tilia2)
+#dim(tilia2)
+#dim(tilia)
+
+#writing to see if this works
+
+#write.csv(tilia,"/Users/breidy/Documents/tilacheck2.csv", row.names = FALSE)
+
+#unique(tilia2$Taxon)
+
+#unique(tilia[!tilia$PlantNumber %in% tilia2$PlantNumber, "Taxon"])
+#unique(tilia[!tilia$PlantNumber %in% tilia2$PlantNumber, "species"])
+#unique(tilia2$Taxon)
+#unique(tilia2$species)
+#summary(as.factor(tilia2$species))
 # ----------------------------
 
 
 # ----------------------------
 # Doing some clustering and mapping
 # ----------------------------
+
+
 # Compute a euclidean distance matrix
 tilia.dist <- dist(tilia[,c("BgLongitude", "BgLatitude")])
 summary(tilia.dist)
 
+#Visualizing distance
+fviz_dist(tilia.dist, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+
+
+#getting the kmean for 4 cetners with 50 starts
+tilia.kmeans4 <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=4, nstart=50)
+
+#viewing the structure of the kmeans
+str(tilia.kmeans)
+
+fviz_cluster(tilia.kmeans4, data = tilia.dist)
+
+fviz_cluster(tilia.kmeans4, data =tilia.dist, choose.vars = NULL, stand = TRUE,
+axes = c(1, 2), geom = c("text"), repel = FALSE,
+show.clust.cent =FALSE, ellipse = FALSE, ellipse.type = "convex",
+ellipse.level = 0.95, ellipse.alpha = 0.2, shape = NULL,
+pointsize = 1.5, labelsize = 12, main = "Cluster plot",)
+
+#compairing different clusters with differnt center sizes
+tilia.kmeans3 <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=3, nstart=50)
+tilia.kmeans5 <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=5, nstart=50)
+tilia.kmeans6 <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=6, nstart=50)
+
+# plots to compare
+p1 <- fviz_cluster(tilia.kmeans3, geom = "point", data = tilia.dist) + ggtitle("k = 3")
+p2 <- fviz_cluster(tilia.kmeans4, geom = "point",  data = tilia.dist) + ggtitle("k = 4")
+p3 <- fviz_cluster(tilia.kmeans5, geom = "point",  data = tilia.dist) + ggtitle("k = 4")
+p4 <- fviz_cluster(tilia.kmeans6, geom = "point",  data = tilia.dist) + ggtitle("k = 6")
+
+### DID NOT WORK
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+
+
+dist.kmeans <- as.matrix(dist(tilia.kmeans$centers))
+summary(dist.kmeans)
+
+
+
+#----------------- Working above this line----------------------#
+
+
+
+
 # Go through and add in the closest group so that groups are between 20 & 30 trees
-max.trees <- 18
-min.trees <- 13
-n.groups <- round(nrow(tilia)/mean(max.trees, min.trees))
+max.trees <- 17
+min.trees <-10 
+n.groups <- round(nrow(tilia)/mean(max.trees + min.trees))
+n.groups
 
 # ---------
 # Option 1: Group groups based on distance
@@ -110,10 +165,10 @@ n.groups <- round(nrow(tilia)/mean(max.trees, min.trees))
 # nrow(tilia2)/18
 # set.seed(30141038)
 # set.seed(30141103)
-set.seed(201901) # Good, but we'll cut group
+#set.seed(201901) # Good, but we'll cut group
 
-tilia.kmeans <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=n.groups*3) # Starting with our desired end point x ~5 so we have small clusters that get added
-# tilia.kmeans <- kmeans(tilia2[,c("BgLongitude", "BgLatitude")], centers=12) # Starting with an average of paired trees
+tilia.kmeans <- kmeans(tilia[,c("BgLongitude", "BgLatitude")], centers=n.groups*2, nstart=25) # Starting with our desired end point x 4 so we have small clusters that get added
+ tilia.kmeans <- kmeans(tilia2[,c("BgLongitude", "BgLatitude")], centers=12) # Starting with an average of paired trees
 summary(summary(as.factor(tilia.kmeans$cluster))) # Looking at average number of members when pairing
 tilia.kmeans$centers
 tilia$group.kmean <- as.factor(tilia.kmeans$cluster)
