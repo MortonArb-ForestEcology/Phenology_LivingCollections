@@ -104,8 +104,8 @@ ggplot(data=leaf.color) +
   png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Leaf Color", x="Day of Year")
 dev.off()
@@ -168,8 +168,8 @@ ggplot(data=falling.leaves) +
   png(file.path(path.figs,"All_First_Falling_Leaf_dens.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of First Falling Leaves", x="Day of Year")
 dev.off()
@@ -212,7 +212,7 @@ ggplot(data=breaking.buds) +
   scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
-  labs(title="Average Day of First Breaking Lead Buds", x="Day of Year")
+  labs(title="Average Day of First Breaking Leaf Buds", x="Day of Year")
 dev.off()
 
 ###########
@@ -256,6 +256,53 @@ ggplot(data=leaves.present) +
   theme_bw()+
   labs(title="Average Day of Leaves Present", x="Day of Year")
 dev.off()
+###########
+###########
+#Getting a graph of leaves present intensity 
+###########
+###########
+dat.lpi <- dat.spring[dat.spring$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.present.intensity", "Collection")]
+summary(dat.lpi)
+dat.lpi <- dat.lpi[!is.na(dat.lpi$PlantNumber),]
+summary(dat.lpi)
+
+#Checking to make sure date ranges are correct
+min(dat.lpi$Date.Observed)
+max(dat.lpi$Date.Observed)
+mean(dat.lpi$Date.Observed)
+range(dat.lpi$Date.Observed)
+
+#Setting my yday
+dat.lpi$yday <- lubridate::yday(dat.lpi$Date.Observed)
+summary(dat.lpi)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.lpi <- dat.lpi [dat.lpi$yday>=180,]
+#dat.lpi <- dat.lpi [dat.lpi$yday<=Sys.Date(),]
+#summary(dat.lpi)
+
+#removing "0 and NA's
+dat.lpi <- aggregate(yday ~ PlantNumber + Species + Year + Collection + leaf.present.intensity + Date.Observed , dat=dat.lpi, FUN=min, NA.rm=T)
+summary(dat.lpi)
+head(dat.lpi)
+
+dat.lpi$yday <- lubridate::yday(dat.lpi$Date.Observed)
+summary(dat.lpi)
+
+#leaves.present.intensity <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.lpi, FUN=min, NA.rm=T)
+#summary(leaves.present.intensity)
+#head(leaves.present.intensity)
+
+#png(file.path(path.figs,"Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.lpi) +
+  geom_histogram(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.present.intensity,))+
+  facet_grid(Collection~Year)+
+  #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  theme_bw()+
+  labs(title="Leaves Present Intensity", x="Day of Year",)
+dev.off()
+
 
 ###########
 ###########
@@ -293,8 +340,8 @@ png(file.path(path.figs,"Leaf_Increasing_dens.png"), height=4, width=6, units="i
 ggplot(data=leaves.increasing) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
-  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="#E69F00", "2021"="#0072B2")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Leaves Increasing in Size Observed", x="Day of Year")
 dev.off()
@@ -322,7 +369,7 @@ summary(dat.fb)
 
 
 #only looking at trees that showed flower buds in the first half of the year
-dat.fb <- dat.fb [dat.li$yday<=180,]
+dat.fb <- dat.fb [dat.fb$yday<=180,]
 summary(dat.fb)
 
 #aggregating quercus.lf so it shows me the date of first flower buds for  every plant number and species 
@@ -341,12 +388,13 @@ ggplot(data=flower.buds) +
   labs(title="Average Day of Flower Buds or Flowers Observed", x="Day of Year")
 dev.off()
 
+
 ###########
 ###########
 #Getting a graph of open flowers observations
 ###########
 ###########
-dat.fo <- dat.all[dat.all$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed", "Collection")]
+dat.fo <- dat.spring[dat.spring$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed", "Collection")]
 dat.fo <- dat.fo[!is.na(dat.fo$PlantNumber),]
 summary(dat.fo)
 head(dat.fo)
@@ -364,8 +412,8 @@ summary(dat.fo)
 
 
 #only looking at trees that showed open flowers in the first half of the year
-#dat.fo <- dat.fo [dat.li$yday<=180,]
-#summary(dat.fo)
+dat.fo <- dat.fo [dat.fo$yday<=180,]
+summary(dat.fo)
 
 #aggregating quercus.lf so it shows me the date of open flowers for  every plant number and species 
 flower.open <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fo, FUN=min, na.rm=T)
@@ -380,8 +428,8 @@ png(file.path(path.figs,"All_Flowers_Open.png"), height=4, width=6, units="in", 
 ggplot(data=flower.open) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Open Flower Observed", x="Day of Year")
 dev.off()
@@ -391,7 +439,7 @@ dev.off()
 #Getting a graph of pollen observations
 ###########
 ###########
-dat.fp <- dat.all[dat.all$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed", "Collection")]
+dat.fp <- dat.[dat.spring$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed", "Collection")]
 dat.fp <- dat.fp[!is.na(dat.fp$PlantNumber),]
 summary(dat.fp)
 head(dat.fp)
@@ -409,8 +457,8 @@ summary(dat.fp)
 
 
 #only looking at trees that showed pollen in the first half of the year
-#dat.fp <- dat.fp [dat.li$yday<=180,]
-#summary(dat.fp)
+dat.fp <- dat.fp [dat.fp$yday<=180,]
+summary(dat.fp)
 
 #aggregating quercus.lf so it shows me the date of first pollen for  every plant number and species 
 flower.pollen <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fp, FUN=min, na.rm=T)
@@ -418,17 +466,180 @@ summary(flower.pollen)
 head(flower.pollen)
 #removing 2020 because there were no spring observations
 flower.pollen <- flower.pollen[!flower.pollen$Year=="2020",]
-
+ 
 #Graphing
 png(file.path(path.figs,"All_Flowers_Pollen.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.pollen) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
-  scale_color_manual(name="Year", values=c("2018"="red", "2019"="orange", "2021"="blue")) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
   theme_bw()+
   labs(title="Average Day of Flower Pollen Observed", x="Day of Year")
 dev.off()
 
 
 ######## Need to add fruit phenophases Now
+
+#########subsetting out for fruit present
+dat.fr <- dat.spring[dat.spring$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed", "Collection")]
+summary(dat.fr)
+dat.fr <- dat.fr[!is.na(dat.fr$PlantNumber),]
+summary(dat.fr)
+
+#Checking to make sure date ranges are correct
+min(dat.fr$Date.Observed)
+max(dat.fr$Date.Observed)
+mean(dat.fr$Date.Observed)
+range(dat.fr$Date.Observed)
+
+#Setting my yday
+dat.fr$yday <- lubridate::yday(dat.fr$Date.Observed)
+summary(dat.fr)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.fr <- dat.fr [dat.fr$yday>=180,]
+#dat.fr <- dat.fr [dat.fr$yday<=Sys.Date(),]
+#summary(dat.fr)
+
+#aggregating to only show me observations that are present
+fruit.present <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fr, FUN=min, na.rm=T)
+summary(fruit.present)
+head(fruit.present)
+#removing 2020 because there were no spring observations
+fruit.present <- fruit.present[!fruit.present$Year=="2020",]
+
+
+ggplot(data=fruit.present) +
+  png(file.path(path.figs,"Fruit_present_Oak_Maple.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of Fruit Present Observed", x="Day of Year")
+dev.off()
+
+########
+#subsetting out for ripe fruit
+dat.rf <- dat.spring[dat.spring$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed", "Collection")]
+summary(dat.rf)
+dat.rf <- dat.rf[!is.na(dat.rf$PlantNumber),]
+summary(dat.rf)
+
+#Checking to make sure date ranges are correct
+min(dat.rf$Date.Observed)
+max(dat.rf$Date.Observed)
+mean(dat.rf$Date.Observed)
+range(dat.rf$Date.Observed)
+
+#Setting my yday
+dat.rf$yday <- lubridate::yday(dat.rf$Date.Observed)
+summary(dat.rf)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.rf <- dat.rf [dat.rf$yday>=180,]
+#dat.rf <- dat.rf [dat.rf$yday<=Sys.Date(),]
+#summary(dat.rf)
+
+#aggregating to only show me observations that are present
+ripe.fruit <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.rf, FUN=min, na.rm=T)
+summary(ripe.fruit)
+head(ripe.fruit)
+#removing 2020 because there were no spring observations
+ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
+
+
+ggplot(data=ripe.fruit) +
+  png(file.path(path.figs,"Ripe_Fruit_Present_All.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of Ripe Fruit Observed", x="Day of Year")
+dev.off()
+
+##############
+#subsetting out for fruit drop
+dat.fd <- dat.spring[dat.spring$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed", "Collection")]
+summary(dat.fd)
+dat.fd <- dat.fd[!is.na(dat.fd$PlantNumber),]
+summary(dat.fd)
+
+#Checking to make sure date ranges are correct
+min(dat.fd$Date.Observed)
+max(dat.fd$Date.Observed)
+mean(dat.fd$Date.Observed)
+range(dat.fd$Date.Observed)
+
+#Setting my yday
+dat.fd$yday <- lubridate::yday(dat.fd$Date.Observed)
+summary(dat.fd)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.fd <- dat.fd [dat.fd$yday>=180,]
+#dat.fd <- dat.fd [dat.fd$yday<=Sys.Date(),]
+#summary(dat.fd)
+
+#aggregating to only show me observations that are present
+fruit.drop <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.fd, FUN=min, na.rm=T)
+summary(fruit.drop)
+head(fruit.drop)
+#removing 2020 because there were no spring observations
+ripe.fruit <- ripe.fruit[!ripe.fruit$Year=="2020",]
+
+
+ggplot(data=fruit.drop) +
+  png(file.path(path.figs,"Fruit__Drop_Present_All.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2021"="#0072B2")) +
+  theme_bw()+
+  labs(title="Average Day of Fruit Drop Observed", x="Day of Year")
+dev.off()
+
+############
+#getting averages for date of  phenophases occurace in certain years
+###########
+####Open flowers quercus
+dat.ofa18 <- quercus18[quercus18$flower.open.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.of)
+#####Fruit Present quercus & acer
+#2018 quercus
+dat.fpa18 <- quercus18[quercus18$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa18)
+#2019 quercus
+dat.fpa19 <- quercus19[quercus19$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa19)
+#2021 quercus
+dat.fpa21 <- quercus21[quercus21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa21)
+#2019 acer
+dat.afpa19 <- acer19[acer19$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.afpa19)
+#2021 acer
+dat.afpa21 <- acer21[acer21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.afpa21)
+##### Ripe fruit####
+#quercus 21
+dat.rfa21 <- quercus21[quercus21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.rfa21)
+#2019 acer
+dat.arfa19 <- acer19[acer19$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.arfa19)
+#2021 acer
+dat.arfa21 <- acer21[acer21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.arfa21)
+
+### Fruit Drop
+#quercus 21
+dat.fda21 <- quercus21[quercus21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.rfa21)
+#2019 acer
+dat.afda19 <- acer19[acer19$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.arfa19)
+#2021 acer
+dat.afda21 <- acer21[acer21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.arfa21)

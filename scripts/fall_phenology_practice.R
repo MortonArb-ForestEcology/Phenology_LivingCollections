@@ -219,3 +219,46 @@ ggplot(data=dat.lci) +
   theme_bw()+
   theme(axis.text.y=element_blank())+
   labs(title="Fruit Present Intensity", x="Day of Year")
+############
+#getting averages for date of  phenophases occurace in certain years
+###########
+####Open flowers quercus
+dat.ofa18 <- quercus18[quercus18$flower.open.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.of)
+#####Fruit Present quercus & acer
+#2018 quercus
+dat.fpa18 <- quercus18[quercus18$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa18)
+#2019 quercus
+dat.fpa19 <- quercus19[quercus19$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa19)
+#2021 quercus
+dat.fpa21 <- quercus21[quercus21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa21)
+#2019 acer
+dat.afpa19 <- acer19[acer19$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.afpa19)
+#2021 acer
+dat.afpa21 <- acer21[acer21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.afpa21)
+##### Ripe fruit####
+#quercus 21
+dat.rfa21 <- quercus21[quercus21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.rfa21)
+#2019 acer
+dat.arfa19 <- acer19[acer19$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.arfa19)
+#2021 acer
+dat.arfa21 <- acer21[acer21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.arfa21)
+
+### Fruit Drop
+#quercus 21
+dat.fda21 <- quercus21[quercus21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.rfa21)
+#2019 acer
+dat.afda19 <- acer19[acer19$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.arfa19)
+#2021 acer
+dat.afda21 <- acer21[acer21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.arfa21)

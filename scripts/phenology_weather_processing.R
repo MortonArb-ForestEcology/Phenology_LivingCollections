@@ -92,6 +92,7 @@ head(dat.ghcn4)
 dat.ghcn5 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn5)
 
+
 #attemtption to generte a graph
 png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
@@ -144,8 +145,8 @@ ggplot(data=dat.ghcn7) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
 
-################# Graphing for everything since 2007#################
-dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2007,]
+################# Graphing for everything since 200#################
+dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
 summary(dat.ghcn13)
 head(dat.ghcn13)
 
@@ -213,7 +214,20 @@ ggplot(data=dat.ghcn17) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
 
+#Getting cumulative precipitation for just 2021
+dat.ghcn18 <- dat.ghcn2[dat.ghcn2$YEAR=="2021", c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
+summary(dat.ghcn18)
+#looking at cumulative precipitation only before December first since most trees will have gone dormant by then.
+dat.ghcn18 <- dat.ghcn18 [dat.ghcn18$YDAY<=334,]
+summary(dat.ghcn18)
 
+#compring it to the averages for all years without December and for all years before this year
+dat.ghcn151 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
+summary(dat.ghcn151)
+dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YDAY<=334,]
+summary(dat.ghcn151)
+dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2021,]
+summary(dat.ghcn151)
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
 #write.csv(dat.ghcn2, file.path(path.out, "data", "Weather_ArbCOOP_historical_latest.csv"), row.names=F)
