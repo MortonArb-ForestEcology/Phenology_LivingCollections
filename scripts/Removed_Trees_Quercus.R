@@ -4,23 +4,25 @@ library (tidyr); library(dplyr); library(readbulk); library(googlesheets4)
 setwd("~/Google Drive/My Drive/LivingCollections_Phenology")
 dir.base <- "Google Drive/My Drive/LivingCollections_Phenology"
 
-
-path.out <- "Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/Quercus"
-
+path.google <- "~/GoogleDrive/My Drive" # Mac
+path.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/Quercus/"
 
 #Batch loading trees from the Quercus tree observation lists and placing them in data frame dat.all
-dat.all <- read_bulk(directory = "../LivingCollections_Phenology/Observing Lists/Quercus", extension = ".csv", header=FALSE,)
+dat.all <- read_bulk(directory = "../LivingCollections_Phenology/Observing Lists/Quercus", extension = ".csv", header= TRUE,)
 head(dat.all)
+dat.all <- subset(dat.all, select = c(1:8,27))
 
+head(dat.all)
 #Up dating col name from V1, V2, etc to reflect the information in those columns 
 colnames(dat.all)<- c("Obs.List", "PlantNumber", "Taxon", "Vernacular","BgLatitude", "BgLongitude","GardenGrid", "GardenSubGrid", "Spacer")
+
 
 summary(dat.all)
 head(dat.all)
 
 #Loading the Removed trees google sheet and placing it in a data frame
 dat.gone <- read_sheet("https://docs.google.com/spreadsheets/d/16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ/edit#gid=0")
-df.gone <-data.frame(dat.gone, header=FALSE)
+df.gone <-data.frame(dat.gone, header=TRUE)
 
 head(df.gone)
 
@@ -29,17 +31,15 @@ head(df.gone)
 new.dat <- anti_join(dat.all, df.gone, by=("PlantNumber"))
 summary(new.dat)
 
+head(new.dat)
 # Splitting the new.dat dataframe by names in the the "Spacer" column, splits the data into
 # the updated observations lists, and the list containing all oaks. 
 split_new.dat <- split(new.dat, list(new.dat$Spacer))
 
 # Loop to write out new .csv filesbased upon the splits created in the split_new.dat 
 
-######Change file path to path.out if everything works correctly#######
-
 for (Spacer in names(split_new.dat)) {
-  write.csv(split_new.dat[[Spacer]], paste0("~/Desktop/R junk/", Spacer, ".csv"),)
+  write.csv(split_new.dat[[Spacer]], paste0(path.out, Spacer), row.names = F,)
 }
-
 
 
