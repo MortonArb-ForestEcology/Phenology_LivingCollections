@@ -10,7 +10,7 @@ path.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists
 #Batch loading trees from the Quercus tree observation lists and placing them in data frame dat.all
 dat.all <- read_bulk(directory = "../LivingCollections_Phenology/Observing Lists/Quercus", extension = ".csv", header= TRUE,)
 head(dat.all)
-dat.all <- subset(dat.all, select = c(1:8,27))
+dat.all <- subset(dat.all, select = c(1:9))
 
 head(dat.all)
 #Up dating col name from V1, V2, etc to reflect the information in those columns 
@@ -32,6 +32,8 @@ new.dat <- anti_join(dat.all, df.gone, by=("PlantNumber"))
 summary(new.dat)
 
 head(new.dat)
+
+
 # Splitting the new.dat dataframe by names in the the "Spacer" column, splits the data into
 # the updated observations lists, and the list containing all oaks. 
 split_new.dat <- split(new.dat, list(new.dat$Spacer))
