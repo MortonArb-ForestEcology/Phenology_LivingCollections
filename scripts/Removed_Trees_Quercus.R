@@ -10,11 +10,11 @@ path.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists
 #Batch loading trees from the Quercus tree observation lists and placing them in data frame dat.all
 dat.all <- read_bulk(directory = "../LivingCollections_Phenology/Observing Lists/Quercus", extension = ".csv", header= TRUE,)
 head(dat.all)
-dat.all <- subset(dat.all, select = c(1:9))
+dat.all <- subset(dat.all, select = c(1:8))
 
-head(dat.all)
+#head(dat.all)
 #Up dating col name from V1, V2, etc to reflect the information in those columns 
-colnames(dat.all)<- c("Obs.List", "PlantNumber", "Taxon", "Vernacular","BgLatitude", "BgLongitude","GardenGrid", "GardenSubGrid", "Spacer")
+#colnames(dat.all)<- c("Obs.List", "PlantNumber", "Taxon", "Vernacular","BgLatitude", "BgLongitude","GardenGrid", "GardenSubGrid", "Spacer")
 
 
 summary(dat.all)
@@ -33,15 +33,18 @@ summary(new.dat)
 
 head(new.dat)
 
+#Writing a csv of new.dat to be our quercus all list
+write.csv(new.dat, paste0(path.out, "Quercus_all.csv"), row.names = FALSE)
 
-# Splitting the new.dat dataframe by names in the the "Spacer" column, splits the data into
+
+# Splitting the new.dat dataframe by names in the the "Obs.List" column, splits the data into
 # the updated observations lists, and the list containing all oaks. 
-split_new.dat <- split(new.dat, list(new.dat$Spacer))
+split_new.dat <- split(new.dat, list(new.dat$Obs.List))
 
 # Loop to write out new .csv filesbased upon the splits created in the split_new.dat 
 
-for (Spacer in names(split_new.dat)) {
-  write.csv(split_new.dat[[Spacer]], paste0(path.out, Spacer), row.names = F,)
+for (Obs.List in names(split_new.dat)) {
+  write.csv(split_new.dat[[Obs.List]], paste0(path.out,"ObservingList_Quercus",Obs.List), row.names = F,)
 }
 
 
