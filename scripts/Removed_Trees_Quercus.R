@@ -2,7 +2,7 @@ library (tidyr); library(dplyr); library(readbulk); library(googlesheets4)
 
 #Making sure the working directory in is google drive. 
 setwd("~/Google Drive/My Drive/LivingCollections_Phenology")
-dir.base <- "Google Drive/My Drive/LivingCollections_Phenology"
+dir.base <- "Google Drive/My Drive/LivingCollections_Phenology/Observing Lists"
 
 path.google <- "~/GoogleDrive/My Drive" # Mac
 path.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/Quercus/"
@@ -28,27 +28,30 @@ head(df.gone)
 
 #Joinging two data frames with anti_join, to remove all the values for PlantNumber that match 
 #between dat.all and df.gone and placing them in the new data frame new.dat
-new.dat <- anti_join(dat.all, df.gone, by=("PlantNumber"))
+new.dat <- anti_join(dat.all, df.gone, by=("PlantNumber"), row.names=F)
 
 #deleting duplicates
-new.dat <- new.dat[!duplicated(new.dat), ]
-
+new.dat <- arrange(new.dat, Obs.List)
+new.dat <- new.dat[!duplicated(new.dat$PlantNumber), ]
 summary(new.dat)
 
 head(new.dat)
 
 #Writing a csv of new.dat to be our quercus all list
-write.csv(new.dat, paste0(path.out, "Quercus.csv"), row.names = FALSE)
+
+write.csv(new.dat, paste0(path.out, "ObservingList_Quercus.csv"),)
 
 
 # Splitting the new.dat dataframe by names in the the "Obs.List" column, splits the data into
 # the updated observations lists, and the list containing all oaks. 
 split_new.dat <- split(new.dat, list(new.dat$Obs.List))
 
-# Loop to write out new .csv filesbased upon the splits created in the split_new.dat 
+# Loop to write out new .csv files based upon the splits created in the split_new.dat 
 
 for (Obs.List in names(split_new.dat)) {
   write.csv(split_new.dat[[Obs.List]], paste0(path.out,"ObservingList_Quercus_",Obs.List,".csv"), row.names = F,)
 }
+
+
 
 
