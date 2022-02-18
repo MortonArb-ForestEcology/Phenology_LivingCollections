@@ -41,9 +41,7 @@ head(new.dat)
 #Writing a csv of new.dat to be our Acer all list
 
 write.csv(new.dat, paste0(path.out, "ObservingList_Acer.csv"), row.names = F)
-
-write.csv(new.dat, paste0("~/Desktop/R junk/", "ObservingList_Acer.csv"), row.names = F)
-
+3
 # Splitting the new.dat dataframe by names in the the "Obs.List" column, splits the data into
 # the updated observations lists, and the list containing all oaks. 
 split_new.dat <- split(new.dat, list(new.dat$Obs.List))
@@ -51,7 +49,7 @@ split_new.dat <- split(new.dat, list(new.dat$Obs.List))
 # Loop to write out new .csv files based upon the splits created in the split_new.dat 
 
 for (Obs.List in names(split_new.dat)) {
-  write.csv(split_new.dat[[Obs.List]], paste0("~/Desktop/R junk/","ObservingList_Acer_",Obs.List,".csv"), row.names = F,)
+  write.csv(split_new.dat[[Obs.List]], paste0(path.out,"ObservingList_Acer_",Obs.List,".csv"), row.names = F,)
 }
 
 
