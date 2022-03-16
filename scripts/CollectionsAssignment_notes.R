@@ -6,9 +6,7 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 #setwd(dir.base)
 
 path.dat <- file.path(dir.base, "Observing Lists")
-path.out <- "Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/Observing Lists"
-.maps.out <- file.path(path.dat)
-path.gis <- "/Volumes/GIS/Collections" # Note: could soft-code this in, but repeating it everywhere is making it easier to search
+path.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/Tilia/"
 dir.create(path.dat, recursive = T, showWarnings = F)
 
 # Species in the NPN database
@@ -59,7 +57,7 @@ tilia <- anti_join(tilia, trees.exclude)
 
 # Go through and add in the closest group so that groups are between 20 & 30 trees
 max.trees <- 17
-min.trees <-10 
+min.trees <-12 
 n.groups <- round(nrow(tilia)/mean(max.trees + min.trees))
 n.groups
 
@@ -104,8 +102,31 @@ p3 <- fviz_cluster(tilia.kmeans5, geom = "point",  data = tilia.dist) + ggtitle(
 p4 <- fviz_cluster(tilia.kmeans6, geom = "point",  data = tilia.dist) + ggtitle("k = 6")
 
 grid.arrange(p1, p2, p3, p4, nrow = 2)
+# after this we are picking a cluster with k= 3
 
-_____
+tilia.kmeans3$cluster
+#### adding an obs.list row, placing it as the first row, and then organizing our list by the obs.list row
+tilia$Obs.List <- tilia.kmeans3$cluster
+tilia <- tilia %>% relocate(Obs.List, .before = PlantNumber)
+tilia <- tilia[order(tilia$Obs.List),]
+tilia <- subset(tilia,select=-c(5,10,11))
+View(tilia)
+
+#Writing a csv of the total  list
+
+write.csv(tilia, paste0(path.out, "ObservingList_Tilia.csv"), row.names = F)
+
+# Splitting the tilia dataframe by the the "Obs.List" column, splits the data into
+# the updated observations lists, 
+split_new.dat <- split(tilia, list(tilia$Obs.List))
+
+# Loop to write out new .csv files based upon the splits created in the split_new.dat 
+
+for (Obs.List in names(split_new.dat)) {
+  write.csv(split_new.dat[[Obs.List]], paste0(path.out,"ObservingList_tilia_",Obs.List,".csv"), row.names = F,)}
+
+
+
 
 ###Looking at the best possible cluster within sum of squares in our groups
 
