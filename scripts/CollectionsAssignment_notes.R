@@ -1,4 +1,4 @@
-library(raster); library(rgdal); library(rgeos); library(dplyr); library(factoextra); # spatial analysis packages
+library(rgdal); library(dplyr); library(factoextra); # spatial analysis packages
 library(ggplot2); library(grid);library(gridExtra); library(FactoMineR); library(factoextra);library(cluster) # graphing packages
 
 
@@ -110,7 +110,7 @@ tilia$Obs.List <- tilia.kmeans3$cluster
 tilia <- tilia %>% relocate(Obs.List, .before = PlantNumber)
 tilia <- tilia[order(tilia$Obs.List),]
 tilia <- subset(tilia,select=-c(5,10,11))
-View(tilia)
+#View(tilia)
 
 #Writing a csv of the total  list
 
