@@ -40,6 +40,12 @@ summary(acer)
 
 ulmus <- clean.google(collection="Ulmus", dat.yr=lubridate::year(Sys.Date()))
 summary(ulmus)
+
+tilia <- clean.google(collection = "Tilia", dat.yr = lubridate::year(Sys.Date()))
+summary(tilia)
+
+macrocarpa <- clean.google(collection = "Q.macrocarpa", dat.yr = lubridate::year(Sys.Date()))
+summary(macrocarpa)
 # ----------------
 
 # Put the data together
