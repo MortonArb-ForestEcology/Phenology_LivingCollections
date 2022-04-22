@@ -49,7 +49,7 @@ summary(macrocarpa)
 # ----------------
 
 # Put the data together
-dat.all <- rbind(quercus, acer, ulmus)
+dat.all <- rbind(quercus, acer, ulmus, tilia, macrocarpa)
 summary(dat.all)
 summary(dat.all[is.na(dat.all$leaf.buds.observed),])
 
@@ -94,6 +94,9 @@ dat.all[dat.all$Date.Observed>Sys.Date(),1:6]
 quercus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Quercus.csv"))
 acer.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Acer.csv"))
 ulmus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Ulmus.csv"))
+tilia.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Tilia.csv"))
+macrocarpa.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Macrocarpa.csv"))
+
 quercus.list$collection <- "Quercus"
 acer.list$collection <- "Acer"
 ulmus.list$collection <- "Ulmus"
