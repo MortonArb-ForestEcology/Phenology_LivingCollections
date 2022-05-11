@@ -9,7 +9,7 @@ path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
 
 
 path.out <- file.path(path.google, "LivingCollections_Phenology/Phenology Forecasting")
-path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_02_EndOfYear_Report/figures_2021_end")
+path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end")
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -78,13 +78,16 @@ summary(dat.ghcn2)
 head(dat.ghcn2)
 # dat.ghcn2[dat.ghcn2$DATE=="2020-04-09",]
 
-#creating a data frame of just the last 3 years of weather data
+#creating a data frame of just the last 5 years of weather data
 dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2018,]
-summary(dat.ghcn3)
-head(dat.ghcn3)
+
+#making sure the date being shown only shows spring dates
+dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=130,]
+summary(dat.ghcn33)
+head(dat.ghcn33)
 
 #Subsetting out uncecessary columns for the phenology report
-dat.ghcn4 <- dat.ghcn3[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
+dat.ghcn4 <- dat.ghcn33[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
 summary(dat.ghcn4)
 head(dat.ghcn4)
 
@@ -94,7 +97,7 @@ summary(dat.ghcn5)
 
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
   # scale_color_manual(name="Year") +
@@ -113,7 +116,7 @@ dat.ghcn6 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn6)
 
 #graph of Mean Temperature
-png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
