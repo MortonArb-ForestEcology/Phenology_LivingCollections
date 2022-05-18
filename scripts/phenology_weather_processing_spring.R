@@ -151,12 +151,13 @@ ggplot(data=dat.ghcn7) +
 
 ################# Graphing for everything since 2008#################
 dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
+
+#making sure the date being shown only shows spring dates
+dat.ghcn13 <- dat.ghcn13[dat.ghcn13$YDAY<=149,]
+dat.ghcn13 <- dat.ghcn13[dat.ghcn13$YDAY>=59,]
 summary(dat.ghcn13)
 head(dat.ghcn13)
 
-#Setting dates for only March-may
-dat.ghcn13 <- dat.ghcn3[dat.ghcn3$YDAY<=149,]
-dat.ghcn13 <- dat.ghcn3[dat.ghcn3$YDAY>=59,]
 #Subsetting out uncecessary columns for the phenology report
 dat.ghcn14 <- dat.ghcn13[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
 summary(dat.ghcn14)
@@ -166,11 +167,12 @@ head(dat.ghcn14)
 dat.ghcn15 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn15)
 
+
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2022")     +
+  gghighlight::gghighlight(YEAR== "2022") +
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
@@ -181,6 +183,8 @@ dev.off()
 ggplot(data=dat.ghcn15) +
   geom_smooth(aes(x=YDAY, y=PRCP.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year", fill="Year")
+
+
 
 #doing the same thing as lines 73-83 above but for TMEAN
 dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
@@ -204,7 +208,7 @@ ggplot(data=dat.ghcn16) +
 dat.ghcn17 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD5.cum")]
 summary(dat.ghcn17)
 
-dat.ghcn17 <- dat.ghcn17 [dat.ghcn17$YDAY<=180,]
+#dat.ghcn17 <- dat.ghcn17 [dat.ghcn17$YDAY<=180,]
 summary(dat.ghcn17)
 
 #attemtption to generte a graph
