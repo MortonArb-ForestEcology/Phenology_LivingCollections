@@ -100,9 +100,14 @@ macrocarpa.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_
 quercus.list$collection <- "Quercus"
 acer.list$collection <- "Acer"
 ulmus.list$collection <- "Ulmus"
+tilia.list$collection <- "Tilia"
+macrocarpa.list$collection <-"Macrocarpa"
+
 quercus.list$Obs.List <- paste(quercus.list$collection, quercus.list$Obs.List, sep="-")
 acer.list$Obs.List <- paste(acer.list$collection, acer.list$Obs.List, sep="-")
 ulmus.list$Obs.List <- paste(ulmus.list$collection, ulmus.list$Obs.List, sep="-")
+tilia$Obs.List <- paste(tilia.list$collection, tilia.list$Obs.List, sep="-")
+macrocarpa$Obs.List <- paste(macrocarpa.list$collection, macrocarpa.list$Obs.List, sep="-")
 
 summary(quercus.list)
 summary(acer.list)
