@@ -112,9 +112,11 @@ macrocarpa$Obs.List <- paste(macrocarpa.list$collection, macrocarpa.list$Obs.Lis
 summary(quercus.list)
 summary(acer.list)
 summary(ulmus.list)
+summary(tilia.list)
+summary(macrocarpa.list)
 head(acer.list)
 
-obs.list <- rbind(quercus.list, acer.list, ulmus.list)
+obs.list <- rbind(quercus.list, acer.list, ulmus.list, macrocarpa.list, tilia.list)
 summary(obs.list)
 
 dat.all <- merge(dat.all, obs.list[,c("Obs.List", "collection", "PlantNumber")])
@@ -234,7 +236,7 @@ obs.all
 obs.check <- aggregate(dat.all$Date.Observed, by=list(dat.all$Observer), FUN=max)
 names(obs.check) <- c("Observer", "Observation.Last")
 obs.check
-obs.check[obs.check$Observation.Last < Sys.Date()-10,] # Return anybody that's more than 8 days old
+obs.check[obs.check$Observation.Last < Sys.Date()-10,] # Return anybody that's more than 10 days old
 
 # See if anybody has not enetered at all
 obs.all[!obs.all$Observer.ID %in% obs.check$Observer,]
@@ -244,12 +246,12 @@ acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Spec
 names(acc.check)[which(names(acc.check)=="x")] <- "Observation.Last"
 acc.check <- merge(acc.check, obs.all[,c("Obs.List", "Observer.ID")], all.x=T)
 summary(acc.check)
-acc.check[acc.check$Observation.Last < Sys.Date()-8,] # Return any tree that hasn't been observed for more than 8 days
+acc.check[acc.check$Observation.Last < Sys.Date()-10,] # Return any tree that hasn't been observed for more than 10 days
 
 # Ignore known "troublemakers"
-acc.check[acc.check$Observation.Last < Sys.Date()-8 & acc.check$Observer.ID!="Populorum" & !(acc.check$Observer.ID=="Buerger" & acc.check$Species=="Acer barbatum"),]
+acc.check[acc.check$Observation.Last < Sys.Date()-10 & acc.check$Observer.ID!="Populorum" & !(acc.check$Observer.ID=="Buerger" & acc.check$Species=="Acer barbatum"),]
 
-nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8,])/nrow(acc.check)
+nrow(acc.check[acc.check$Observation.Last < Sys.Date()-10,])/nrow(acc.check)
 nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8 & acc.check$Observer.ID!="Populorum",])/nrow(acc.check)
 #----------------------------
 # -------------------------------------------------------------
@@ -379,6 +381,7 @@ summary(droplevels(pheno.now[pheno.now$collection=="Acer" & pheno.now$leaf.buds.
 # -------------------------------------------------------------
 
 # getting exact numbers
+summary(pheno.now)
 
 summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
 summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
