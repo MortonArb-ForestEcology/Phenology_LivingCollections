@@ -55,8 +55,8 @@ summary(dat.all)
 #Getting a graph of colored leaf observations
 ###########
 ###########
-dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed", "Collection")]
-dat.lc <- dat.lc[!is.na(dat.lc$PlantNumber),]
+#dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed", "Collection")]
+#dat.lc <- dat.lc[!is.na(dat.lc$PlantNumber),]
 summary(dat.lc)
 head(dat.lc)
 
