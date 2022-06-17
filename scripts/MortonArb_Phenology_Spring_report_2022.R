@@ -73,7 +73,7 @@ summary(dat.lb)
 
 
 #only looking at trees that showed breaking leaf buds in the first half of the year
-dat.lb <- dat.lb [dat.lb$yday<=150,]
+
 dat.lb <- dat.lb [dat.lb$yday>=62,]
 summary(dat.lb)
 

@@ -383,30 +383,7 @@ summary(droplevels(pheno.now[pheno.now$collection=="Acer" & pheno.now$leaf.buds.
 # getting exact numbers
 summary(pheno.now)
 
-summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
-summary(pheno.now[pheno.now$leaf.present.observed=="Yes",])
-summary(pheno.now[pheno.now$leaf.increasing.observed=="Yes",])
-summary(pheno.now[pheno.now$leaf.color.observed=="Yes",])
-summary(pheno.now[pheno.now$leaf.falling.observed=="Yes",])
-summary(pheno.now[pheno.now$flower.buds.observed=="Yes",])
-summary(pheno.now[pheno.now$flower.open.observed=="Yes",])
-summary(pheno.now[pheno.now$flower.pollen.observed=="Yes",])
-summary(pheno.now[pheno.now$fruit.present.observed=="Yes",])
-summary(pheno.now[pheno.now$fruit.ripe.observed=="Yes",])
-summary(pheno.now[pheno.now$fruit.drop.observed=="Yes",])
 
-
-summary(pheno.now[pheno.now$leaf.buds.observed=="?",])
-summary(pheno.now[pheno.now$leaf.present.observed=="?",])
-summary(pheno.now[pheno.now$leaf.increasing.observed=="?",])
-summary(pheno.now[pheno.now$leaf.color.observed=="?",])
-summary(pheno.now[pheno.now$leaf.falling.observed=="?",])
-summary(pheno.now[pheno.now$flower.buds.observed=="?",])
-summary(pheno.now[pheno.now$flower.open.observed=="?",])
-summary(pheno.now[pheno.now$flower.pollen.observed=="?",])
-summary(pheno.now[pheno.now$fruit.present.observed=="?",])
-summary(pheno.now[pheno.now$fruit.ripe.observed=="?",])
-summary(pheno.now[pheno.now$fruit.drop.observed=="?",])
 # -------------------------------------------------------------
 # Additional QAQC: Options
 # - maps showing patterns of activity
@@ -414,3 +391,4 @@ summary(pheno.now[pheno.now$fruit.drop.observed=="?",])
 # -------------------------------------------------------------
 # 
 # -------------------------------------------------------------
+
