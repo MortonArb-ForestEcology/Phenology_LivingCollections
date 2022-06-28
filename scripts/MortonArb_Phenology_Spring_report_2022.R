@@ -308,15 +308,15 @@ ggplot(data=flower.pollen) +
   labs(title="Average Day of Flower Pollen Observed", x="Day of Year")
 dev.off()
 
-
+###########
 ### getting intensity for leaves present
-
-all.lpi <- dat.all[dat.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.intensity", "leaf.present.observed")]
+##########
+all.lpi <- dat.all[dat.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.intensity", "leaf.present.observed", "Collection")]
 all.lpi <- all.lpi[!is.na(all.lpi$PlantNumber),]
 summary(all.lpi)
 head(all.lpi)
 
-#finding the minimimum and maximum range and mean of the dates Leaf Breaking Bud was observed on our trees.
+#finding the minimimum and maximum range and mean of the dates Leaf present Bud was observed on our trees.
 #Note the na.rm=T which is removing N/A values
 min(all.lpi$Date.Observed)
 max(all.lpi$Date.Observed)
@@ -337,13 +337,13 @@ all.lpi <- all.lpi [all.lpi$yday>=62,]
 
 
 #aggregating quercus.bbi so it shows me the date of first Leaf Breaking Bud for  every plant number and species 
-ileaf.present <- aggregate(yday ~ PlantNumber + Species + Year+ leaf.present.intensity, data=all.lpi, FUN=min, na.rm=T)
+ileaf.present <- aggregate(yday ~ Collection + PlantNumber + Species + Year + leaf.present.intensity, data=all.lpi, FUN=min, na.rm=T)
 summary(ileaf.present)
 head(ileaf.present)
 
 #aggregating the data so it only shows us the average of the first day there were leaf breaking buds per species
 #not per individual. So what is the average day per species that first leaf breaking buds appeared
-meanileaf.present <- aggregate(yday ~ Species + Year+ leaf.present.intensity, data=ileaf.present, FUN=mean, na.rm=T)
+meanileaf.present <- aggregate(yday ~ Species + Year+ Collection + leaf.present.intensity, data=ileaf.present, FUN=mean, na.rm=T)
 summary(meanileaf.present)
 
 
@@ -367,19 +367,20 @@ ggplot(data=meanileaf.present) +
   theme(axis.text.y=element_blank())+
   labs(title="Mean Period of Leaves Present", x="Day of Year")
 
-ggplot(data=meanifirst.bud) +
-  geom_histogram(alpha=1.5, aes(x=yday, fill=leaf.present.intensity,)) +
-  facet_grid(~Year)+
+
+ggplot(data=meanileaf.present) +
+  geom_histogram(alpha=1.5, bins=15, aes(x=yday, fill=leaf.present.intensity,)) +
+  facet_grid(Collection ~Year)+
   #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   theme_bw()+
   theme(axis.text.y=element_blank())+
   labs(title="Mean Period of Leaves Present", x="Day of Year")
 
-png(file.path(path.figs,"Quercus_Leaf_Present_density.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Quercus_Leaf_Present_density.png"), height=4, width=6, units="in", res=320)
 ggplot(data=meanileaf.present) +
   geom_density(alpha=1.5, aes(x=yday, fill=leaf.present.intensity,)) +
-  facet_grid(~Year)+
+  facet_grid(Collection~Year)+
   #scale_fill_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   #scale_color_manual(name="Year", values=c("0%"="red", "<5%"="orange", "5-24%"="yellow", "25-49%"="green", "50-74%"="blue", "75-94%"="blue3", ">95%"="violet")) +
   theme_bw()+
