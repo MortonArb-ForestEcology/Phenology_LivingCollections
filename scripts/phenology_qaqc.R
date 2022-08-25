@@ -18,8 +18,8 @@ dir.base <- "/Volumes/GoogleDrive/My Drive/LivingCollections_Phenology/"
 # setwd(dir.base)
 #dir.base<-"G://My Drive//LivingCollections_Phenology"
 
-path.dat <- file.path(dir.base, "Observing Lists/2020_Quercus")
-maps.out <- file.path(path.dat)
+#path.dat <- file.path(dir.base, "Observing Lists/2020_Quercus")
+#maps.out <- file.path(path.dat)
 # path.gis <- "/Volumes/GIS/Collections" # Path on a Mac
 # path.gis <- "Y:/Collections" # Path on a PC
 # -------------------------------------------------------------
@@ -114,7 +114,7 @@ summary(acer.list)
 summary(ulmus.list)
 summary(tilia.list)
 summary(macrocarpa.list)
-head(acer.list)
+
 
 obs.list <- rbind(quercus.list, acer.list, ulmus.list, macrocarpa.list, tilia.list)
 summary(obs.list)
@@ -130,69 +130,69 @@ length(unique(dat.all$PlantNumber))
 length(unique(dat.all$Species))
 
 # Saving the figures that show observations for each individual
-for(PHENO in phenophase.obs){
-  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/", paste0("status_", lubridate::year(Sys.Date())), "by_Phenophase", paste0(lubridate::year(Sys.Date()), "_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
-  for(OBS in levels(dat.all$Obs.List)){
-    dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
-    dat.tmp$Phenophase <- dat.tmp[,PHENO]
-    print(
-      ggplot(data=dat.tmp[,]) +
-        ggtitle(paste0(OBS)) +
-        facet_grid(Species*PlantNumber~., scales="free_y", switch="y") +
-        geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase), binwidth=7) +
-        scale_fill_manual(PHENO, values=c("gray50", "green4", "blue2", "black") ) +
-        scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-        scale_y_discrete(expand=c(0,0)) +
-        scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-        theme(legend.position="bottom",
-              legend.text = element_text(size=rel(1)),
-              legend.title = element_text(size=rel(1)),
-              plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
-              panel.grid = element_blank(),
-              panel.background=element_rect(fill=NA, color="black"),
-              panel.spacing=unit(0, "lines"),
-              axis.text.x=element_text(size=rel(1)),
-              axis.title.x=element_text(size=rel(1), face="bold"),
-              axis.title.y=element_blank(),
-              axis.text.y=element_blank(),
-              axis.ticks.y=element_blank(),
-              strip.text.y=element_text(size=rel(1), angle=180))
-    )
-  }
-  dev.off()
-}
+#for(PHENO in phenophase.obs){
+ # pdf(file.path(dir.base, "Data_Observations/Pheno_Status/", paste0("status_", lubridate::year(Sys.Date())), "by_Phenophase", paste0(lubridate::year(Sys.Date()), "_Observations_", PHENO, "_by_List_byTree.pdf")), width=11, height=8.5)
+ # for(OBS in levels(dat.all$Obs.List)){
+  #  dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
+  #  dat.tmp$Phenophase <- dat.tmp[,PHENO]
+  #  print(
+  #    ggplot(data=dat.tmp[,]) +
+   #     ggtitle(paste0(OBS)) +
+    #    facet_grid(Species*PlantNumber~., scales="free_y", switch="y") +
+    #    geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase), binwidth=7) +
+     #   scale_fill_manual(PHENO, values=c("gray50", "green4", "blue2", "black") ) +
+     #   scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
+     #   scale_y_discrete(expand=c(0,0)) +
+     #   scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
+     #   theme(legend.position="bottom",
+            #  legend.text = element_text(size=rel(1)),
+              #legend.title = element_text(size=rel(1)),
+             # plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
+             # panel.grid = element_blank(),
+             # panel.background=element_rect(fill=NA, color="black"),
+            #  panel.spacing=unit(0, "lines"),
+             # axis.text.x=element_text(size=rel(1)),
+             # axis.title.x=element_text(size=rel(1), face="bold"),
+             # axis.title.y=element_blank(),
+              #axis.text.y=element_blank(),
+              #axis.ticks.y=element_blank(),
+              #strip.text.y=element_text(size=rel(1), angle=180))
+#   )
+#  }
+#  dev.off()
+#}
 
-for(OBS in levels(dat.all$Obs.List)){
-  dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
-  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/", paste0("status_", lubridate::year(Sys.Date())), "by_ObservingList", paste0(lubridate::year(Sys.Date()), "_Observations_", PHENO, "_by_Phenophase_byTree.pdf")), width=11, height=8.5)
-  for(PHENO in phenophase.obs){
-    dat.tmp$Phenophase <- dat.tmp[,PHENO]
-    print(
-      ggplot(data=dat.tmp[,]) +
-        ggtitle(paste0(PHENO)) +
-        facet_grid(Species*PlantNumber~., scales="free_y", switch="y") +
-        geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase), binwidth=7) +
-        scale_fill_manual(PHENO, values=c("gray50", "green4", "blue2", "black") ) +
-        scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
-        scale_y_discrete(expand=c(0,0)) +
-        scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
-        theme(legend.position="bottom",
-              legend.text = element_text(size=rel(1)),
-              legend.title = element_text(size=rel(1)),
-              plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
-              panel.grid = element_blank(),
-              panel.background=element_rect(fill=NA, color="black"),
-              panel.spacing=unit(0, "lines"),
-              axis.text.x=element_text(size=rel(1)),
-              axis.title.x=element_text(size=rel(1), face="bold"),
-              axis.title.y=element_blank(),
-              axis.text.y=element_blank(),
-              axis.ticks.y=element_blank(),
-              strip.text.y=element_text(size=rel(1), angle=180))
-    )
-  }
-  dev.off()
-}
+#for(OBS in levels(dat.all$Obs.List)){
+#  dat.tmp <- dat.all[dat.all$Obs.List==OBS, ]
+#  pdf(file.path(dir.base, "Data_Observations/Pheno_Status/", paste0("status_", lubridate::year(Sys.Date())), "by_ObservingList", paste0(lubridate::year(Sys.Date()), "_Observations_", PHENO, "_by_Phenophase_byTree.pdf")), width=11, height=8.5)
+#  for(PHENO in phenophase.obs){
+#    dat.tmp$Phenophase <- dat.tmp[,PHENO]
+ #   print(
+   #   ggplot(data=dat.tmp[,]) +
+   #     ggtitle(paste0(PHENO)) +
+   #     facet_grid(Species*PlantNumber~., scales="free_y", switch="y") +
+   #     geom_bin2d(aes(x=Date.Observed, y=PlantNumber, fill=Phenophase), binwidth=7) +
+   #     scale_fill_manual(PHENO, values=c("gray50", "green4", "blue2", "black") ) +
+   #     scale_x_date(name="Date", limits = range(dat.all$Date.Observed), expand=c(0,0)) +
+    #    scale_y_discrete(expand=c(0,0)) +
+    #    scale_alpha_continuous(name= "Prop. Obs.", limits=c(0,1), range=c(0.1,1)) +
+    #    theme(legend.position="bottom",
+     #         legend.text = element_text(size=rel(1)),
+     #         legend.title = element_text(size=rel(1)),
+     #         plot.title = element_text(size=rel(1), face="bold", hjust=0.5),
+     #         panel.grid = element_blank(),
+      #        panel.background=element_rect(fill=NA, color="black"),
+      #        panel.spacing=unit(0, "lines"),
+      #        axis.text.x=element_text(size=rel(1)),
+       #       axis.title.x=element_text(size=rel(1), face="bold"),
+       #       axis.title.y=element_blank(),
+        #      axis.text.y=element_blank(),
+       #       axis.ticks.y=element_blank(),
+         #     strip.text.y=element_text(size=rel(1), angle=180))
+   # )
+ # }
+#  dev.off()
+#}
 #----------------------------
 
 
@@ -227,19 +227,19 @@ summary(dat.all)
 # ###### ------------------ NOTE ------------------ ###### #
 # This section needs to be fixed and updated to googlesheets4!
 # ###### ------------------ NOTE ------------------ ###### #
-obs.gs <- gs_title("VolunteerAssignments_Phenology")
-obs.all <- data.frame(gs_read(obs.gs, ws="2019"))[1:5]
-obs.all$Obs.List <- paste(obs.all$Collection, obs.all$List, sep="-")
-obs.all
+#obs.gs <- gs_title("VolunteerAssignments_Phenology")
+#obs.all <- data.frame(gs_read(obs.gs, ws="2019"))[1:5]
+#obs.all$Obs.List <- paste(obs.all$Collection, obs.all$List, sep="-")
+#obs.all
 
-
+###This still works
 obs.check <- aggregate(dat.all$Date.Observed, by=list(dat.all$Observer), FUN=max)
 names(obs.check) <- c("Observer", "Observation.Last")
 obs.check
 obs.check[obs.check$Observation.Last < Sys.Date()-10,] # Return anybody that's more than 10 days old
 
 # See if anybody has not enetered at all
-obs.all[!obs.all$Observer.ID %in% obs.check$Observer,]
+#obs.all[!obs.all$Observer.ID %in% obs.check$Observer,]
 
 # Checking to make sure all trees have observations for the past week
 acc.check <- aggregate(dat.all$Date.Observed, by=dat.all[,c("PlantNumber", "Species", "Obs.List")], FUN=max)
@@ -249,10 +249,10 @@ summary(acc.check)
 acc.check[acc.check$Observation.Last < Sys.Date()-10,] # Return any tree that hasn't been observed for more than 10 days
 
 # Ignore known "troublemakers"
-acc.check[acc.check$Observation.Last < Sys.Date()-10 & acc.check$Observer.ID!="Populorum" & !(acc.check$Observer.ID=="Buerger" & acc.check$Species=="Acer barbatum"),]
+#acc.check[acc.check$Observation.Last < Sys.Date()-10 & acc.check$Observer.ID!="Populorum" & !(acc.check$Observer.ID=="Buerger" & acc.check$Species=="Acer barbatum"),]
 
 nrow(acc.check[acc.check$Observation.Last < Sys.Date()-10,])/nrow(acc.check)
-nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8 & acc.check$Observer.ID!="Populorum",])/nrow(acc.check)
+#nrow(acc.check[acc.check$Observation.Last < Sys.Date()-8 & acc.check$Observer.ID!="Populorum",])/nrow(acc.check)
 #----------------------------
 # -------------------------------------------------------------
 
@@ -276,7 +276,7 @@ pheno.now$Status <- as.factor(ifelse(pheno.now$Date.Observed < Sys.Date()-7, "OL
 summary(pheno.now$Status)
 summary(pheno.now)
 
-pheno.now[pheno.now$Date.Observed<as.Date("2019-08-01"),]
+#pheno.now[pheno.now$Date.Observed<as.Date("2019-08-01"),]
 
 
 # Checking some oddballs
@@ -286,7 +286,7 @@ summary(pheno.now[pheno.now$leaf.buds.observed=="Yes",])
 summary(pheno.now[pheno.now$leaf.buds.observed=="Yes" & pheno.now$Status=="Past Week",])
 summary(pheno.now[pheno.now$leaf.buds.observed=="Yes" & pheno.now$collection=="Acer",])
 summary(pheno.now[pheno.now$leaf.present.observed=="No",])
-summary(pheno.now[pheno.now$leaf.present.observed=="No" & pheno.now$Observer=="Bigsby",])
+#summary(pheno.now[pheno.now$leaf.present.observed=="No" & pheno.now$Observer=="Bigsby",])
 
 summary(pheno.now[pheno.now$leaf.buds.observed=="No" & pheno.now$leaf.present.observed=="No",])
 
@@ -298,7 +298,7 @@ pheno.now[pheno.now$leaf.present.observed=="?",]
 pheno.now[pheno.now$leaf.buds.observed %in% c("No", "Did not look for") & !pheno.now$leaf.buds.intensity %in% c("0", NA),]
 pheno.now[pheno.now$leaf.present.observed %in% c("No", "Did not look for") & !pheno.now$leaf.present.intensity %in% c("0%", NA),]
 pheno.now[pheno.now$leaf.increasing.observed %in% c("No", "Did not look for") & !pheno.now$leaf.increasing.intensity %in% c("0%", NA),]
-pheno.now[pheno.now$leaf.color.observed %in% c("No", "Did not look for") & !pheno.now$leaf.color.observed %in% c("0%", NA),]
+pheno.now[pheno.now$leaf.color.observed %in% c("No", "Did not look for") & pheno.now$leaf.color.observed %in% c("0%", NA),]
 pheno.now[!pheno.now$leaf.falling.observed %in% c("No", "Did not look for"),]
 summary(pheno.now[!pheno.now$leaf.color.observed %in% c("No", "Did not look for"),])
 pheno.now[pheno.now$leaf.color.observed %in% c("Yes") & pheno.now$leaf.color.intensity %in% (">95%"),]
@@ -310,7 +310,7 @@ pheno.now[pheno.now$flower.pollen.observed %in% c("No", "Did not look for") & !p
 pheno.now[pheno.now$fruit.present.observed %in% c("No", "Did not look for") & !pheno.now$fruit.present.intensity %in% c("0", NA),]
 pheno.now[pheno.now$fruit.ripe.observed %in% c("No", "Did not look for") & !pheno.now$fruit.ripe.intensity %in% c("0%", NA),]
 pheno.now[pheno.now$fruit.drop.observed %in% c("No", "Did not look for") & !pheno.now$fruit.drop.intensity %in% c("0", NA),]
-pheno.now[!pheno.now$fruit.drop.observed %in% c("No", "Did not look for"),]
+#pheno.now[!pheno.now$fruit.drop.observed %in% c("No", "Did not look for"),]
 
 summary(pheno.now[!pheno.now$fruit.present.observed %in% c("No", "Did not look for") ,])
 pheno.now[!pheno.now$fruit.ripe.intensity %in% c(NA, "0%"),]
@@ -318,7 +318,10 @@ pheno.now[!pheno.now$fruit.ripe.intensity %in% c(NA, "0%"),]
 pheno.now[! pheno.now$leaf.color.intensity %in% c(NA, "0%"),]
 summary(pheno.now[!pheno.now$flower.pollen.intensity %in% c(NA, "None") & pheno.now$collection=="Quercus",])
 
+# getting exact numbers
+summary(pheno.now)
 
+####Needs to be updated#######
 pheno.leaf <- names(pheno.now)[grep("leaf", names(pheno.now))]
 pheno.flower <- names(pheno.now)[grep("flower", names(pheno.now))]
 pheno.fruit <- names(pheno.now)[grep("fruit", names(pheno.now))]
@@ -380,8 +383,7 @@ summary(droplevels(pheno.now[pheno.now$collection=="Acer" & pheno.now$leaf.buds.
 #----------------------------
 # -------------------------------------------------------------
 
-# getting exact numbers
-summary(pheno.now)
+
 
 
 # -------------------------------------------------------------
