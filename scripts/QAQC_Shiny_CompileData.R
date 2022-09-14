@@ -23,18 +23,26 @@ acer <- clean.google(collection="Acer", dat.yr=lubridate::year(Sys.Date()))
 ulmus <- clean.google(collection="Ulmus", dat.yr=lubridate::year(Sys.Date()))
 # summary(ulmus)
 
-dat.all <- rbind(quercus, acer, ulmus)
+tilia <- clean.google(collection="Tilia", dat.yr=lubridate::year(Sys.Date()))
+# summary(tilia)
+
+dat.all <- rbind(quercus, acer, ulmus, tilia)
+
+yrs.bad <- which(lubridate::year(dat.all$Date.Observed)==lubridate::year(Sys.Date())-2000)
+dat.all$Date.Observed[yrs.bad] <- dat.all$Date.Observed[yrs.bad] %m+% lubridate::years(2000)
 summary(dat.all)
 
 # Add in observing lists
 quercus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Quercus.csv"))
 acer.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Acer.csv"))
 ulmus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Ulmus.csv"))
+tilia.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Tilia.csv"))
 quercus.list$collection <- "Quercus"
 acer.list$collection <- "Acer"
 ulmus.list$collection <- "Ulmus"
+tilia.list$collection <- "Tilia"
 
-obs.list <- rbind(quercus.list, acer.list, ulmus.list)
+obs.list <- rbind(quercus.list, acer.list, ulmus.list, tilia.list)
 obs.list$Obs.List <- paste(obs.list$collection, obs.list$Obs.List, sep="-")
 
 # summary(obs.list)
@@ -87,22 +95,22 @@ dat.all.stack <- merge(dat.all.stack, dat.int, all=T)
 
 # Merge in lat & lon data
 # Also merge in the observing lists and volunteer assignments
-quercus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Quercus.csv"))
-acer.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Acer.csv"))
-ulmus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Ulmus.csv"))
-quercus.list$collection <- "Quercus"
-acer.list$collection <- "Acer"
-ulmus.list$collection <- "Ulmus"
-quercus.list$Obs.List <- paste(quercus.list$collection, quercus.list$Obs.List, sep="-")
-acer.list$Obs.List <- paste(acer.list$collection, acer.list$Obs.List, sep="-")
-ulmus.list$Obs.List <- paste(ulmus.list$collection, ulmus.list$Obs.List, sep="-")
+# quercus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Quercus.csv"))
+# acer.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Acer.csv"))
+# ulmus.list <- read.csv(file.path("../data/ObservingLists", "ObservingLists_Ulmus.csv"))
+# quercus.list$collection <- "Quercus"
+# acer.list$collection <- "Acer"
+# ulmus.list$collection <- "Ulmus"
+# quercus.list$Obs.List <- paste(quercus.list$collection, quercus.list$Obs.List, sep="-")
+# acer.list$Obs.List <- paste(acer.list$collection, acer.list$Obs.List, sep="-")
+# ulmus.list$Obs.List <- paste(ulmus.list$collection, ulmus.list$Obs.List, sep="-")
 
 # summary(quercus.list)
 # summary(acer.list)
 # summary(ulmus.list)
 # head(acer.list)
 
-obs.list <- rbind(quercus.list, acer.list, ulmus.list)
+# obs.list <- rbind(quercus.list, acer.list, ulmus.list)
 # summary(obs.list)
 # head(obs.list)
 
