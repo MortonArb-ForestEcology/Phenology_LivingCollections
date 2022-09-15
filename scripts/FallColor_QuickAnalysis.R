@@ -18,14 +18,14 @@
 # https://r-spatial.github.io/rgee/articles/rgee03.html
 ### # http://www.css.cornell.edu/faculty/dgr2/_static/files/R_html/ex_rgee.html 
 ### # ^ This one is really good!
-library(rgee); library(reticulate)
+library(rgee); library(raster); library(rgdal); library(terra)
 # ee_check()
-rgee::ee_Initialize(user = 'crollinson@mortonarb.org')
-ee_get_earthengine_path()
+rgee::ee_Initialize(user = 'crollinson@mortonarb.org', drive=T)
+# ee_get_earthengine_path()
 
 # Setting up Chicago as 
 chicago <- ee$FeatureCollection('users/crollinson/Chicago')$first();
-Map$centerObject(chicago)
+# Map$centerObject(chicago)
 chi <- ee$Feature(chicago)
 chibuff10 <- chi$buffer(distance=10e3)
 chimsk <- ee$Image$constant(1)$clip(chibuff10$geometry())$mask()
@@ -64,9 +64,38 @@ Map$addLayer(Greendown1b$select("2001_01_01_MidGreendown_1"), Greendown1Vis, "St
 
 
 greenchi.r <- ee_as_raster(Greendown1b, region=chibuff10$geometry(), via="drive")
+class(greenchi.r)
+names(greenchi.r)
+greenchi.r[[1]]
+summary(greenchi.r)
+greenchi.r <- brick(greenchi.r)
+raster::plot(greenchi.r)
 
-ee_print(chibuff10)
+library(terra)
+# greenchi.terra <- rast(greenchi.r)
+greenchi.r[greenchi.r==0] <- NA
+# greenchi.terra[greenchi.terra<180] <- NA
+# greenchi.terra[greenchi.terra>365] <- NA
+summary(greenchi.r)
+plot(greenchi.terra)
 
+yrs <- 2001:2019
+for(i in 1:dim(greenchi.r)[3]){
+  noffset <- difftime(paste0(yrs[i], "-01-01"), "1970-01-01")
+  greenchi.r[[i]] <- greenchi.r[[i]] - as.numeric(noffset)
+}
+summary(greenchi.r)
+
+greenchi.r[greenchi.r<180] <- NA
+greenchi.r[greenchi.r>365] <- NA
+summary(greenchi.r)
+plot(greenchi.r)
+
+ts.green1 <- apply(as.array(greenchi.r), 3, mean, na.rm=T)
+
+dat1 <- data.frame(year=2001:2019, greendown1 = ts.green1)
+lm1 <- lm(greendown1 ~ year, data=dat1)
+summary(lm1)
 # phenochi.ee <- Greendown1b$mask(chimsk)
 # ee_print(phenochi.ee)
 # phenochi.ee <- Greendown1$map(function(img){
