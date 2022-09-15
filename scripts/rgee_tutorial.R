@@ -4,6 +4,7 @@ library(rgee)
 ee_Initialize(user="crollinson@mortonarb.org")
 
 ######### Playing with the imagery
+library(raster); library(rgdal); library(terra)
 dataset <- ee$ImageCollection('LANDSAT/LC08/C01/T1_8DAY_EVI')$filterDate('2017-01-01', '2017-12-31')
 ee_print(dataset)
 
@@ -23,13 +24,34 @@ region.ithaca <- ee$Geometry$Rectangle(
   geodesic = FALSE
 )
 
+Map$centerObject(region.ithaca, 11);
+colorizedVis <- list(
+  min=0.0,
+  max=1.0,
+  palette=c(
+    'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+    '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+    '012E01', '011D01', '011301'
+  )
+)
+evi02jul <- evi$select("20170704_EVI")
+Map$addLayer(evi02jul, colorizedVis, 'Landsat 8 EVI 02-July-2017')
+
+
 evi.r <- ee_as_raster(evi, 
                       region=region.ithaca,
                       via = "drive",
                       scale = 1000)
 
+class(evi.r)
 
+evi.r2 <- rast(evi.r)
+class(evi.r2)
 
+summary(evi.r)
+summary(evi.r2)
+
+plot(evi.r)
 
 ############# Workign with TerraClimate data
 terraclimate <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE")
