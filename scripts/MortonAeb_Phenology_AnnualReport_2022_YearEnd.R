@@ -114,7 +114,7 @@ dat.lc22$yday <- lubridate::yday(dat.lc22$Date.Observed)
 summary(dat.lc22)
 
 
-#only looking at trees that showed fall color in the last half of the year
+#only looking at trees that showed fall color from 9/1 on
 dat.llc22 <- dat.lc22 [dat.lc22$yday>=180,]
 summary(dat.llc22)
 
@@ -125,14 +125,67 @@ head(leaf.color22)
 
 #Graphing
 ggplot(data=leaf.color22) +
-  png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
+ # png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   #facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Collection), color=as.factor(Collection))) +
-  scale_fill_manual(name="Collection", values=c("Quercus"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
-  scale_color_manual(name="Collection", values=c("Quercus"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2")) +
+  scale_fill_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
+  scale_color_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
   theme_bw()+
-  labs(title="Average Day of First Leaf Color", x="Day of Year")
+  labs(title="Leaf Color Present", x="Day of Year")
 dev.off()
+
+ggplot(data=leaf.color22) +
+  # png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
+  #facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_histogram(alpha=0.5, aes(x=yday, fill=as.factor(Collection), color=as.factor(Collection))) +
+  scale_fill_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
+  scale_color_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
+  theme_bw()+
+  labs(title="Leaf Color Present", x="Day of Year")
+dev.off()
+### getting leaf color intensity
+dat.22lci <- dat.22[dat.22$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.intensity", "Collection")]
+summary(dat.22lci)
+dat.22lci <- dat.22lci[!is.na(dat.22lci$PlantNumber),]
+summary(dat.22lci)
+
+#Checking to make sure date ranges are correct
+min(dat.22lci$Date.Observed)
+max(dat.22lci$Date.Observed)
+mean(dat.22lci$Date.Observed)
+range(dat.22lci$Date.Observed)
+
+#Setting my yday
+dat.22lci$yday <- lubridate::yday(dat.22lci$Date.Observed)
+summary(dat.22lci)
+
+#setting my yday to only show dates later in the season and the current date
+dat.22lci <- dat.22lci [dat.22lci$yday>=200,]
+#dat.22lci <- dat.22lci [dat.22lci$yday<=Sys.Date(),]
+summary(dat.22lci)
+
+#removing "0 and NA's
+dat.22lci <- aggregate(yday ~ PlantNumber + Species + Year + Collection + leaf.color.intensity + Date.Observed , dat=dat.22lci, FUN=min, NA.rm=T)
+summary(dat.22lci)
+head(dat.22lci)
+
+dat.22lci$yday <- lubridate::yday(dat.22lci$Date.Observed)
+summary(dat.22lci)
+
+#leaves.present.intensity <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.22lci, FUN=min, NA.rm=T)
+#summary(leaves.present.intensity)
+#head(leaves.present.intensity)
+
+#png(file.path(path.figs,"Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.22lci) +
+  geom_histogram(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.color.intensity,))+
+  facet_grid(Collection~ .)+
+  #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
+  theme_bw()+
+  labs(title="Leaf color Intensity", x="Day of Year",)
+dev.off()
+
 ###########
 ###########
 #Getting a graph of colored leaf observations
