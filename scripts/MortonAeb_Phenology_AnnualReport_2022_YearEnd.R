@@ -119,7 +119,7 @@ dat.llc22 <- dat.lc22 [dat.lc22$yday>=180,]
 summary(dat.llc22)
 
 #aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-leaf.color22 <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.llc22, FUN=min, na.rm=T)
+leaf.color22 <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.llc22, FUN=min, na.rm=F)
 summary(leaf.color22)
 head(leaf.color22)
 
@@ -128,6 +128,7 @@ ggplot(data=leaf.color22) +
  # png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   #facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.5, aes(x=yday, fill=as.factor(Collection), color=as.factor(Collection))) +
+  xlim(150, 365)+
   scale_fill_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
   scale_color_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
   theme_bw()+
