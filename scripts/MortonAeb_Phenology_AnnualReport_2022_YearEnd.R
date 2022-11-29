@@ -119,7 +119,7 @@ dat.llc22 <- dat.lc22 [dat.lc22$yday>=180,]
 summary(dat.llc22)
 
 #aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-leaf.color22 <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.llc22, FUN=min, na.rm=F)
+leaf.color22 <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.llc22, FUN=min, na.rm=T)
 summary(leaf.color22)
 head(leaf.color22)
 
@@ -132,7 +132,7 @@ ggplot(data=leaf.color22) +
   scale_fill_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
   scale_color_manual(name="Collection", values=c("Quercus"="maroon4", "Acer"="#009E73", "Tilia"="gray", "Ulmus"="#0072B2")) +
   theme_bw()+
-  labs(title="Leaf Color Present", x="Day of Year")
+  labs(title="Mean Day of First Leaf Color Present", x="Day of Year")
 dev.off()
 
 ggplot(data=leaf.color22) +
