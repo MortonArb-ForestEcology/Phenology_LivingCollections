@@ -31,32 +31,92 @@ dat.22$yday <- lubridate::yday(dat.22$Date.Observed)
 summary(dat.22)
 
 
-#only looking at trees that showed fall color from 8/1 on
-dat.22 <- dat.22 [dat.22$yday>=150,]
+#only looking at trees that showed fall color from 8/1 on --> 8/1 is day 213, but I'm going to soft-code it
+dat.22 <- dat.22 [dat.22$yday>=lubridate::yday("2022-08-01"),]
+summary(dat.22)
 
-#Seperating out the columns I want. I might be able to skip this step, however,I wanted to make sure I was only grabbing trees that recorded "Yes" for leaves.
-dat.se <- dat.22[dat.22$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "leaf.color.intensity", "Collection", "leaf.present.intensity")]
+#Separating out the columns I want. I might be able to skip this step, however,I wanted to make sure I was only grabbing trees that recorded "Yes" for leaves.
+## CR: I *think* this is okay, but if a tree were to be like ginkgo and just drop ALL of it's leaves at once without showing color or having that recorded, it'd give us a bad reading.
+dat.se <- dat.22[dat.22$leaf.present.observed=="Yes", ]
 summary(dat.se)
 
 ##Creating a df containing only leaves that expressed the critera of senescence 
-dat.22o <-dat.22[dat.22$leaf.present.intensity %in% c( "<5","5-24%", "25-49%")| dat.22$leaf.color.intensity %in% c(">95", "75-94%", "50-74%"),]
+## CR: Note that here you're actulaly not referencing the object you created in line 40.  Not a problem (see my note), but just something to be aware of
+# checking our categories 
+unique(dat.se$leaf.present.intensity);unique(dat.se$leaf.color.intensity) 
+
+dat.22o <- dat.se[(!is.na(dat.se$leaf.present.intensity) & dat.se$leaf.present.intensity %in% c("0%", "<5%","5-24%", "25-49%"))| (!is.na(dat.se$leaf.color.intensity) & dat.se$leaf.color.intensity %in% c(">95%", "75-94%", "50-74%")),]
 head(dat.22o)
+summary(dat.22o)
+
 
 #aggregating out NA'S and superfluous columns 
 leaf.sen <- aggregate(yday ~ PlantNumber + Species + Collection, data=dat.22o, FUN=min, na.rm=T)
 summary(leaf.sen)
 head(leaf.sen)
+dim(leaf.sen) # 501 trees!
+
+# Creating a folder for where we want to save everything for this
+path.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations/Collaboration-Primack_FallSenescence"
+dir.create(path.out, recursive = T)
 
 #writing .csv commented out for now
-write.csv(leaf.sen,"~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations//Tree_senescence__TMA_2022.CSV")
+write.csv(leaf.sen, file.path(path.out, "Tree_senescence_TMA_2022.CSV"), row.names=F)
 
-#Graphing
+dates.breaks <- c("2022-08-15", "2022-09-01", "2022-09-15", "2022-10-01", "2022-10-15", "2022-11-01", "2022-11-15", "2022-12-01")
+yday.breaks <- lubridate::yday(dates.breaks)
+breaks.labs <- c("Aug 15", "Sept 1", "Sept 15", "Oct 1", "Oct 15", "Nov 1", "Nov 15", "Dec 1")
+
+png(file.path(path.out, "Senescence_2022_Individuals_byCollection.png"), height=8, width=8, units="in", res=220)
 ggplot(data=leaf.sen) +
   facet_grid(Collection~.,scales="free_y" ) + 
   geom_point(alpha=0.5, aes(x=yday, y=PlantNumber, fill=as.factor(yday), color=as.factor(yday))) +
- #theme(axis.title.y=element_blank(),
-        #axis.text.y=element_blank(),
-       # axis.ticks.y=element_blank())+
+  scale_x_continuous(breaks=yday.breaks, labels=breaks.labs) +
+  theme(axis.title.y=element_blank(),
+       axis.text.y=element_blank(),
+       axis.ticks.y=element_blank(),
+       panel.grid=element_blank())+
   theme(legend.position = "none")+
-  labs(title="testing", x="Day of Year")
+  labs(title="Points", x="Day of Year")
 dev.off()
+
+
+png(file.path(path.out, "Senescence_2022_byCollection-Histogram.png"), height=8, width=8, units="in", res=220)
+ggplot(data=leaf.sen) +
+  facet_grid(Collection~.,scales="free_y") + 
+  geom_histogram(aes(x=yday, fill=Species), binwidth=7) +
+  scale_x_continuous(breaks=yday.breaks, labels=breaks.labs) +
+  theme_bw() +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank())+
+  theme(legend.position = "none")+
+  labs( x="Day of Year")
+dev.off()
+
+
+# Checking out our outliers
+leaf.sen[leaf.sen$yday<=227,]
+
+
+# Doing a spot check on a couple of our outliers and it looks like there are some issues with random "no" observations early --> go back and go with your filter of saying it has to have leaves.  If we wanted to get fancy we can remove things like that that are just a clear 1-off, but that'd be hard
+dat.22[dat.22$PlantNumber=="3-2008*1",c("Timestamp", "Observer", "Date.Observed", "Species", "PlantNumber", "leaf.present.observed", "leaf.present.intensity", "leaf.color.observed", "leaf.color.intensity")]
+
+# Thsi is a weird example too becuase on 9/26 there's a Q. variabilis with the accession number that's otherwise a quercus deamii --> we need to figure that out!  This no logner appears when we filter out the "nos" but it's weird
+
+# Checking our data for PlantNumbers with multiple species attached 
+check.plants <- aggregate(yday ~ PlantNumber, data=leaf.sen, FUN=length)
+check.plants[check.plants$yday>1,]
+
+# 2 numbers with multiple species listed: 437-2004*2, 476-42*1
+head(dat.22[dat.22$PlantNumber=="437-2004*3",]) # Merskey/Houston
+head(dat.22[dat.22$PlantNumber=="476-42*1",]) # Teesdale/Wagner
+
+# # NOTE: probably worth doing this earlier on to make sure we don't have this more broadly.  Running this check on anything that is already aggregated to 1 value per PlantNumber per species will reveal it
+dat.check <- aggregate(yday ~ PlantNumber + Species + Collection, data=dat.22, FUN=median, na.rm=T)
+summary(dat.check)
+plant.check2 <- aggregate(yday ~ PlantNumber, data=dat.check, FUN=length)
+plant.check2[plant.check2$yday>1,]
+
+# Three PlantNumbers have this issue: 437-2004*2, 476-42*1, and 3-2008*1
