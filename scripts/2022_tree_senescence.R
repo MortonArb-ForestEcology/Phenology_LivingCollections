@@ -3,7 +3,7 @@
 library(ggplot2)
 #------------------------------------
 source("clean_google_form.R")
-# Reading phenooogy data for 2022
+# Reading phenology data for 2022
 acer22 <- clean.google(collection="Acer", dat.yr=2022)
 acer22$Collection <- as.factor("Acer")
 acer22$Year <- lubridate::year(acer22$Date.Observed)
