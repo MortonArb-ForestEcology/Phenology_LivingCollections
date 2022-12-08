@@ -1,15 +1,4 @@
-# A new script with to attempt to get 50% sceesence metric for leaf color in 2022
- library(ggplot2)
-###setting the file path to mac or windows##
-path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
-path.out <- file.path(path.google, "LivingCollections_Phenology/Data_Observations")
-#path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2021_02_EndOfYear_Report/figures_2021_end")
-# this is for google -> path.figs <- "G://My Drive/LivingCollections_Phenology/Reports/2021_01_MidYear_Report/figures_spring_2021"
-#if(!dir.exists("../data")) dir.create("../data/")
-#if(!dir.exists("../figures/")) dir.create("../figures/")
-
-# -----------------------------------
-# 1. Arb Data
+# A new script with to attempt to get 50% senescence metric for leaf color in 2022
 # -----------------------------------
 source("clean_google_form.R")
 # Reading phenooogy data for 2022
