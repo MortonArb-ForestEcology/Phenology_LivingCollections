@@ -82,7 +82,7 @@ head(dat.ghcn2)
 dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2018,]
 
 #making sure the date being shown only shows spring dates
-dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=130,]
+dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=334,]
 summary(dat.ghcn33)
 head(dat.ghcn33)
 
@@ -132,11 +132,11 @@ ggplot(data=dat.ghcn6) +
 dat.ghcn7 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD5.cum")]
 summary(dat.ghcn7)
 
-dat.ghcn7 <- dat.ghcn7 [dat.ghcn7$YDAY<=180,]
+dat.ghcn7 <- dat.ghcn7 [dat.ghcn7$YDAY<=334,]
 summary(dat.ghcn7)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn7) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
@@ -163,10 +163,10 @@ dat.ghcn15 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn15)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2021")     +
+  gghighlight::gghighlight(YEAR== "2022")     +
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
