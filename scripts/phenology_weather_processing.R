@@ -183,7 +183,7 @@ dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn16)
 
 #graph of Mean Temperature
-png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   gghighlight::gghighlight(YEAR== "2021") +
@@ -204,7 +204,7 @@ dat.ghcn17 <- dat.ghcn17 [dat.ghcn17$YDAY<=180,]
 summary(dat.ghcn17)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn17) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   gghighlight::gghighlight(YEAR== "2021") +
@@ -217,8 +217,8 @@ ggplot(data=dat.ghcn17) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
 
-#Getting cumulative precipitation for just 2021
-dat.ghcn18 <- dat.ghcn2[dat.ghcn2$YEAR=="2021", c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
+#Getting cumulative precipitation for just this year
+dat.ghcn18 <- dat.ghcn2[dat.ghcn2$YEAR=="2022", c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn18)
 #looking at cumulative precipitation only before December first since most trees will have gone dormant by then.
 dat.ghcn18 <- dat.ghcn18 [dat.ghcn18$YDAY<=334,]
@@ -229,7 +229,7 @@ dat.ghcn151 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn151)
 dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YDAY<=334,]
 summary(dat.ghcn151)
-dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2021,]
+dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2022,]
 summary(dat.ghcn151)
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
