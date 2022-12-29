@@ -748,143 +748,23 @@ summary(dat.arfa21)
 
 #Getting an animated polar graph of colored leaf observations
 ###########
-###########
-dat.lc22 <- dat.22[dat.22$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed", "Collection")]
-dat.lc22 <- dat.lc22[!is.na(dat.lc22$PlantNumber),]
-summary(dat.lc22)
-head(dat.lc22)
 
-#finding the minimimum and maximum range and mean of the dates fall color was observed on our trees.
-#Note the na.rm=T which is removing N/A values
-min(dat.lc22$Date.Observed)
-max(dat.lc22$Date.Observed)
-range(dat.lc22$Date.Observed)
-mean(dat.lc22$Date.Observed,na.rm=T)
-
-#Now make my Yday
-dat.lc22$yday <- lubridate::yday(dat.lc22$Date.Observed)
-summary(dat.lc22)
-
-
-#only looking at trees that showed fall color from 9/1 on
-dat.llc22 <- dat.lc22 [dat.lc22$yday>=180,]
-summary(dat.llc22)
-
-#aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
-leaf.color22 <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.llc22, FUN=min, na.rm=T)
-summary(leaf.color22)
-head(leaf.color22)
-
-#Graphing
-
-ggplot(data=leaf.color22) +
-  # png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
-  #facet_grid(Collection~ . ) + # This is the code that will stack everything
-  geom_bar(alpha=5,aes(x=yday, fill=as.factor(Collection), color=as.factor(Collection))) + ylim(-100,120) +
-  #scale_fill_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442")) +
- # scale_color_manual(name="Year", values=c("2018"="maroon4", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442")) +
-  theme_bw()+
-  labs(title="Leaf Color Present", x="Day of Year")+
-  coord_polar(start = 0)
-
-###### First animated 
-P = ggplot(data=leaf.color22)+ 
-  geom_bar (aes(x =yday, fill=as.factor(Collection), color=as.factor(Collection))) + ylim(-100,120)+
-  theme_bw()+
-  #labs(title="Leaf Color Present", x="Day of Year")+
- #coord_polar(start = 0)+
-  labs(title = "Data over time")
-
-
-anim = P + transition_states(yday, transition_length = 4, state_length = 1) +
-  view_follow(fixed_x = TRUE)  +
-  labs(title = 'GDP per Year : {closest_state}',  
-       subtitle  =  "Top 10 Countries",
-       caption  = "GDP in Billions USD | Data Source: World Bank Data")
-
-animate(anim, 200, fps = 20,  width = 1200, height = 1000, 
-        renderer = ffmpeg_renderer()) -> for_mp4
-anim_save("animation.mp4", animation = for_mp4 )
-
-animate(anim, 200, fps = 20,  width = 1200, height = 1000, 
-        renderer = gifski_renderer("gganim.gif"))
-
+ dat.lc22 <- dat.22[dat.22$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "Collection")] 
+  dat.lc22 <- dat.lc22[!is.na(dat.lc22$PlantNumber),]
+  summary(dat.lc22)
   
+  dat.lc22$yday <- lubridate::yday(dat.lc22$Date.Observed)
+  summary(dat.lc22)
+  dat.lc22 <- dat.lc22 [dat.lc22$yday>=200,]
+  dat.lci22 <- dat.lci22 [dat.lc22$yday<=331,]
   
-  a <- data.frame(group=c("A","B","C"), values=c(3,2,4), frame=rep('a',3))
-  b <- data.frame(group=c("A","B","C"), values=c(5,3,7), frame=rep('b',3))
-  data <- rbind(a,b)  
-  
-  # Basic barplot:
-  ggplot(a, aes(x=group, y=values, fill=group)) + 
-    geom_bar(stat='identity')
-  
-  # Make a ggplot, but add frame=year: one image per year
-  ggplot(data, aes(x=group, y=values, fill=group)) + 
-    geom_bar(stat='identity') +
-    theme_bw() +
-    # gganimate specific bits:
-    transition_states(
-      frame,
-      transition_length = 2,
-      state_length = 1
-    ) +
-    ease_aes('sine-in-out')
-  anim_save("288-animated-barplot-transition.gif",animation = for_gif)  
-  
-  
-  
-#######
-  dat.lci22 <- dat.22[dat.22$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.intensity", "Collection")]
-  summary(dat.lci22)
-  dat.lci22 <- dat.lci22[!is.na(dat.lci22$PlantNumber),]
-  summary(dat.lci22)
-
-dat.lci22$leaf.color.intensity <- gsub("[%]","", dat.lci22$leaf.color.intensity)
-
-
-  #Checking to make sure date ranges are correct
-  min(dat.lci22$Date.Observed)
-  max(dat.lci22$Date.Observed)
-  mean(dat.lci22$Date.Observed)
-  range(dat.lci22$Date.Observed)
-  
-  #Setting my yday
-  dat.lci22$yday <- lubridate::yday(dat.lci22$Date.Observed)
-  summary(dat.lci22)
-  
-  #setting my yday to only show dates later in the season and the current date
-  dat.lci22 <- dat.lci22 [dat.lci22$yday>=200,]
-  #dat.lci22 <- dat.lci22 [dat.lci22$yday<=Sys.Date(),]
-  summary(dat.lci22)
-  
-  #removing "0 and NA's
-  dat.lci22 <- aggregate(yday ~ PlantNumber + Species + Year + Collection + leaf.color.intensity + Date.Observed , dat=dat.lci22, FUN=min, NA.rm=T)
-  summary(dat.lci22)
-  head(dat.lci22)
-  
-  dat.lci22$yday <- lubridate::yday(dat.lci22$Date.Observed)
-  summary(dat.lci22)
-  
-  #leaves.present.intensity <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.lci, FUN=min, NA.rm=T)
-  #summary(leaves.present.intensity)
-  #head(leaves.present.intensity)
-  
-  #png(file.path(path.figs,"Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)
-  ggplot(data=dat.lci22) +
-    geom_histogram(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.color.intensity,))+
-    facet_grid(Collection~ .)+
-    #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
-    #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
-    theme_bw()+
-    labs(title="Leaf color Intensity", x="Day of Year",)
-  dev.off()
- 
-    ggplot(data=dat.lci22)+
-  geom_col(aes(x= yday, y= leaf.color.intensity,fill=leaf.color.intensity,))+
-    labs(title = "Data over time", x = "Day", y = "Value")
-  
-    
-     p + transition_time(day) +
-     labs(title = "Data over time {frame_time}")  
+  ggplot(dat.lc22) + 
+    geom_histogram(alpha=1.5, binwidth =5, aes(x=yday, fill=Collection,))+ ylim(-100,120) +
+     theme_bw()+
+     labs(title="Leaf color", x="Day of Year",)+
+    coord_polar(start = 200)+
+    transition_states(yday, transition_length = 30, state_length =30)+
+    shadow_mark(size = 0.5,)
+   dev.off()
+##########################################
    
