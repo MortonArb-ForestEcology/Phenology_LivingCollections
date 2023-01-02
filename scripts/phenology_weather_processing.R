@@ -186,7 +186,7 @@ summary(dat.ghcn16)
 #png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2021") +
+  gghighlight::gghighlight(YEAR== "2022") +
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
