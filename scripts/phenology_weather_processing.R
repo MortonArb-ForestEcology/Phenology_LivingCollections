@@ -100,6 +100,7 @@ summary(dat.ghcn5)
 #png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
+  geom_smooth(aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
@@ -119,7 +120,8 @@ summary(dat.ghcn6)
 #png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
+ 
+   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
 
@@ -166,6 +168,7 @@ summary(dat.ghcn15)
 #png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
+  geom_smooth(aes(x=YDAY, y=PRCP.cum))+
   gghighlight::gghighlight(YEAR== "2022")     +
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
