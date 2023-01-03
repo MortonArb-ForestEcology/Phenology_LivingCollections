@@ -3,7 +3,6 @@
 # ---------------------------------
 library(ggplot2)
 library(gghighlight)
-
 # path.google <- "G:/My Drive" # Windows
 path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
 
@@ -95,12 +94,14 @@ head(dat.ghcn4)
 dat.ghcn5 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn5)
 
+#calculating the mean daily percipation across years
+dat.ghcn5mean <- aggregate(PRCP.cum ~ YDAY,dat=dat.ghcn5, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
 #png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  geom_smooth(aes(x=YDAY, y=PRCP.cum))+
+  geom_smooth(data=dat.ghcn5mean)+ (aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
@@ -116,14 +117,21 @@ ggplot(data=dat.ghcn5) +
 dat.ghcn6 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn6)
 
+dat.ghcn6mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
+
+#(color = "green", linetype = "dashed", aes(x=YDAY, Y=TMEAN))+
 #graph of Mean Temperature
-#png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
+
+  #png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
-  geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
- 
-   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
+  geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
+ geom_smooth(aes (x=YDAY, y=TMEAN))+
+  gghighlight::gghighlight(YEAR== "2022") +
+   geom_smooth(data= dat.ghcn6mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
+  labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   theme_classic()
-dev.off()
+dev.off() 
+
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn6) +
@@ -164,12 +172,15 @@ head(dat.ghcn14)
 dat.ghcn15 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn15)
 
+#calculating the mean daily percipation across years
+dat.ghcn15mean <- aggregate(PRCP.cum ~ YDAY,data=dat.ghcn15, FUN=mean, NA.rm=T)
+
 #attemtption to generte a graph
 #png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  geom_smooth(aes(x=YDAY, y=PRCP.cum))+
   gghighlight::gghighlight(YEAR== "2022")     +
+  geom_smooth(data=dat.ghcn15mean)+ (aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
@@ -184,15 +195,18 @@ ggplot(data=dat.ghcn15) +
 #doing the same thing as lines 73-83 above but for TMEAN
 dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn16)
+dat.ghcn16mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
 
 #graph of Mean Temperature
 #png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
-  geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
+  geom_smooth(aes (x=YDAY, y=TMEAN))+
   gghighlight::gghighlight(YEAR== "2022") +
+  geom_smooth(data= dat.ghcn16mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   theme_classic()
-dev.off()
+dev.off() 
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn16) +
