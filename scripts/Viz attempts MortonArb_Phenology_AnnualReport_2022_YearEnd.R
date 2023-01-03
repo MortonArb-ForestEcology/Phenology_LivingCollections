@@ -1,15 +1,10 @@
 # A new script with some combined collections analyses/graphs for the end of the year report
 library(ggplot2)
-library(stringi)
 library(lubridate)
 library(ggiraph)
-library(viridis)
-library(ggnewscale)
-library(geomtextpath)
 library(cowplot)
 library(tidyverse)
 library(gganimate)
-library(gifski)
 library(dplyr)
 ###setting the file path to mac or windows##
 path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
@@ -764,7 +759,21 @@ summary(dat.arfa21)
      labs(title="Leaf color", x="Day of Year",)+
     coord_polar(start = 200)+
     transition_states(yday, transition_length = 30, state_length =30)+
-    shadow_mark(size = 0.5,)
+    shadow_mark(size = 1, past = TRUE)
    dev.off()
+   
+   
+    ggplot(dat.lc22) + 
+     geom_histogram(alpha=1.5, binwidth =2.5, aes(x=yday, fill=Collection,))+ ylim(-100,120) +
+     theme_dark()+
+     labs(title="Leaf color", x="Day of Year",)+
+     coord_polar(start = 200)+
+     transition_states(yday, transition_length = 30, state_length =30)+
+      ease_aes(x = 'sine-out', y = 'sine-out') + 
+      shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+                  falloff = 'sine-in', exclude_phase = 'enter') 
+   dev.off()
+   
+
 ##########################################
    
