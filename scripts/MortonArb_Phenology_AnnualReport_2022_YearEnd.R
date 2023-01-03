@@ -728,3 +728,54 @@ summary(dat.arfa19)
 #2021 acer
 dat.afda21 <- acer21[acer21$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
 summary(dat.arfa21)
+
+##### breaking leaf buds 22
+dat.bbq22 <- quercus22[quercus22$leaf.breaking.buds.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "leaf.breaking.buds.observed")]
+summary(dat.bbq22)
+
+dat.bba22 <- acer22[acer22$leaf.breaking.buds.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "leaf.breaking.buds.observed")]
+summary(dat.bba22)
+
+
+### Flower buds 22
+dat.fbq22 <- quercus22[quercus22$flower.buds.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.buds.observed")]
+summary(dat.bbq22)
+
+dat.fba22 <- acer22[acer22$flower.buds.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.buds.observed")]
+summary(dat.bba22)
+
+### open flowers 22
+dat.ofq22 <- quercus22[quercus22$flower.open.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.ofq22)
+
+dat.ofa22 <- acer22[acer22$flower.open.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.ofa22)
+
+### pollen 22
+dat.pfq22 <- quercus22[quercus22$flower.pollen.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.pollen.observed")]
+summary(dat.ofq22)
+
+dat.pfa22 <- acer22[acer22$flower.pollen.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.pollen.observed")]
+summary(dat.ofa22)
+
+
+### fruit present
+dat.fpq22 <- quercus22[quercus22$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpq22)
+
+dat.fpa22 <- acer22[acer22$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa22)
+
+### Ripe fruit 
+dat.frq22 <- quercus22[quercus22$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.frq22)
+
+dat.fra22 <- acer22[acer22$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.fra22)
+
+### Fruit Drop
+dat.fdq22 <- quercus22[quercus22$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.frq22)
+
+dat.fda22 <- acer22[acer22$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.fda22)
