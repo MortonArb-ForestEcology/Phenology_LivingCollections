@@ -8,7 +8,7 @@ library(gganimate)
 library(dplyr)
 library(reshape2)
 ###setting the file path to mac or windows##
-path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
+path.google <- "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive" # Mac
 path.out <- file.path(path.google, "G://My Drive/LivingCollections_Phenology/Reports")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end")
 # this is for google -># 
@@ -853,10 +853,10 @@ dat.22y$pheno = with(dat.22y, ifelse(dat.22y$leaf.color.observed=="Yes", "Leaf C
 
 
 
-ggplot(dat.22y) + 
-  geom_bar(alpha=1.5,aes(x=yday, fill=pheno,))+ ylim(-100,120) +
+p<-ggplot(dat.22y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,120) +
   theme_dark()+
-  labs(title="Leaf color", x="Day of Year",)+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
   coord_polar(start = 200)+
   transition_states(yday, transition_length = 30, state_length =30)+
   ease_aes(x = 'sine-out', y = 'sine-out') + 
@@ -864,7 +864,7 @@ ggplot(dat.22y) +
               falloff = 'sine-in', exclude_phase = 'enter') 
 dev.off()
 
-
+animate(p, fps=8)
 
 
 
