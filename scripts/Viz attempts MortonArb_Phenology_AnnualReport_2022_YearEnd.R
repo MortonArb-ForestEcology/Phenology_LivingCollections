@@ -6,6 +6,7 @@ library(cowplot)
 library(tidyverse)
 library(gganimate)
 library(dplyr)
+library(reshape2)
 ###setting the file path to mac or windows##
 path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
 path.out <- file.path(path.google, "G://My Drive/LivingCollections_Phenology/Reports")
@@ -776,4 +777,115 @@ summary(dat.arfa21)
    
 
 ##########################################
+dat.lb22 <- dat.22[dat.22$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed","leaf.breaking.buds.observed","leaf.present.observed", "Collection")] 
+dat.lb22 <- dat.lb22[!is.na(dat.lb22$PlantNumber),]
+summary(dat.lb22)
    
+dat.lp22 <- dat.22[dat.22$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed","leaf.breaking.buds.observed","leaf.present.observed", "Collection")] 
+dat.lp22 <- dat.lp22[!is.na(dat.lp22$PlantNumber),]
+summary(dat.lp22)
+
+dat.lc22 <- dat.22[dat.22$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection")]  
+dat.lc22 <- dat.lc22[!is.na(dat.lc22$PlantNumber),]
+summary(dat.lc22)
+
+dat.22lam <- rbind(dat.lc22,dat.lp22,dat.lb22)
+summary(dat.22lam)
+dat.22lam$yday <- lubridate::yday(dat.22lam$Date.Observed)
+summary(dat.22lam)
+
+dat.22y <- rbind(dat.lc22,dat.lp22,dat.lb22)
+summary(dat.22y)
+dat.22y$yday <- lubridate::yday(dat.22y$Date.Observed)
+summary(dat.22y)
+
+
+#x <- function(dat.22lam) {
+ # dat.22lam$leaf.present.observed= "Yes" <- ifelse(dat.22lam$leaf.color.observed!="Yes", dat.22lam$leaf.color.observed,NA)
+ # dat.22lam$leaf.breaking.buds.observed = "Yes" <- ifelse(dat.22lam$leaf.present.observed!=Yes| dat.22lam$leaf.color.observed!="Yes", dat.22$leaf.breaking.buds.observed,NA)
+ # return (dat.22lam)
+#}
+
+
+#x <- function(dat.22lam) {
+ # dat.22lam$leaf.color.observed ="Yes" <- ifelse(dat.22lam$leaf.color.observed!= "No", dat.22lam$leaf.color.observed,NA)
+ # dat.22lam$leaf.present.observed = "Yes" <- ifelse(dat.22lam$leaf.color.observed!="Yes" & dat.22lam$leaf.present.observed!"No", dat.22lam$leaf.present.observed,NA)
+ # dat.22lam$leaf.breaking.buds.observed = "Yes" <- ifelse(dat.22lam$leaf.present.observed!="Yes" & dat.22lam$leaf.color.observed!="Yes", dat.22$leaf.breaking.buds.observed,NA)
+ # return (dat.22lam)
+#}
+
+
+#x <- function(dat.22lam) {
+ # dat.22lam$leaf.color.observed <- if(dat.22lam$leaf.color.observed!= "No")
+#  dat.22lam$leaf.present.observed <- ifelse(dat.22lam$leaf.color.observed!="Yes" & dat.22lam$leaf.present.observed!="No", dat.22lam$leaf.present.observed,NA)
+#  dat.22lam$leaf.breaking.buds.observed <- ifelse(dat.22lam$leaf.present.observed!="Yes" | dat.22lam$leaf.color.observed!="Yes", dat.22$leaf.breaking.buds.observed,NA)
+#  return (dat.22lam)
+#}
+#dat.22x <- x(dat.22lam=dat.22lam)
+#summary(dat.22x)
+
+#dat.22y$leaf.breaking.buds.observed <-ifelse(dat.22y$leaf.breaking.buds.observed=="Yes", "Yes",NA)
+#dat.22y$leaf.present.observed <-ifelse(dat.22y$leaf.present.observed=="Yes", "Yes",NA)
+#dat.22y$leaf.color.observed <-ifelse(dat.22y$leaf.color.observed=="Yes", "Yes",NA)
+
+
+#dat.22y$pheno <- if( dat.22y$leaf.present.observed=="Yes" & dat.22y$leaf.breaking.buds.observed=="Yes" & dat.22y$leaf.color.observed=="Yes"  "Colored Leaves")
+ # dat.22y$pheno <- ifelse( dat.22y$leaf.present.observed!="Yes" & dat.22y$leaf.breaking.buds.observed!="Yes" & dat.22y$leaf.color.observed=="Yes", "Colored Leaves", "Leaves")
+#dat.22y$pheno <- ifelse( dat.22y$leaf.present.observed!="Yes" & dat.22y$leaf.breaking.buds.observed=="Yes" & dat.22y$leaf.color.observed!="Yes", "Breaking Leaf Buds", "Leaves")
+#dat.22y$pheno <- ifelse( dat.22y$leaf.present.observed=="Yes"  & dat.22y$leaf.color.observed!="Yes", "Leave", "Colored Leaves")
+
+
+#dat.22y$pheno <- ifelse( dat.22y$leaf.present.observed=="Yes" & dat.22y$leaf.breaking.buds.observed=="Yes" & dat.22y$leaf.color.observed!="Yes", "Leaves","Breaking Leaf ")
+#dat.22y$pheno <- ifelse( dat.22y$leaf.present.observed=="Yes" & dat.22y$leaf.breaking.buds.observed=="Yes" & dat.22y$leaf.color.observed!="Yes", "Leaves","Breaking Leaf ")
+
+
+
+#dat.22lam$pheno<-  ifelse(dat.22$leaf.present.observed!="No" & dat.22lam$leaf.color.observed!="Yes", dat.22lam)
+
+
+
+
+dat.22y$pheno = with(dat.22y, ifelse(dat.22y$leaf.color.observed=="Yes", "Leaf Color Observed",
+                                     ifelse(dat.22y$leaf.present.observed=="Yes" & dat.22y$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
+                                            ifelse(dat.22y$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
+
+
+
+
+
+ggplot(dat.22y) + 
+  geom_bar(alpha=1.5,aes(x=yday, fill=pheno,))+ ylim(-100,120) +
+  theme_dark()+
+  labs(title="Leaf color", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+dev.off()
+
+
+
+
+
+
+#dfm <- melt(dat.22lam[,c("yday", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed")],id.vars = 1)
+
+#ggplot(dfm,aes(x = yday,y = value)) + 
+ # geom_bar(aes(fill = variable),stat = "identity",position = "dodge") 
+#dev.off()
+
+#ggplot(dfm) + 
+ # geom_bar(alpha=1.5,aes(x=yday, fill=as.factor(value),))+ ylim(-100,120) +
+  #theme_dark()+
+  #labs(title="Leaf color", x="Day of Year",)+
+  #coord_polar(start = 200)+
+  #transition_states(yday, transition_length = 30, state_length =30)+
+  #ease_aes(x = 'sine-out', y = 'sine-out') + 
+  #shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+   #           falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+
+#dat.22lamb <- dat.22lam %>% select("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed") %>%
+  pivot_longer(., cols = c("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed"), names_to = "Var", values_to = "Val")
