@@ -844,7 +844,7 @@ summary(dat.22y)
 
 
 
-
+#Finally realized I could make another ifelse statment the "else" in and ifelse statment- astounding levels of stupidity here. 
 dat.22y$pheno = with(dat.22y, ifelse(dat.22y$leaf.color.observed=="Yes", "Leaf Color Observed",
                                      ifelse(dat.22y$leaf.present.observed=="Yes" & dat.22y$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
                                             ifelse(dat.22y$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
@@ -852,9 +852,11 @@ dat.22y$pheno = with(dat.22y, ifelse(dat.22y$leaf.color.observed=="Yes", "Leaf C
 
 
 
+####### many versions of the same graph
 
+# Large pole dark 
 p<-ggplot(dat.22y) + 
-  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,120) +
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,325) +
   theme_dark()+
   labs(title="Leaf Phenopases", x="Day of Year",)+
   coord_polar(start = 200)+
@@ -862,11 +864,82 @@ p<-ggplot(dat.22y) +
   ease_aes(x = 'sine-out', y = 'sine-out') + 
   shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
               falloff = 'sine-in', exclude_phase = 'enter') 
-dev.off()
+
+
+animate(p, fps=8)
+
+# small pole dark
+
+p<-ggplot(dat.22y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_dark()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+# no pole dark
+p<-ggplot(dat.22y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(0,325) +
+  theme_dark()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
 
 animate(p, fps=8)
 
 
+## Light
+#Large pole light
+p<-ggplot(dat.22y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+#small pole light
+
+p<-ggplot(dat.22y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+# no pole light
+p<-ggplot(dat.22y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(0,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
 
 
 #dfm <- melt(dat.22lam[,c("yday", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed")],id.vars = 1)
@@ -888,4 +961,4 @@ animate(p, fps=8)
 
 
 #dat.22lamb <- dat.22lam %>% select("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed") %>%
-  pivot_longer(., cols = c("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed"), names_to = "Var", values_to = "Val")
+#  pivot_longer(., cols = c("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed"), names_to = "Var", values_to = "Val")
