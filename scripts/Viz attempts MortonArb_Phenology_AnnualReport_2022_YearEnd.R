@@ -854,7 +854,7 @@ dat.22y$pheno = with(dat.22y, ifelse(dat.22y$leaf.color.observed=="Yes", "Leaf C
 
 ####### many versions of the same graph
 
-# Large pole dark 
+# Large pole dark
 p<-ggplot(dat.22y) + 
   geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,325) +
   theme_dark()+
@@ -942,6 +942,22 @@ p<-ggplot(dat.22y) +
 animate(p, fps=8)
 
 
+
+###
+#Small pole light- facet- collections
+p<-ggplot(dat.22y) + 
+  facet_wrap_interactive(Collection~ .)+
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-50,200) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+animate(p, fps=8)
+
 #dfm <- melt(dat.22lam[,c("yday", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed")],id.vars = 1)
 
 #ggplot(dfm,aes(x = yday,y = value)) + 
@@ -959,6 +975,24 @@ animate(p, fps=8)
    #           falloff = 'sine-in', exclude_phase = 'enter') 
 
 
+dat.lb22i <- dat.22[dat.22$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection", "leaf.breaking.buds.intensity", "leaf.present.intensity", "leaf.color.intensity" )] 
+dat.lb22i <- dat.lb22i[!is.na(dat.lb22i$PlantNumber),]
+summary(dat.lb22i)
 
-#dat.22lamb <- dat.22lam %>% select("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed") %>%
-#  pivot_longer(., cols = c("leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed"), names_to = "Var", values_to = "Val")
+dat.lp22i <- dat.22[dat.22$leaf.present.observed=="Yes",c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection", "leaf.breaking.buds.intensity", "leaf.present.intensity", "leaf.color.intensity" )]
+dat.lp22i <- dat.lp22i[!is.na(dat.lp22i$PlantNumber),]
+summary(dat.lp22i)
+
+dat.lc22i <- dat.22[dat.22$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection", "leaf.breaking.buds.intensity", "leaf.present.intensity", "leaf.color.intensity" )]  
+dat.lc22i <- dat.lc22i[!is.na(dat.lc22i$PlantNumber),]
+summary(dat.lc22i)
+
+
+dat.22z <- rbind(dat.lc22i,dat.lp22i,dat.lb22i)
+summary(dat.22z)
+dat.22z$yday <- lubridate::yday(dat.22z$Date.Observed)
+summary(dat.22z)
+
+dat.22z$pheno = with(dat.22z, ifelse(dat.22z$leaf.color.intensity %>% c("50-74%", "75-94%",">95%")| dat.22z$leaf.present.intensity %>% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed",
+                                     ifelse(dat.22z$leaf.present.intensity %>% c("50-74%", "75-94%", ">95%") & dat.22z$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
+                                            ifelse(dat.22z$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
