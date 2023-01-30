@@ -996,3 +996,7 @@ summary(dat.22z)
 dat.22z$pheno = with(dat.22z, ifelse(dat.22z$leaf.color.intensity %>% c("50-74%", "75-94%",">95%")| dat.22z$leaf.present.intensity %>% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed",
                                      ifelse(dat.22z$leaf.present.intensity %>% c("50-74%", "75-94%", ">95%") & dat.22z$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
                                             ifelse(dat.22z$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
+dat.22z$pheno = with(dat.22z, ifelse(leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed",
+                                     ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.intensity %>% c("50-74%", "75-94%", ">95%"), "Leaves Present Observed",
+                                            ifelse(leaf.color.intensity %>% c("50-74%", "75-94%",">95%")| leaf.present.intensity %>% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed", "Leaves Present Observed"))))
+
