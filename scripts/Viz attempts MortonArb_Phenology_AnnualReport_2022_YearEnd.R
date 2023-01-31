@@ -1,12 +1,9 @@
 # A new script with some combined collections analyses/graphs for the end of the year report
 library(ggplot2)
 library(lubridate)
-library(ggiraph)
-library(cowplot)
 library(tidyverse)
 library(gganimate)
 library(dplyr)
-library(reshape2)
 ###setting the file path to mac or windows##
 path.google <- "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive" # Mac
 path.out <- file.path(path.google, "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/LivingCollections_Phenology/Reports")
@@ -26,75 +23,22 @@ acer22$Collection <- as.factor("Acer")
 acer22$Year <- lubridate::year(acer22$Date.Observed)
 summary(acer22)
 
-acer21 <- clean.google(collection="Acer", dat.yr=2021)
-acer21$Collection <- as.factor("Acer")
-acer21$Year <- lubridate::year(acer21$Date.Observed)
-summary(acer21)
-
-acer20 <- clean.google(collection="Acer", dat.yr=2020)
-acer20$Collection <- as.factor("Acer")
-acer20$Year <- lubridate::year(acer20$Date.Observed)
-summary(acer20)
-
-acer19 <- clean.google(collection="Acer", dat.yr=2019)
-acer19$Collection <- as.factor("Acer")
-acer19$Year <- lubridate::year(acer19$Date.Observed)
-summary(acer19)
-
 quercus22 <- clean.google(collection="Quercus", dat.yr=2022)
 quercus22$Collection <- as.factor("Quercus")
 quercus22$Year <- lubridate::year(quercus22$Date.Observed)
 summary(quercus22)
-
-quercus21 <- clean.google(collection="Quercus", dat.yr=2021)
-quercus21$Collection <- as.factor("Quercus")
-quercus21$Year <- lubridate::year(quercus21$Date.Observed)
-summary(quercus21)
-
-quercus20 <- clean.google(collection="Quercus", dat.yr=2020)
-quercus20$Collection <- as.factor("Quercus")
-quercus20$Year <- lubridate::year(quercus20$Date.Observed)
-summary(quercus20)
-
-quercus19 <- clean.google(collection="Quercus", dat.yr=2019)
-quercus19$Collection <- as.factor("Quercus")
-quercus19$Year <- lubridate::year(quercus19$Date.Observed)
-summary(quercus19)
-
-quercus18 <- clean.google(collection="Quercus", dat.yr=2018)
-quercus18$Collection <- as.factor("Quercus")
-quercus18$Year <- lubridate::year(quercus18$Date.Observed)
-summary(quercus18)
 
 ulmus22 <- clean.google(collection="Ulmus", dat.yr=2022)
 ulmus22$Collection <- as.factor("Ulmus")
 ulmus22$Year <- lubridate::year(ulmus22$Date.Observed)
 summary(ulmus22)
 
-ulmus21 <- clean.google(collection="Ulmus", dat.yr=2021)
-ulmus21$Collection <- as.factor("Ulmus")
-ulmus21$Year <- lubridate::year(ulmus21$Date.Observed)
-summary(ulmus21)
-
-
-ulmus20 <- clean.google(collection="Ulmus", dat.yr=2020)
-ulmus20$Collection <- as.factor("Ulmus")
-ulmus20$Year <- lubridate::year(ulmus20$Date.Observed)
-summary(ulmus20)
-
 tilia22 <- clean.google(collection="Tilia", dat.yr=2022)
 tilia22$Collection <- as.factor("Tilia")
 tilia22$Year <- lubridate::year(tilia22$Date.Observed)
 summary(tilia22)
 
-#binding, but leaving tilia out because 
-dat.all <- rbind(ulmus22, quercus22, acer22, ulmus20, ulmus21, quercus18, quercus19, quercus20, quercus21, acer19, acer20, acer21)
-dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
-summary(dat.all)
-
-
-
-#########generating a 2022 only df for funsies
+#########generating a 2022 only df 
 dat.22 <- rbind(quercus22,acer22, ulmus22, tilia22)
 dat.22$yday <- lubridate::yday(dat.22$Date.Observed)
 summary(dat.22)
@@ -317,10 +261,26 @@ summary(dat.22z)
 dat.22z$yday <- lubridate::yday(dat.22z$Date.Observed)
 summary(dat.22z)
 
-dat.22z$pheno = with(dat.22z, ifelse(dat.22z$leaf.color.intensity %>% c("50-74%", "75-94%",">95%")| dat.22z$leaf.present.intensity %>% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed",
-                                     ifelse(dat.22z$leaf.present.intensity %>% c("50-74%", "75-94%", ">95%") & dat.22z$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
+#doesn't work exactly
+dat.22z$pheno = with(dat.22z, ifelse(dat.22z$leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| dat.22z$leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed",
+                                     ifelse(dat.22z$leaf.present.intensity %in% c("50-74%", "75-94%", ">95%") & dat.22z$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
                                             ifelse(dat.22z$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
-dat.22z$pheno = with(dat.22z, ifelse(leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed",
-                                     ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.intensity %>% c("50-74%", "75-94%", ">95%"), "Leaves Present Observed",
-                                            ifelse(leaf.color.intensity %>% c("50-74%", "75-94%",">95%")| leaf.present.intensity %>% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed", "Leaves Present Observed"))))
 
+
+#sort of works
+dat.22zz$pheno = with(dat.22z, ifelse(leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed",
+                                     ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.intensity %in% c("50-74%", "75-94%", ">95%"), "Leaves Present Observed",
+                                            ifelse(leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed", "Leaves Present Observed"))))
+
+
+p<-ggplot(dat.22zz) + 
+  geom_bar(alpha=0.5,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+animate(p, fps=8)
