@@ -5,11 +5,13 @@ library(tidyverse)
 library(gganimate)
 library(dplyr)
 ###setting the file path to mac or windows##
-path.google <- "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive" # Mac
-path.out <- file.path(path.google, "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/LivingCollections_Phenology/Reports")
+user.mac <- dir("~/Library/CloudStorage/")
+
+path.google <- file.path("~/Library/CloudStorage", user.mac, "My Drive") # Mac
+path.out <- file.path(path.google, "LivingCollections_Phenology/Reports")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end")
 # this is for google -># 
-path.figs <- "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end"
+path.figs <- file.path(path.out, "figures_2022_end")
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
