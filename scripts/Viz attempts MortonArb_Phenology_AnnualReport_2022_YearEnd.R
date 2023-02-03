@@ -5,13 +5,11 @@ library(tidyverse)
 library(gganimate)
 library(dplyr)
 ###setting the file path to mac or windows##
-user.mac <- dir("~/Library/CloudStorage/")
-
-path.google <- file.path("~/Library/CloudStorage", user.mac, "My Drive") # Mac
-path.out <- file.path(path.google, "LivingCollections_Phenology/Reports")
+path.google <- "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive" # Mac
+path.out <- file.path(path.google, "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/LivingCollections_Phenology/Reports")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end")
 # this is for google -># 
-path.figs <- file.path(path.out, "figures_2022_end")
+path.figs <- "/Library/CloudStorage/GoogleDrive-breidy@mortonarb.org/My Drive/LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -270,20 +268,25 @@ dat.22z$pheno = with(dat.22z, ifelse(dat.22z$leaf.color.intensity %in% c("50-74%
 
 
 #sort of works
-dat.22z$pheno = with(dat.22z, ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.observed!="Yes", "Leaf Breaking Buds Observed",
+ dat.22z$pheno = with(dat.22z, ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.observed!="Yes", "Leaf Breaking Buds Observed",
                                      ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.observed=="Yes", "Leaves Present Observed",
                                             ifelse(leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed", "Leaves Present Observed"))))
 
+
+dat.22z$pheno = with(dat.22z, ifelse(dat.22z$leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| dat.22z$leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color",
+                                    ifelse(dat.22z$leaf.present.observed== "Yes" & dat.22z$leaf.breaking.buds.observed=="Yes", "Leaves Present ",
+                                           ifelse(dat.22z$leaf.breaking.buds.observed=="Yes" & dat.22z$leaf.present.observed!= "Yes","Leaf Breaking Buds ", 
+                                                  ifelse(dat.22z$leaf.breaking.buds.observed=="Yes" | dat.22z$leaf.color.observed=="Yes","Leaf Breaking Buds", "Leaves Present")))))
 
 p<-ggplot(dat.22z) + 
   geom_bar(alpha=0.5,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
   theme_bw()+
   labs(title="Leaf Phenopases", x="Day of Year",)+
- # coord_polar(start = 200)+
+ coord_polar(start = 200)+
   transition_states(yday, transition_length = 30, state_length =30)+
   ease_aes(x = 'sine-out', y = 'sine-out') + 
   shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
               falloff = 'sine-in', exclude_phase = 'enter') 
 
-animate(p, fps=12)
+animate(p, fps=7.5)
 
