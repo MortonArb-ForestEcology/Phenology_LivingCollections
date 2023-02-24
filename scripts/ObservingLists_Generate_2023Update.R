@@ -19,6 +19,8 @@
 # load in useful packages ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 library(ggplot2)
+
+source("HelperFuncitons_ObservingLists.R")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -34,6 +36,13 @@ google.PC <- NA
 
 # Automatically pick mac or PC path depending on what actually works
 path.google <- ifelse(dir.exists(google.mac), google.mac, google.PC)
+
+# Establish google sheets authorization to make life easier
+googlesheets4::gs4_auth("crolllinson@mortonarb.org")
+
+# Target List size: 15-20
+listMin = 15
+listMax = 20
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,6 +111,10 @@ treesCollections <- treesCollections[(treesCollections$GardenLocalityName=="Quer
                                        (treesCollections$GardenLocalityName=="Tilia" & treesCollections$GenusName=="Tilia"),]
 summary(treesCollections)
 
+# Making it so that there are no blank species name just for our own sanity and record keeping
+treesCollections$SpeciesName[is.na(treesCollections$SpeciesName)] <- "spp."
+
+
 # Doing a quick plot of what we were observing versus what we _could_ observe
 png(file.path(path.google, "Observing Lists", "Update2023_BRAHMS_v_2022.png"), height=10, width=10, units="in", res=220)
 ggplot(data=TreesCollections) +
@@ -116,44 +129,230 @@ ggplot(data=TreesCollections) +
 dev.off()
 
 # Comparing Number of Trees we've been observing vs. what's in our collections
-nrow(oldAll); nrow(treesCollections); 
-nrow(oldAll[oldAll$GardenLocalityName=="Quercus",]); nrow(treesCollections[treesCollections$GardenLocalityName=="Quercus",]) 
-nrow(oldAll[oldAll$GardenLocalityName=="Acer",]); nrow(treesCollections[treesCollections$GardenLocalityName=="Acer",])
-nrow(oldAll[oldAll$GardenLocalityName=="Ulmus",]); nrow(treesCollections[treesCollections$GardenLocalityName=="Ulmus",]) 
-nrow(oldAll[oldAll$GardenLocalityName=="Tilia",]); nrow(treesCollections[treesCollections$GardenLocalityName=="Tilia",]) 
+names(treesCollections); names(oldAll)
 
-# Comparing number of taxa we've been observing vs. what's in our collections
-length(unique(oldAll$Taxon[oldAll$GardenLocalityName=="Quercus"])); length(unique(treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Quercus"])); length(unique(treesCollections$CalcFullName[treesCollections$GardenLocalityName=="Quercus"]))
+# Indicating whether a tree in the new mast list is part of the old
+treesCollections$PastObserving <- ifelse(treesCollections$PlantId %in% oldAll$PlantNumber, T, F)
+summary(treesCollections)
 
-length(unique(oldAll$Taxon[oldAll$GardenLocalityName=="Acer"])); length(unique(treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Acer"])); length(unique(treesCollections$CalcFullName[treesCollections$GardenLocalityName=="Acer"]))
+# Looking for things that are lacking a species designation --> this has only been an issue for Ulmus (which makes sense; everything else we've gone with needing a species designation, even if it's a hybrid)
+treesCollections[is.na(treesCollections$SpeciesName) & treesCollections$PastObserving, c("GardenLocalityName", "PlantId", "GenusName", "SpeciesName", "CalcFullName")]
 
-length(unique(oldAll$Taxon[oldAll$GardenLocalityName=="Ulmus"])); length(unique(treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Ulmus"])); length(unique(treesCollections$CalcFullName[treesCollections$GardenLocalityName=="Ulmus"]))
+# Getting total potential and actual tree counts by Collection
+CollectionStats <- aggregate(PlantId ~ GardenLocalityName, data=treesCollections, FUN=length)
+names(CollectionStats)[names(CollectionStats)=="PlantId"] <- "nTreesCollection"
+CollectionStats$PastObserve <- aggregate(PlantId ~ GardenLocalityName, data=treesCollections[treesCollections$PastObserving,], FUN=length)$PlantId
+CollectionStats
 
-length(unique(oldAll$Taxon[oldAll$GardenLocalityName=="Tilia"])); length(unique(treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Tilia"])); length(unique(treesCollections$CalcFullName[treesCollections$GardenLocalityName=="Tilia"]))
 
-oldAll[oldAll$GardenLocalityName=="Tilia",]
-treesCollections[treesCollections$GardenLocalityName=="Tilia", c("PlantId", "LivingStatus", "CalcFullName", "GenusName", "SpeciesName")]
+sppListAll <- aggregate(PlantId ~ GardenLocalityName + GenusName + SpeciesName, data=treesCollections, FUN=length)
+names(sppListAll)[names(sppListAll)=="PlantId"] <- "PotentialObserving"
 
-names(oldAll)
+sppListPast <- aggregate(PlantId ~ GardenLocalityName + GenusName + SpeciesName, data=treesCollections[treesCollections$PastObserving,], FUN=length)
+names(sppListPast)[names(sppListPast)=="PlantId"] <- "PastObserving"
 
-QuercusCollAgg <- aggregate(PlantId ~ GenusName + SpeciesName, data=treesCollections[treesCollections$GardenLocalityName=="Quercus",], FUN=length)
-AcerCollAgg <- aggregate(PlantId ~ GenusName + SpeciesName, data=treesCollections[treesCollections$GardenLocalityName=="Acer",], FUN=length)
-UlmusCollAgg <- aggregate(PlantId ~ GenusName + SpeciesName, data=treesCollections[treesCollections$GardenLocalityName=="Ulmus",], FUN=length)
-TiliaCollAgg <- aggregate(PlantId ~ GenusName + SpeciesName, data=treesCollections[treesCollections$GardenLocalityName=="Tilia",], FUN=length)
+head(sppListAll)
+dim(sppListAll)
+dim(sppListPast)
 
-write.csv(QuercusCollAgg, file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Quercus.csv"), row.names=F)
-write.csv(AcerCollAgg, file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Acer.csv"), row.names=F)
-write.csv(UlmusCollAgg, file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Ulmus.csv"), row.names=F)
-write.csv(TiliaCollAgg, file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Tilia.csv"), row.names=F)
+# Merging the species lists together
+sppListAll <- merge(sppListAll, sppListPast, all=T)
+sppListAll$PastObserving[is.na(sppListAll$PastObserving)] <- 0
+dim(sppListAll)
+summary(sppListAll)
 
-oakPhenoAgg <- aggregate(PlantNumber ~ Taxon, data=oldAll[oldAll$GardenLocalityName=="Quercus",], FUN=length)
+sppListAll[sppListAll$GardenLocalityName=="Quercus",]
+sppListAll[sppListAll$GardenLocalityName=="Acer",]
+sppListAll[sppListAll$GardenLocalityName=="Ulmus",]
+sppListAll[sppListAll$GardenLocalityName=="Tilia",] # Note: misses non-specific hybrids
 
-sum(oakCollAgg$PlantId)
-sum(oakPhenoAgg$PlantNumber)
+write.csv(sppListAll[sppListAll$GardenLocalityName=="Quercus",], file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Quercus.csv"), row.names=F)
+write.csv(sppListAll[sppListAll$GardenLocalityName=="Acer",], file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Acer.csv"), row.names=F)
+write.csv(sppListAll[sppListAll$GardenLocalityName=="Ulmus",], file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Ulmus.csv"), row.names=F)
+write.csv(sppListAll[sppListAll$GardenLocalityName=="Tilia",], file.path(path.google, "Observing Lists", "Update2023_BRAHMS_PotentialSpecies_Tilia.csv"), row.names=F)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-length(which(is.na(treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Quercus"])))
-sum(ifelse(QuercusCollAgg$PlantId>10, 8, QuercusCollAgg$PlantId))
-sum(oakPhenoAgg$PlantNumber)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Making some decisions about collections ----
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+summary(sppListAll[,])
+summary(treesCollections)
+
+list2023 <- data.frame(List=NA, PlantID=NA, Taxon=NA, Vernacular = NA, BgLatitude=NA, BgLongitude=NA, GardenGrid=NA, GardenSubgrid=NA)
+
+# ~~~~~~~~~~~~~~~~
+# Tilia (31 trees; observe all) ----
+# Starting with Tilia because easiest --> monitor everything, 2 lists
+# ~~~~~~~~~~~~~~~~
+colSums(sppListAll[sppListAll$GardenLocalityName=="Tilia",c("PotentialObserving", "PastObserving")])
+
+# Next looking at Ulmus --> next biggest
+colSums(sppListAll[sppListAll$GardenLocalityName=="Ulmus", c("PotentialObserving", "PastObserving")])
+
+tilia2023 <- data.frame(List=NA, PlantID = treesCollections$PlantId[treesCollections$GardenLocalityName=="Tilia"], 
+                        Taxon = paste(treesCollections$GenusName[treesCollections$GardenLocalityName=="Tilia"], treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Tilia"], sep=" "), 
+                        Vernacular = NA, 
+                        BgLatitude = treesCollections$Latitude[treesCollections$GardenLocalityName=="Tilia"], 
+                        BgLongitude = treesCollections$Longitude[treesCollections$GardenLocalityName=="Tilia"], 
+                        GardenGrid = treesCollections$GardenSubarea1[treesCollections$GardenLocalityName=="Tilia"], 
+                        GardenSubgrid = treesCollections$GardenSubarea2[treesCollections$GardenLocalityName=="Tilia"])
+
+tilia2023
+head(treesCollections)
+
+# Run the spatial clustering on Tilia -- this is easy so just 2 lists shoudlwork
+set.seed(241133)
+
+tilia.kmeans <- kmeans(tilia2023[,c("BgLongitude", "BgLatitude")], centers=2) # 
+summary(as.factor(tilia.kmeans$cluster))
+tilia2023$List <- tilia.kmeans$cluster
+
+# This passes the gut test
+ggplot(data=tilia2023) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+# dev.off()
+
+
+write.csv(tilia2023, file=file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.csv"))
+# ~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~
+# Ulmus (157 potential trees; past observing: 146) ----
+# Ulmus is a little weird in that there are a handful of individuals without proper species names
+# Observing rules: up to 10 indiv
+# ~~~~~~~~~~~~~~~~
+sppListUlmus <- aggregate(PlantId ~ GardenLocalityName + CalcFullName, data=treesCollections[treesCollections$GardenLocalityName=="Ulmus",], FUN=length)
+names(sppListUlmus)[names(sppListUlmus)=="PlantId"] <- "PotentialObserving"
+
+sppListUlmusPast <- aggregate(PlantId ~ GardenLocalityName + CalcFullName, data=treesCollections[treesCollections$GardenLocalityName=="Ulmus" & treesCollections$PastObserving,], FUN=length)
+names(sppListUlmusPast)[names(sppListUlmusPast)=="PlantId"] <- "PastObserving"
+
+dim(sppListUlmus); dim(sppListUlmusPast)
+
+sppListUlmus <- merge(sppListUlmus, sppListUlmusPast, all=T)
+sppListUlmus[is.na(sppListUlmus$PastObserving),]
+sppListUlmus
+
+colSums(sppListUlmus[, c("PotentialObserving", "PastObserving")], na.rm=T)
+
+
+sppListAll[sppListAll$GardenLocalityName=="Ulmus",]
+sppListAll[sppListAll$GardenLocalityName=="Ulmus" & sppListAll$PastObserving==0,]
+sppListAll[sppListAll$GardenLocalityName=="Ulmus" & sppListAll$PastObserving>10,]
+
+# Starting by taking everything with less than 9 trees (3 x 3)
+ulmusTemp <- treesCollections[treesCollections$GardenLocalityName=="Ulmus" & treesCollections$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
+
+# For the species with lots of varieties & cultivars, lets dig deeper:
+# If there are >3 varieties, monitor a max of 4 per varieties 
+# If there's only 1 variety, randomly select 9 from what we've monitored before OR all we've monitored before plus a random set of what's left
+ulmusSppBIG <- sppListAll$SpeciesName[sppListAll$GardenLocalityName=="Ulmus" & sppListAll$PotentialObserving>9]
+
+dim(ulmusTemp)
+for(SPP in ulmusSppBIG){
+  sppSubset <- subsetTrees(dataRaw=treesCollections[treesCollections$GardenLocalityName=="Ulmus",], SPP=SPP, nTreeSpp=9, nTreeVar=4, dataOut=NULL)
+  
+  ulmusTemp <- rbind(ulmusTemp, sppSubset)
+  
+} # End SPP list
+summary(ulmusTemp)
+
+ulmus2023 <- data.frame(List=NA, PlantID = ulmusTemp$PlantId, 
+                        Taxon = paste(ulmusTemp$GenusName, ulmusTemp$SpeciesName, sep=" "), 
+                        Vernacular = NA, 
+                        BgLatitude = ulmusTemp$Latitude, 
+                        BgLongitude = ulmusTemp$Longitude, 
+                        GardenGrid = ulmusTemp$GardenSubarea1, 
+                        GardenSubgrid = ulmusTemp$GardenSubarea2)
+
+summary(ulmus2023)
+
+set.seed(1435)
+
+# May need to play around with the seed function to get things to look good, but this function should make it easier
+ulmus2023 <- clusterTrees(datIn=ulmus2023, clusterMin=20, clusterMax=30, seed=1521)
+
+# This passes the gut test
+ggplot(data=ulmus2023) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+# dev.off()
+
+write.csv(ulmus2023, file=file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"))
+
+# ~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~
+# Quercus (366 potential trees; 213 in past) ----
+# ~~~~~~~~~~~~~~~~
+colSums(sppListAll[sppListAll$GardenLocalityName=="Quercus",c("PotentialObserving", "PastObserving")])
+
+# Made Notes on Google sheet that I'll pull in; current rules were:
+# 1) All trees outside of sections Quercus & Lobatae
+# 2) All trees that are ranked as something other than "least concern" in the 2020 Red List of Oaks
+# 3) All trees in the USA NPN List
+# 4) No more than 9 trees of any species unless key varieties
+# 5) no hybrids with only 1 individual to monitor or didn't have multiple individuals of parent species (maybe ditch hybrids all together)
+# 6) No trees with only 1 tree to observe (if not part of above)
+# 7) All remaining
+oak.priorities <- googlesheets4::read_sheet(ss = "1KlXfLvtGSpOKvd1uJ-8etRFvbgyWDwiye_3d71d2w24", sheet = "Quercus")
+colSums(oak.priorities[,c("PotentialObserving", "PastObserving", "2023 Goal")], na.rm=T)
+
+quercus <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$SpeciesName %in% oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>0] ,]
+dim(quercus)
+
+# Starting by taking everything with less than 9 trees (3 x 3)
+quercusTemp <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
+dim(quercusTemp)
+
+# For the species with lots of varieties & cultivars, lets dig deeper:
+# If there are >3 varieties, monitor a max of 4 per varieties 
+# If there's only 1 variety, randomly select 9 from what we've monitored before OR all we've monitored before plus a random set of what's left
+QuercusSppBIG <- oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>9]
+QuercusSppBIG
+
+dim(quercusTemp)
+for(SPP in QuercusSppBIG){
+  sppSubset <- subsetTrees(dataRaw=quercus, SPP=SPP, nTreeSpp=9, stratVar = F, nTreeVar=2, dataOut=NULL)
+  
+  quercusTemp <- rbind(quercusTemp, sppSubset)
+  
+} # End SPP list
+summary(quercusTemp)
+dim(quercus)
+
+quercus2023 <- data.frame(List=NA, PlantID = quercusTemp$PlantId, 
+                        Taxon = paste(quercusTemp$GenusName, quercusTemp$SpeciesName, sep=" "), 
+                        Vernacular = NA, 
+                        BgLatitude = quercusTemp$Latitude, 
+                        BgLongitude = quercusTemp$Longitude, 
+                        GardenGrid = quercusTemp$GardenSubarea1, 
+                        GardenSubgrid = quercusTemp$GardenSubarea2)
+
+summary(quercus2023)
+
+# May need to play around with the seed function to get things to look good, but this function should make it easier
+quercus2023 <- clusterTrees(datIn=quercus2023, clusterMin=20, clusterMax=30, nTry=2, seed=1727)
+
+# This passes the gut test
+ggplot(data=quercus2023) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+# dev.off()
+
+summary(as.factor(quercus2023$List))
+
+write.csv(quercus2023, file=file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"))
+
+# ~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~
+# Acer ----
+# ~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
