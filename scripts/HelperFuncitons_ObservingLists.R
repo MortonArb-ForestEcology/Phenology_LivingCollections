@@ -1,7 +1,7 @@
 
 # Setting a script 
 # dataRaw=treesCollections[treesCollections$GardenLocalityName=="Ulmus",]
-subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOut=NULL){
+subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOut=NULL, seed=1153){
   # dataRaw = the input data from Brahms; don't mess with the header names when you get it from Brahms!
   # SPP = the species you're working with from column "SpeciesName"
   # nTreeSpp = the max number of trees from a species with no varieties you want
@@ -28,7 +28,7 @@ subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOu
         obsPast <- which(datSpp$CalcFullName==VAR & datSpp$PastObserving) 
         if(length(obsPast)>nTreeVar){
           # If we have an excess, randomly subset from the past
-          set.seed(1153)
+          set.seed(seed)
           dataOut <- rbind(dataOut, dataRaw[dataRaw$PlantId %in% datSpp$PlantId[sample(obsPast, nTreeVar, replace = F)],])
         } else {
           # If we don't have an excess, but could add a few, randomly pick
@@ -36,7 +36,7 @@ subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOu
           dataOut <- rbind(dataOut, dataRaw[dataRaw$PlantId %in% datSpp$PlantId[obsPast],])
           
           # Find some new trees to add as well
-          set.seed(1153)
+          set.seed(seed)
           obsNew <- sample(which(datSpp$CalcFullName==VAR & !datSpp$PastObserving), nTreeVar-length(obsPast), replace=F)
           dataOut <- rbind(dataOut, dataRaw[dataRaw$PlantId %in% datSpp$PlantId[obsNew],])
         } # End if/else clause for whether you need to add new trees or not
@@ -56,7 +56,7 @@ subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOu
     
     if(length(obsPast)>nTreeSpp){
       # If we have an excess, randomly subset from the past
-      set.seed(1153)
+      set.seed(seed)
       dataOut <- rbind(dataOut, dataRaw[dataRaw$PlantId %in% datSpp$PlantId[sample(obsPast, nTreeSpp, replace = F)],])
     } else {
       # If we don't have an excess, but could add a few, randomly pick
@@ -64,7 +64,7 @@ subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOu
       dataOut <- rbind(dataOut, dataRaw[dataRaw$PlantId %in% datSpp$PlantId[obsPast],])
       
       # Find some new trees to add as well
-      set.seed(1153)
+      set.seed(seed)
       obsNew <- sample(obsNew, nTreeSpp-length(obsPast), replace=F)
       dataOut <- rbind(dataOut, dataRaw[dataRaw$PlantId %in% datSpp$PlantId[obsNew],])
     } # End if/else clause for whether you need to add new trees or not
@@ -75,7 +75,7 @@ subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOu
 
 
 # datIn <- ulmus2023
-clusterTrees <- function(datIn, clusterMin=20, clusterMax=30, nTry=10, seed=sample.int(1e6, 1)){
+clusterTreesOLD <- function(datIn, clusterMin=20, clusterMax=30, nTry=10, seed=sample.int(1e6, 1)){
   # datIn <- datIn # Add a dub here just to be safe for now
   datIn$List <- NA
 
@@ -182,3 +182,94 @@ clusterTrees <- function(datIn, clusterMin=20, clusterMax=30, nTry=10, seed=samp
   
 } # End clustering function
 
+
+clusterTreesNew <- function(datIn, clusterMin=15, clusterMax=25, seed=sample.int(1e6, 1)){
+  # datIn <- datIn # Add a dub here just to be safe for now
+  datIn$List <- NA
+  
+  # Doing 5 times more clusters than we actually want
+  set.seed(seed)
+  listKmeans <- kmeans(datIn[,c("BgLongitude", "BgLatitude")], centers=round(nrow(datIn)/mean(c(clusterMin, clusterMax)))) # 
+  summary(as.factor(listKmeans$cluster))
+  datIn$List <- listKmeans$cluster
+  nList <- max(listKmeans$cluster)
+  
+  # Next step is doing clustering trying to balance number + distance
+  # Note: the first n rows will be our centers; the rest will be trees
+  distPts2Grps <- as.matrix(dist(rbind(listKmeans$centers, datIn[,c("BgLongitude", "BgLatitude")]), method="euclidean"))
+  rownames(distPts2Grps) <- c(paste0("GRP", 1:nList), 1:nrow(datIn))
+  colnames(distPts2Grps) <- c(paste0("GRP", 1:nList), 1:nrow(datIn))
+  summary(distPts2Grps)
+  
+  # IFF we need to rebalance:
+  # if(any(listKmeans$size>clusterMax | listKmeans$size<clusterMin)){
+    # Stratify our groups into "givers" (too many trees) and "takers" (need some trees to balance):
+    # 1. Start with the takers since this is where the cascade happens: take the closest tree from another group
+    # 2. If that group now needs a tree, take the nearest tree from another group (that isn't the first one)
+    
+    # Set up our starters
+    listSize <- summary(as.factor(datIn$List))
+    takersOrig <- which(listSize<clusterMin) 
+    
+    takersNew <- takersOrig
+    takersTot <- takersOrig
+    while(length(takersNew)>0){ # As long as there are still groups needing a tree, keep going
+      print("Rebalancing Lists: Takers Group")
+      for(i in 1:length(takersNew)){
+        # print(as.numeric(takersNew[i]))
+        while(listSize[takersNew[i]]<clusterMin){
+          rows.avail <- which(!datIn$List %in% c(takersNew[1:max(i-1,i)], takersTot[1:(length(takersTot)-length(takersNew))]))
+          dist.avail <- distPts2Grps[paste(rows.avail),paste0("GRP", takersNew[i])]
+          datIn$List[as.numeric(names(dist.avail[which(dist.avail==min(dist.avail))]))] <- takersNew[i]
+          
+          listSize <- summary(as.factor(datIn$List))
+        } # Finish while loop
+      } # Finish takersNew Loop
+      
+      takersNew <- which(listSize<clusterMin) 
+      takersTot <- c(takersTot, takersNew)
+      
+    } # Finish working with the "takers" group
+    # listSize
+
+    # 3. If we still have trees groups with too many trees, give on to the nearest group
+    # 4. If this results in the receiving group have too many trees, give it to the nearest etc.
+    listSize <- summary(as.factor(datIn$List))
+    giversOrig <- which(listSize>clusterMax) 
+    
+    giversNew <- giversOrig
+    giversTot <- giversOrig
+    while(length(giversNew)>0){ # As long as there are still groups needing a tree, keep going
+      print("Rebalancing Lists: Givers Group")
+      
+      for(i in 1:length(giversNew)){
+        print(as.numeric(giversNew[i]))
+        while(listSize[giversNew[i]]>clusterMax){
+          ### NOTE: ALTERNATE LOGIC AVAILABLE
+          ### Find the closet group to your group that could accept trees & give it the closest trees that won't make it overload
+          
+          # I want to find the tree furthest from the center and give it to its closest cluster
+          rows.avail <- which(datIn$List %in% giversNew[i])
+          dist.avail <- distPts2Grps[paste(rows.avail),paste0("GRP", giversNew[i])]
+          tree.give <- names(dist.avail[which(dist.avail==max(dist.avail))])
+          grpsout <- paste0("GRP",c(giversNew[1:max(i-1,i)], giversTot[1:(length(giversTot)-length(giversNew))]))
+          groupDist <- distPts2Grps[tree.give, colnames(distPts2Grps)[grepl("GRP", colnames(distPts2Grps)) & !colnames(distPts2Grps) %in% grpsout]]
+          groupNew <- names(groupDist)[which(groupDist==min(groupDist))]
+          datIn$List[as.numeric(tree.give)] <- as.numeric(gsub("GRP", "", groupNew))
+          
+          listSize <- summary(as.factor(datIn$List))
+        } # Finish while loop
+      } # Finish giversNew Loop
+      
+      giversNew <- which(listSize>clusterMax) 
+      giversTot <- c(giversTot, giversNew)
+      
+    } # Finish with the "givers" group
+    listSize
+  # } # end the rebalance bit; may no longer be necessary to have this
+  
+
+  
+  return(datIn)
+  
+} # End clustering function

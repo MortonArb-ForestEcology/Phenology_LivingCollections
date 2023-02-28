@@ -38,52 +38,45 @@ google.PC <- NA
 path.google <- ifelse(dir.exists(google.mac), google.mac, google.PC)
 
 # Establish google sheets authorization to make life easier
-googlesheets4::gs4_auth("crolllinson@mortonarb.org")
+# googlesheets4::gs4_auth("crolllinson@mortonarb.org")
 
 # Target List size: 15-20
 listMin = 15
-listMax = 20
+listMax = 25
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Read in the our old observing lists for reference ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dir(file.path(path.google, "Observing Lists", "Quercus"))
+dir(file.path(path.google, "Observing Lists/OLD", "Quercus"))
 
-oldQuercus <- read.csv(file.path(path.google, "Observing Lists", "Quercus/ObservingList_Quercus.csv"))
+oldQuercus <- read.csv(file.path(path.google, "Observing Lists/OLD", "Quercus/ObservingList_Quercus.csv"))
 oldQuercus <- oldQuercus[,!names(oldQuercus) %in% "X"]
 oldQuercus$GardenLocalityName <- "Quercus"
 
-oldAcer <- read.csv(file.path(path.google, "Observing Lists", "Acer/ObservingList_Acer.csv"))
+oldAcer <- read.csv(file.path(path.google, "Observing Lists/OLD", "Acer/ObservingList_Acer.csv"))
 oldAcer <- oldAcer[,!names(oldAcer) %in% "X"]
 oldAcer$GardenLocalityName <- "Acer"
 
-oldUlmus <- read.csv(file.path(path.google, "Observing Lists", "Ulmus/ObservingList_Ulmus.csv"))
+oldUlmus <- read.csv(file.path(path.google, "Observing Lists/OLD", "Ulmus/ObservingList_Ulmus.csv"))
 oldUlmus <- oldUlmus[,!names(oldUlmus) %in% "X"]
 oldUlmus$GardenLocalityName <- "Ulmus"
 
-oldTilia <- read.csv(file.path(path.google, "Observing Lists", "Tilia/ObservingList_Tilia.csv"))
+oldTilia <- read.csv(file.path(path.google, "Observing Lists/OLD", "Tilia/ObservingList_Tilia.csv"))
 oldTilia <- oldTilia[,!names(oldTilia) %in% "X"]
 oldTilia$GardenLocalityName <- "Tilia"
 
+# Put all of the previous observing lists together and remove anything dead
+oldAll <- rbind(oldQuercus, oldAcer, oldUlmus, oldTilia)
+# rm(oldQuercus, oldAcer, oldUlmus, oldTilia)
 
 # Now also grab the trees that had been removed
 treesGone <- googlesheets4::read_sheet("16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ")
-
-head(oldQuercus)
-head(oldAcer)
-head(oldUlmus)
-head(oldTilia)
-
-# Put all of the previous observing lists together and remove anything dead
-oldAll <- rbind(oldQuercus, oldAcer, oldUlmus, oldTilia)
-rm(oldQuercus, oldAcer, oldUlmus, oldTilia)
 
 oldAll <- oldAll[!oldAll$PlantNumber %in% unique(treesGone$PlantNumber), ]
 # names(oldAll)[names(oldAll) %in% c("BgLongitude", "BgLatitude")]
 names(oldAll)
 dim(oldAll)
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,7 +84,7 @@ dim(oldAll)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 collectionsWant <- c("Quercus", "Acer", "Ulmus", "Tilia")
 
-brahmsAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists/MortonArb_BRHAMS_AllAliveTrees_2023-01-26.xlsx"))
+brahmsAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists/MortonArb_BRAHMS_AllAliveTrees_2023-02-27.xlsx"))
 summary(brahmsAll)
 
 # Looking for where we can narrow down to the collections --> "GardenLocalityName"
@@ -114,10 +107,9 @@ summary(treesCollections)
 # Making it so that there are no blank species name just for our own sanity and record keeping
 treesCollections$SpeciesName[is.na(treesCollections$SpeciesName)] <- "spp."
 
-
 # Doing a quick plot of what we were observing versus what we _could_ observe
 png(file.path(path.google, "Observing Lists", "Update2023_BRAHMS_v_2022.png"), height=10, width=10, units="in", res=220)
-ggplot(data=TreesCollections) +
+ggplot(data=treesCollections) +
   facet_wrap(~GardenLocalityName, scales="free") +
   # coord_map() +
   geom_point(aes(x=Longitude, y=Latitude, color="BRAHMS 2023"), size=2, alpha=0.5) +
@@ -134,9 +126,6 @@ names(treesCollections); names(oldAll)
 # Indicating whether a tree in the new mast list is part of the old
 treesCollections$PastObserving <- ifelse(treesCollections$PlantId %in% oldAll$PlantNumber, T, F)
 summary(treesCollections)
-
-# Looking for things that are lacking a species designation --> this has only been an issue for Ulmus (which makes sense; everything else we've gone with needing a species designation, even if it's a hybrid)
-treesCollections[is.na(treesCollections$SpeciesName) & treesCollections$PastObserving, c("GardenLocalityName", "PlantId", "GenusName", "SpeciesName", "CalcFullName")]
 
 # Getting total potential and actual tree counts by Collection
 CollectionStats <- aggregate(PlantId ~ GardenLocalityName, data=treesCollections, FUN=length)
@@ -193,12 +182,14 @@ colSums(sppListAll[sppListAll$GardenLocalityName=="Ulmus", c("PotentialObserving
 
 tilia2023 <- data.frame(List=NA, PlantID = treesCollections$PlantId[treesCollections$GardenLocalityName=="Tilia"], 
                         Taxon = paste(treesCollections$GenusName[treesCollections$GardenLocalityName=="Tilia"], treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Tilia"], sep=" "), 
-                        Vernacular = NA, 
+                        Vernacular = treesCollections$VernacularName[treesCollections$GardenLocalityName=="Tilia"], 
                         BgLatitude = treesCollections$Latitude[treesCollections$GardenLocalityName=="Tilia"], 
                         BgLongitude = treesCollections$Longitude[treesCollections$GardenLocalityName=="Tilia"], 
                         GardenGrid = treesCollections$GardenSubarea1[treesCollections$GardenLocalityName=="Tilia"], 
                         GardenSubgrid = treesCollections$GardenSubarea2[treesCollections$GardenLocalityName=="Tilia"])
 
+tilia2023$Vernacular <- gsub("'", "", tilia2023$Vernacular)
+tilia2023$Vernacular <- gsub('["]', '', tilia2023$Vernacular)
 tilia2023
 head(treesCollections)
 
@@ -208,6 +199,7 @@ set.seed(241133)
 tilia.kmeans <- kmeans(tilia2023[,c("BgLongitude", "BgLatitude")], centers=2) # 
 summary(as.factor(tilia.kmeans$cluster))
 tilia2023$List <- tilia.kmeans$cluster
+summary(as.factor(tilia2023$List))
 
 # This passes the gut test
 ggplot(data=tilia2023) +
@@ -216,7 +208,7 @@ ggplot(data=tilia2023) +
 # dev.off()
 
 
-write.csv(tilia2023, file=file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.csv"))
+write.csv(tilia2023, file=file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.csv"), row.names=F)
 # ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~
@@ -253,7 +245,7 @@ ulmusSppBIG <- sppListAll$SpeciesName[sppListAll$GardenLocalityName=="Ulmus" & s
 
 dim(ulmusTemp)
 for(SPP in ulmusSppBIG){
-  sppSubset <- subsetTrees(dataRaw=treesCollections[treesCollections$GardenLocalityName=="Ulmus",], SPP=SPP, nTreeSpp=9, nTreeVar=4, dataOut=NULL)
+  sppSubset <- subsetTrees(dataRaw=treesCollections[treesCollections$GardenLocalityName=="Ulmus",], SPP=SPP, nTreeSpp=9, nTreeVar=4, dataOut=NULL, seed=1153)
   
   ulmusTemp <- rbind(ulmusTemp, sppSubset)
   
@@ -262,18 +254,21 @@ summary(ulmusTemp)
 
 ulmus2023 <- data.frame(List=NA, PlantID = ulmusTemp$PlantId, 
                         Taxon = paste(ulmusTemp$GenusName, ulmusTemp$SpeciesName, sep=" "), 
-                        Vernacular = NA, 
+                        Vernacular = ulmusTemp$VernacularName, 
                         BgLatitude = ulmusTemp$Latitude, 
                         BgLongitude = ulmusTemp$Longitude, 
                         GardenGrid = ulmusTemp$GardenSubarea1, 
                         GardenSubgrid = ulmusTemp$GardenSubarea2)
+ulmus2023$Vernacular <- gsub("'", "", ulmus2023$Vernacular)
+ulmus2023$Vernacular <- gsub('["]', '', ulmus2023$Vernacular)
 
+unique(ulmus2023$Vernacular)
 summary(ulmus2023)
 
 set.seed(1435)
 
 # May need to play around with the seed function to get things to look good, but this function should make it easier
-ulmus2023 <- clusterTrees(datIn=ulmus2023, clusterMin=20, clusterMax=30, seed=1521)
+ulmus2023 <- clusterTreesNew(datIn=ulmus2023, clusterMin=15, clusterMax=25, seed=1521)
 
 # This passes the gut test
 ggplot(data=ulmus2023) +
@@ -281,7 +276,7 @@ ggplot(data=ulmus2023) +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
 # dev.off()
 
-write.csv(ulmus2023, file=file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"))
+write.csv(ulmus2023, file=file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"), row.names=F)
 
 # ~~~~~~~~~~~~~~~~
 
@@ -326,16 +321,18 @@ dim(quercus)
 
 quercus2023 <- data.frame(List=NA, PlantID = quercusTemp$PlantId, 
                         Taxon = paste(quercusTemp$GenusName, quercusTemp$SpeciesName, sep=" "), 
-                        Vernacular = NA, 
+                        Vernacular = quercusTemp$VernacularName, 
                         BgLatitude = quercusTemp$Latitude, 
                         BgLongitude = quercusTemp$Longitude, 
                         GardenGrid = quercusTemp$GardenSubarea1, 
                         GardenSubgrid = quercusTemp$GardenSubarea2)
-
+quercus2023$Vernacular <- gsub("'", "", quercus2023$Vernacular)
+quercus2023$Vernacular <- gsub('["]', '', quercus2023$Vernacular)
+unique(quercus2023$Vernacular)
 summary(quercus2023)
 
 # May need to play around with the seed function to get things to look good, but this function should make it easier
-quercus2023 <- clusterTrees(datIn=quercus2023, clusterMin=20, clusterMax=30, nTry=2, seed=1727)
+quercus2023 <- clusterTreesNew(datIn=quercus2023, clusterMin=15, clusterMax=25, seed=1656)
 
 # This passes the gut test
 ggplot(data=quercus2023) +
@@ -345,7 +342,7 @@ ggplot(data=quercus2023) +
 
 summary(as.factor(quercus2023$List))
 
-write.csv(quercus2023, file=file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"))
+write.csv(quercus2023, file=file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"), row.names=F)
 
 # ~~~~~~~~~~~~~~~~
 
