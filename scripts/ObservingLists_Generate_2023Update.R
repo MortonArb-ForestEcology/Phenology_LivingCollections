@@ -102,10 +102,15 @@ treesCollections <- treesCollections[(treesCollections$GardenLocalityName=="Quer
                                        (treesCollections$GardenLocalityName=="Acer" & treesCollections$GenusName=="Acer") |
                                        (treesCollections$GardenLocalityName=="Ulmus" & treesCollections$GenusName=="Ulmus") |
                                        (treesCollections$GardenLocalityName=="Tilia" & treesCollections$GenusName=="Tilia"),]
+# Remove trees missing a coordinate
+treesCollections <- treesCollections[!is.na(treesCollections$Latitude),]
+
 summary(treesCollections)
 
 # Making it so that there are no blank species name just for our own sanity and record keeping
 treesCollections$SpeciesName[is.na(treesCollections$SpeciesName)] <- "spp."
+summary(treesCollections)
+
 
 # Doing a quick plot of what we were observing versus what we _could_ observe
 png(file.path(path.google, "Observing Lists", "Update2023_BRAHMS_v_2022.png"), height=10, width=10, units="in", res=220)
@@ -180,6 +185,11 @@ colSums(sppListAll[sppListAll$GardenLocalityName=="Tilia",c("PotentialObserving"
 # Next looking at Ulmus --> next biggest
 colSums(sppListAll[sppListAll$GardenLocalityName=="Ulmus", c("PotentialObserving", "PastObserving")])
 
+ggplot(data=treesCollections[treesCollections$GardenLocalityName=="Tilia",]) +
+  coord_equal() +
+  geom_point(aes(x=Longitude, y=Latitude))
+
+
 tilia2023 <- data.frame(List=NA, PlantID = treesCollections$PlantId[treesCollections$GardenLocalityName=="Tilia"], 
                         Taxon = paste(treesCollections$GenusName[treesCollections$GardenLocalityName=="Tilia"], treesCollections$SpeciesName[treesCollections$GardenLocalityName=="Tilia"], sep=" "), 
                         Vernacular = treesCollections$VernacularName[treesCollections$GardenLocalityName=="Tilia"], 
@@ -202,10 +212,17 @@ tilia2023$List <- tilia.kmeans$cluster
 summary(as.factor(tilia2023$List))
 
 # This passes the gut test
+png(file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=tilia2023) +
   coord_equal() +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
-# dev.off()
+dev.off()
+
+length(tilia2023$List)
+summary(as.factor(tilia2023$List))
+
+length(oldTilia$Obs.List)
+summary(as.factor(oldTilia$Obs.List))
 
 
 write.csv(tilia2023, file=file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.csv"), row.names=F)
@@ -235,8 +252,13 @@ sppListAll[sppListAll$GardenLocalityName=="Ulmus",]
 sppListAll[sppListAll$GardenLocalityName=="Ulmus" & sppListAll$PastObserving==0,]
 sppListAll[sppListAll$GardenLocalityName=="Ulmus" & sppListAll$PastObserving>10,]
 
+ggplot(data=treesCollections[treesCollections$GardenLocalityName=="Ulmus",]) +
+  coord_equal() +
+  geom_point(aes(x=Longitude, y=Latitude))
+
+
 # Starting by taking everything with less than 9 trees (3 x 3)
-ulmusTemp <- treesCollections[treesCollections$GardenLocalityName=="Ulmus" & treesCollections$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
+ulmusTemp <- treesCollections[treesCollections$GardenLocalityName=="Ulmus" & treesCollections$SpeciesName %in% sppListAll$SpeciesName[sppListAll$GenusName=="Ulmus" & sppListAll$PotentialObserving<=9], ]
 
 # For the species with lots of varieties & cultivars, lets dig deeper:
 # If there are >3 varieties, monitor a max of 4 per varieties 
@@ -271,10 +293,18 @@ set.seed(1435)
 ulmus2023 <- clusterTreesNew(datIn=ulmus2023, clusterMin=15, clusterMax=25, seed=1521)
 
 # This passes the gut test
+png(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=ulmus2023) +
   coord_equal() +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
-# dev.off()
+dev.off()
+
+length(ulmus2023$List)
+summary(as.factor(ulmus2023$List))
+
+length(oldUlmus$Obs.List)
+summary(as.factor(oldUlmus$Obs.List))
+
 
 write.csv(ulmus2023, file=file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"), row.names=F)
 
@@ -284,6 +314,13 @@ write.csv(ulmus2023, file=file.path(path.google, "Observing Lists", "Ulmus", "Ob
 # Quercus (366 potential trees; 213 in past) ----
 # ~~~~~~~~~~~~~~~~
 colSums(sppListAll[sppListAll$GardenLocalityName=="Quercus",c("PotentialObserving", "PastObserving")])
+
+# We have a weird little cluster -- this is over by the W end of the plant breeding nursery; if we want to remove this, we should do so prior to the "quercusTemp" generation stage
+ggplot(data=treesCollections[treesCollections$GardenLocalityName=="Quercus",]) +
+  coord_equal() +
+  geom_point(aes(x=Longitude, y=Latitude))
+
+treesCollections[treesCollections$GardenLocalityName=="Quercus" & quercusTemp$Longitude< -88.056,]
 
 # Made Notes on Google sheet that I'll pull in; current rules were:
 # 1) All trees outside of sections Quercus & Lobatae
@@ -296,22 +333,23 @@ colSums(sppListAll[sppListAll$GardenLocalityName=="Quercus",c("PotentialObservin
 oak.priorities <- googlesheets4::read_sheet(ss = "1KlXfLvtGSpOKvd1uJ-8etRFvbgyWDwiye_3d71d2w24", sheet = "Quercus")
 colSums(oak.priorities[,c("PotentialObserving", "PastObserving", "2023 Goal")], na.rm=T)
 
-quercus <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$SpeciesName %in% oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>0] ,]
-dim(quercus)
 
 # Starting by taking everything with less than 9 trees (3 x 3)
-quercusTemp <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
+quercusTemp <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$SpeciesName %in% oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>0 & oak.priorities$`2023 Goal`<9], ]
 dim(quercusTemp)
+
 
 # For the species with lots of varieties & cultivars, lets dig deeper:
 # If there are >3 varieties, monitor a max of 4 per varieties 
 # If there's only 1 variety, randomly select 9 from what we've monitored before OR all we've monitored before plus a random set of what's left
-QuercusSppBIG <- oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>9]
+QuercusSppBIG <- oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>=9]
+# QuercusSppBIG <- sppListAll$SpeciesName[sppListAll$GardenLocalityName=="Quercus" & sppListAll$PotentialObserving>9]
 QuercusSppBIG
 
 dim(quercusTemp)
 for(SPP in QuercusSppBIG){
-  sppSubset <- subsetTrees(dataRaw=quercus, SPP=SPP, nTreeSpp=9, stratVar = F, nTreeVar=2, dataOut=NULL)
+  # seed=1153
+  sppSubset <- subsetTrees(dataRaw=quercus, SPP=SPP, nTreeSpp=9, stratVar = F, nTreeVar=2, dataOut=NULL, seed=1153)
   
   quercusTemp <- rbind(quercusTemp, sppSubset)
   
@@ -335,20 +373,97 @@ summary(quercus2023)
 quercus2023 <- clusterTreesNew(datIn=quercus2023, clusterMin=15, clusterMax=25, seed=1656)
 
 # This passes the gut test
+png(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=quercus2023) +
   coord_equal() +
   geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
-# dev.off()
+dev.off()
 
+length(quercus2023$List)
 summary(as.factor(quercus2023$List))
+
+length(oldQuercus$Obs.List)
+summary(as.factor(oldQuercus$Obs.List))
+
 
 write.csv(quercus2023, file=file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"), row.names=F)
 
 # ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~
-# Acer ----
+# Acer (223 potential species; 111 past) ----
 # ~~~~~~~~~~~~~~~~
+colSums(sppListAll[sppListAll$GardenLocalityName=="Acer",c("PotentialObserving", "PastObserving")])
+sppListAll[sppListAll$GardenLocalityName=="Acer",c("PotentialObserving", "PastObserving")]
+
+
+sppListAll[sppListAll$GardenLocalityName=="Acer",]
+sppListAll[sppListAll$GardenLocalityName=="Acer" & sppListAll$PastObserving==0,]
+sppListAll[sppListAll$GardenLocalityName=="Acer" & sppListAll$PastObserving>10,]
+
+ggplot(data=treesCollections[treesCollections$GardenLocalityName=="Acer",]) +
+  coord_equal() +
+  geom_point(aes(x=Longitude, y=Latitude))
+
+
+# Removing some trees that we know are hard to observe
+treesCollections[treesCollections$GardenLocalityName=="Acer"  & treesCollections$Latitude>41.819,]
+
+treesCollections[treesCollections$GardenLocalityName=="Acer"  & treesCollections$Latitude>41.818   & treesCollections$Latitude>41.819 & treesCollections$Longitude>-88.0506,]
+
+# Remove the first group; second is more questionable
+treesCollections2 <- treesCollections[!(treesCollections$GardenLocalityName=="Acer" & treesCollections$Latitude>41.819),]
+
+# Starting by taking everything with less than 9 trees (3 x 3)
+acerTemp <- treesCollections2[treesCollections2$GardenLocalityName=="Acer" & treesCollections2$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
+
+# For the species with lots of varieties & cultivars, lets dig deeper:
+# If there are >3 varieties, monitor a max of 4 per varieties 
+# If there's only 1 variety, randomly select 9 from what we've monitored before OR all we've monitored before plus a random set of what's left
+acerSppBIG <- sppListAll$SpeciesName[sppListAll$GardenLocalityName=="Acer" & sppListAll$PotentialObserving>9]
+
+dim(acerTemp)
+for(SPP in acerSppBIG){
+  sppSubset <- subsetTrees(dataRaw=treesCollections2[treesCollections2$GardenLocalityName=="Acer",], SPP=SPP, nTreeSpp=9, nTreeVar=4, dataOut=NULL, seed=1153)
+  
+  acerTemp <- rbind(acerTemp, sppSubset)
+  
+} # End SPP list
+summary(acerTemp)
+
+acer2023 <- data.frame(List=NA, PlantID = acerTemp$PlantId, 
+                        Taxon = paste(acerTemp$GenusName, acerTemp$SpeciesName, sep=" "), 
+                        Vernacular = acerTemp$VernacularName, 
+                        BgLatitude = acerTemp$Latitude, 
+                        BgLongitude = acerTemp$Longitude, 
+                        GardenGrid = acerTemp$GardenSubarea1, 
+                        GardenSubgrid = acerTemp$GardenSubarea2)
+acer2023$Vernacular <- gsub("'", "", acer2023$Vernacular)
+acer2023$Vernacular <- gsub('["]', '', acer2023$Vernacular)
+
+unique(acer2023$Vernacular)
+summary(acer2023)
+
+set.seed(1435)
+
+# May need to play around with the seed function to get things to look good, but this function should make it easier
+acer2023 <- clusterTreesNew(datIn=acer2023, clusterMin=15, clusterMax=25, seed=1521)
+
+# This passes the gut test
+png(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2023.png"), height=8, width=8, units="in", res=180)
+ggplot(data=acer2023) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+dev.off()
+
+length(acer2023$List)
+summary(as.factor(acer2023$List))
+
+length(oldAcer$Obs.List)
+summary(as.factor(oldAcer$Obs.List))
+
+write.csv(acer2023, file=file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2023.csv"), row.names=F)
+
 # ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
