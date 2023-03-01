@@ -470,5 +470,15 @@ write.csv(acer2023, file=file.path(path.google, "Observing Lists", "Acer", "Obse
 
 # ~~~~~~~~~~~~~~~~
 
+# ~~~~~~~~~~~~~~~~
+# Combine all lists and put them in the PhenoApp Folder
+# ~~~~~~~~~~~~~~~~
+listsAll <- rbind(quercus2023, acer2023, ulmus2023, tilia2023)
+
+write.csv(listsAll, file=file.path(path.google, "Observing Lists", "ObservingList_AllCombined_2023.csv"), row.names=F)
+write.csv(listsAll, file=file.path(path.google, "DataApp", "ObservingList_AllCombined_2023.csv"), row.names=F)
+
+# ~~~~~~~~~~~~~~~~
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
