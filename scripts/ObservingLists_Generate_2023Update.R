@@ -215,7 +215,8 @@ summary(as.factor(tilia2023$List))
 png(file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=tilia2023) +
   coord_equal() +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List)))+
+  scale_shape_manual(values=c(1:18))
 dev.off()
 
 length(tilia2023$List)
@@ -296,7 +297,8 @@ ulmus2023 <- clusterTreesNew(datIn=ulmus2023, clusterMin=15, clusterMax=25, seed
 png(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=ulmus2023) +
   coord_equal() +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List))) +
+  scale_shape_manual(values=c(1:18))
 dev.off()
 
 length(ulmus2023$List)
@@ -376,7 +378,8 @@ quercus2023 <- clusterTreesNew(datIn=quercus2023, clusterMin=15, clusterMax=25, 
 png(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=quercus2023) +
   coord_equal() +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List))) +
+  scale_shape_manual(values=c(1:18))
 dev.off()
 
 length(quercus2023$List)
@@ -453,7 +456,8 @@ acer2023 <- clusterTreesNew(datIn=acer2023, clusterMin=15, clusterMax=25, seed=1
 png(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2023.png"), height=8, width=8, units="in", res=180)
 ggplot(data=acer2023) +
   coord_equal() +
-  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List)))
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List))) +
+  scale_shape_manual(values=c(1:18))
 dev.off()
 
 length(acer2023$List)
