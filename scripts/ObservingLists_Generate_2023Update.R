@@ -322,7 +322,7 @@ ggplot(data=treesCollections[treesCollections$GardenLocalityName=="Quercus",]) +
   coord_equal() +
   geom_point(aes(x=Longitude, y=Latitude))
 
-treesCollections[treesCollections$GardenLocalityName=="Quercus" & quercusTemp$Longitude< -88.056,]
+treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$Longitude< -88.056,]
 
 # Made Notes on Google sheet that I'll pull in; current rules were:
 # 1) All trees outside of sections Quercus & Lobatae
@@ -335,11 +335,27 @@ treesCollections[treesCollections$GardenLocalityName=="Quercus" & quercusTemp$Lo
 oak.priorities <- googlesheets4::read_sheet(ss = "1KlXfLvtGSpOKvd1uJ-8etRFvbgyWDwiye_3d71d2w24", sheet = "Quercus")
 colSums(oak.priorities[,c("PotentialObserving", "PastObserving", "2023 Goal")], na.rm=T)
 
+# Creating a subset where we get rid of some weird oak groups
+treesCollections[(treesCollections$GardenLocalityName=="Quercus" & treesCollections$Longitude< -88.055),]
+
+# Looking at how much of Q. oglethorpensis we lose -- all except 3.  I think I'm okay with that
+nrow(treesCollections[(treesCollections$GardenLocalityName=="Quercus" & treesCollections$Longitude< -88.055) & treesCollections$SpeciesName=="oglethorpensis",])
+nrow(treesCollections[(treesCollections$GardenLocalityName=="Quercus" & treesCollections$Longitude> -88.055) & treesCollections$SpeciesName=="oglethorpensis",])
+
+
+treesCollectionsQ <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$Longitude> -88.055,]
+ggplot(data=treesCollectionsQ[treesCollectionsQ$GardenLocalityName=="Quercus",]) +
+  coord_equal() +
+  geom_point(aes(x=Longitude, y=Latitude))
+
 
 # Starting by taking everything with less than 9 trees (3 x 3)
-quercusTemp <- treesCollections[treesCollections$GardenLocalityName=="Quercus" & treesCollections$SpeciesName %in% oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>0 & oak.priorities$`2023 Goal`<9], ]
+quercusTemp <- treesCollectionsQ[treesCollectionsQ$GardenLocalityName=="Quercus" & treesCollectionsQ$SpeciesName %in% oak.priorities$SpeciesName[oak.priorities$`2023 Goal`>0 & oak.priorities$`2023 Goal`<9], ]
 dim(quercusTemp)
 
+# ggplot(data=quercusTemp[,]) +
+#   coord_equal() +
+#   geom_point(aes(x=Longitude, y=Latitude))
 
 # For the species with lots of varieties & cultivars, lets dig deeper:
 # If there are >3 varieties, monitor a max of 4 per varieties 
@@ -351,7 +367,7 @@ QuercusSppBIG
 dim(quercusTemp)
 for(SPP in QuercusSppBIG){
   # seed=1153
-  sppSubset <- subsetTrees(dataRaw=quercus, SPP=SPP, nTreeSpp=9, stratVar = F, nTreeVar=2, dataOut=NULL, seed=1153)
+  sppSubset <- subsetTrees(dataRaw=treesCollectionsQ, SPP=SPP, nTreeSpp=9, stratVar = F, nTreeVar=2, dataOut=NULL, seed=1153)
   
   quercusTemp <- rbind(quercusTemp, sppSubset)
   
@@ -372,7 +388,19 @@ unique(quercus2023$Vernacular)
 summary(quercus2023)
 
 # May need to play around with the seed function to get things to look good, but this function should make it easier
-quercus2023 <- clusterTreesNew(datIn=quercus2023, clusterMin=15, clusterMax=25, seed=1656)
+# Note: excluding the Q. oglethorpensis cluster and making that its own mini-list
+# Pretty good: **303; new: 342; 1543; *1544
+quercus2023 <- clusterTreesNew(datIn=quercus2023[,], clusterMin=15, clusterMax=25, seed=1546)
+# quercusMain <- clusterTreesNew(datIn=quercus2023[quercus2023$BgLongitude>-88.056,], clusterMin=15, clusterMax=25, seed=303)
+# quercusMini <- quercus2023[quercus2023$BgLongitude< -88.056,]
+# quercusMini$List <- max(as.numeric(quercusMain$List))+1
+# 1656
+# dim(quercusMain)
+# dim(quercusMini)
+
+# quercus2023 <- rbind(quercusMain, quercusMini)
+dim(quercus2023)
+
 
 # This passes the gut test
 png(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.png"), height=8, width=8, units="in", res=180)
@@ -412,13 +440,13 @@ ggplot(data=treesCollections[treesCollections$GardenLocalityName=="Acer",]) +
 # Removing some trees that we know are hard to observe
 treesCollections[treesCollections$GardenLocalityName=="Acer"  & treesCollections$Latitude>41.819,]
 
-treesCollections[treesCollections$GardenLocalityName=="Acer"  & treesCollections$Latitude>41.818   & treesCollections$Latitude>41.819 & treesCollections$Longitude>-88.0506,]
+treesCollections[treesCollections$GardenLocalityName=="Acer"  & treesCollections$Latitude>41.818 & treesCollections$Longitude>-88.050,]
 
 # Remove the first group; second is more questionable
-treesCollections2 <- treesCollections[!(treesCollections$GardenLocalityName=="Acer" & treesCollections$Latitude>41.819),]
+treesCollectionsA <- treesCollections[treesCollections$GardenLocalityName=="Acer" & treesCollections$Latitude<41.819 & !(treesCollections$Latitude>41.818 & treesCollections$Longitude>-88.050) & !(treesCollections$Longitude< -88.053),]
 
 # Starting by taking everything with less than 9 trees (3 x 3)
-acerTemp <- treesCollections2[treesCollections2$GardenLocalityName=="Acer" & treesCollections2$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
+acerTemp <- treesCollectionsA[treesCollectionsA$GardenLocalityName=="Acer" & treesCollectionsA$SpeciesName %in% sppListAll$SpeciesName[sppListAll$PotentialObserving<=9], ]
 
 # For the species with lots of varieties & cultivars, lets dig deeper:
 # If there are >3 varieties, monitor a max of 4 per varieties 
@@ -427,7 +455,7 @@ acerSppBIG <- sppListAll$SpeciesName[sppListAll$GardenLocalityName=="Acer" & spp
 
 dim(acerTemp)
 for(SPP in acerSppBIG){
-  sppSubset <- subsetTrees(dataRaw=treesCollections2[treesCollections2$GardenLocalityName=="Acer",], SPP=SPP, nTreeSpp=9, nTreeVar=4, dataOut=NULL, seed=1153)
+  sppSubset <- subsetTrees(dataRaw=treesCollectionsA[treesCollectionsA$GardenLocalityName=="Acer",], SPP=SPP, nTreeSpp=9, nTreeVar=4, dataOut=NULL, seed=1153)
   
   acerTemp <- rbind(acerTemp, sppSubset)
   
@@ -450,6 +478,7 @@ summary(acer2023)
 set.seed(1435)
 
 # May need to play around with the seed function to get things to look good, but this function should make it easier
+# works well: 1521
 acer2023 <- clusterTreesNew(datIn=acer2023, clusterMin=15, clusterMax=25, seed=1521)
 
 # This passes the gut test

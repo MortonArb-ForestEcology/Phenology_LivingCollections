@@ -17,6 +17,11 @@ subsetTrees <- function(dataRaw, SPP, nTreeSpp=9, stratVar=T, nTreeVar=4, dataOu
   # Check how many trees we have
   nNow <- nrow(datSpp)
   
+  if(nNow < nTreeSpp){
+    warning("Not enough target trees; taking all we have")
+    nTreeSpp = nNow
+  }
+  
   if(length(varList) > 1 & stratVar){
     for(VAR in varList){
       treeVar <- which(datSpp$CalcFullName==VAR)
@@ -191,7 +196,7 @@ clusterTreesNew <- function(datIn, clusterMin=15, clusterMax=25, seed=sample.int
   set.seed(seed)
   listKmeans <- kmeans(datIn[,c("BgLongitude", "BgLatitude")], centers=round(nrow(datIn)/mean(c(clusterMin, clusterMax)))) # 
   summary(as.factor(listKmeans$cluster))
-  datIn$List <- listKmeans$cluster
+  datIn$List <- as.factor(listKmeans$cluster)
   nList <- max(listKmeans$cluster)
   
   # Next step is doing clustering trying to balance number + distance
@@ -214,8 +219,8 @@ clusterTreesNew <- function(datIn, clusterMin=15, clusterMax=25, seed=sample.int
     # 2. If that group now needs a tree, take the nearest tree from another group (that isn't the first one)
     
     # Set up our starters
-    listSize <- summary(as.factor(datIn$List))
-    takersOrig <- which(listSize<clusterMin) 
+    listSize <- summary(datIn$List)
+    takersOrig <- names(listSize)[which(listSize<clusterMin)]
     
     takersNew <- takersOrig
     takersTot <- takersOrig
@@ -228,20 +233,25 @@ clusterTreesNew <- function(datIn, clusterMin=15, clusterMax=25, seed=sample.int
           dist.avail <- distPts2Grps[paste(rows.avail),paste0("GRP", takersNew[i])]
           datIn$List[as.numeric(names(dist.avail[which(dist.avail==min(dist.avail))]))] <- takersNew[i]
           
-          listSize <- summary(as.factor(datIn$List))
+          listSize <- summary(datIn$List)
         } # Finish while loop
       } # Finish takersNew Loop
       
-      takersNew <- which(listSize<clusterMin) 
+      takersNew <- names(listSize)[which(listSize<clusterMin) ] # New case: we dissolve a group!
       takersTot <- c(takersTot, takersNew)
       
     } # Finish working with the "takers" group
     # listSize
 
+    # Check for empty lists:
+    # listsEmpty <- c(1:nList)[!1:nList %in% unique(datIn$List)]
+    
+    # see if any of our existing lists are more than 
+    
     # 3. If we still have trees groups with too many trees, give on to the nearest group
     # 4. If this results in the receiving group have too many trees, give it to the nearest etc.
-    listSize <- summary(as.factor(datIn$List))
-    giversOrig <- which(listSize>clusterMax) 
+    listSize <- summary(datIn$List)
+    giversOrig <- names(listSize)[which(listSize>clusterMax) ]
     
     giversNew <- giversOrig
     giversTot <- giversOrig
