@@ -200,6 +200,12 @@ clusterTreesNew <- function(datIn, clusterMin=15, clusterMax=25, seed=sample.int
   rownames(distPts2Grps) <- c(paste0("GRP", 1:nList), 1:nrow(datIn))
   colnames(distPts2Grps) <- c(paste0("GRP", 1:nList), 1:nrow(datIn))
   summary(distPts2Grps)
+
+  # Also just setting up the group distance matrix 
+  distGrps <- as.matrix(dist(listKmeans$centers, method="euclidean"))
+  # rownames(distGrps) <- c(paste0("GRP", 1:nList))
+  # colnames(distGrps) <- c(paste0("GRP", 1:nList))
+  summary(distGrps)
   
   # IFF we need to rebalance:
   # if(any(listKmeans$size>clusterMax | listKmeans$size<clusterMin)){
@@ -243,19 +249,29 @@ clusterTreesNew <- function(datIn, clusterMin=15, clusterMax=25, seed=sample.int
       print("Rebalancing Lists: Givers Group")
       
       for(i in 1:length(giversNew)){
-        print(as.numeric(giversNew[i]))
+        # print(as.numeric(giversNew[i]))
         while(listSize[giversNew[i]]>clusterMax){
           ### NOTE: ALTERNATE LOGIC AVAILABLE
           ### Find the closet group to your group that could accept trees & give it the closest trees that won't make it overload
+          grpsout <- c(giversNew[1:max(i-1,i)], giversTot[1:(length(giversTot)-length(giversNew))])
+          grpDists <- distGrps[giversNew[i], colnames(distGrps)[!colnames(distGrps) %in% paste(grpsout)]]
+          groupNew <- names(grpDists)[which(grpDists == min(grpDists) )]
+          
+          # Now find the tree closest to that new group
+          rows.avail <- which(datIn$List %in% giversNew[i])
+          dist.avail <- distPts2Grps[paste(rows.avail),paste0("GRP", groupNew)]
+          tree.give <- names(dist.avail[which(dist.avail==min(dist.avail))])
+          datIn$List[as.numeric(tree.give)] <- as.numeric(groupNew)
           
           # I want to find the tree furthest from the center and give it to its closest cluster
-          rows.avail <- which(datIn$List %in% giversNew[i])
-          dist.avail <- distPts2Grps[paste(rows.avail),paste0("GRP", giversNew[i])]
-          tree.give <- names(dist.avail[which(dist.avail==max(dist.avail))])
-          grpsout <- paste0("GRP",c(giversNew[1:max(i-1,i)], giversTot[1:(length(giversTot)-length(giversNew))]))
-          groupDist <- distPts2Grps[tree.give, colnames(distPts2Grps)[grepl("GRP", colnames(distPts2Grps)) & !colnames(distPts2Grps) %in% grpsout]]
-          groupNew <- names(groupDist)[which(groupDist==min(groupDist))]
-          datIn$List[as.numeric(tree.give)] <- as.numeric(gsub("GRP", "", groupNew))
+          # rows.avail <- which(datIn$List %in% giversNew[i])
+          # dist.avail <- distPts2Grps[paste(rows.avail),paste0("GRP", giversNew[i])]
+          # tree.give <- names(dist.avail[which(dist.avail==max(dist.avail))])
+          # grpsout <- paste0("GRP",c(giversNew[1:max(i-1,i)], giversTot[1:(length(giversTot)-length(giversNew))]))
+          # groupDist <- distPts2Grps[tree.give, colnames(distPts2Grps)[grepl("GRP", colnames(distPts2Grps)) & !colnames(distPts2Grps) %in% grpsout]]
+          # groupNew <- names(groupDist)[which(groupDist==min(groupDist))]
+          # datIn$List[as.numeric(tree.give)] <- as.numeric(gsub("GRP", "", groupNew))
+          
           
           listSize <- summary(as.factor(datIn$List))
         } # Finish while loop
