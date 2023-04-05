@@ -227,6 +227,13 @@ summary(as.factor(oldTilia$Obs.List))
 
 
 write.csv(tilia2023, file=file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.csv"), row.names=F)
+
+tilia2023 <- read.csv(file.path(path.google, "Observing Lists", "Tilia", "ObservingList_Tilia_2023.csv"))
+
+for(OBSLIST in unique(tilia2023$List)){
+  write.csv(tilia2023[tilia2023$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Tilia", paste0("ObservingList_Tilia_2023_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+  
+}
 # ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~
@@ -309,6 +316,13 @@ summary(as.factor(oldUlmus$Obs.List))
 
 
 write.csv(ulmus2023, file=file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"), row.names=F)
+
+ulmus2023 <- read.csv(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"))
+
+for(OBSLIST in unique(ulmus2023$List)){
+  write.csv(ulmus2023[ulmus2023$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Ulmus", paste0("ObservingList_Ulmus_2023_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+  
+}
 
 # ~~~~~~~~~~~~~~~~
 
@@ -419,6 +433,13 @@ summary(as.factor(oldQuercus$Obs.List))
 
 write.csv(quercus2023, file=file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"), row.names=F)
 
+quercus2023 <- read.csv(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"))
+
+for(OBSLIST in unique(quercus2023$List)){
+  write.csv(quercus2023[quercus2023$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Quercus", paste0("ObservingList_Quercus_2023_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+  
+}
+
 # ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~
@@ -497,6 +518,12 @@ summary(as.factor(oldAcer$Obs.List))
 
 write.csv(acer2023, file=file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2023.csv"), row.names=F)
 
+acer2023 <- read.csv(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2023.csv"))
+
+for(OBSLIST in unique(acer2023$List)){
+  write.csv(acer2023[acer2023$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Acer", paste0("ObservingList_Acer_2023_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+  
+}
 # ~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~
