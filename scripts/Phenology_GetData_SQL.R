@@ -25,10 +25,14 @@ observers <- dbReadTable(conn, "Observers")
 treeLists <- dbReadTable(conn, "ObservingLists")
 datAll <- dbReadTable(conn, "FormSubmission")
 
+# observers[order(observers$ObserverID),]
+
 ### DISCONNECT FROM DATABASE
 dbDisconnect(conn)
 
 summary(datAll)
+dim(datAll)
+
 for(COL in names(datAll)[!names(datAll) %in% c("DateEntered", "DateObserved")]){
   datAll[,COL] <- as.factor(datAll[,COL])
 }
