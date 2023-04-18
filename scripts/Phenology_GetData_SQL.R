@@ -1,14 +1,18 @@
 # Establishing a new script to pull data from out SQL server
 
-# Following code from Ross alexander and these resources:
+# From Ross
+library(DBI)
+library(RPostgreSQL)
+
+# Get a list of removed trees 
+removed <- googlesheets4::read_sheet("16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ", sheet="Removed Trees")
+names(removed)
+
+# Following code from Ross Alexander and these resources:
 # https://www.r-bloggers.com/2015/05/getting-started-with-postgresql-in-r/
 # https://hevodata.com/learn/rpostgresql/
 # https://medium.com/geekculture/a-simple-guide-on-connecting-rstudio-to-a-postgresql-database-9e35ccdc08be
 # https://www.datacareer.de/blog/connect-to-postgresql-with-r-a-step-by-step-example/
-
-# From Ross
-library(DBI)
-library(RPostgreSQL)
 
 ### CONNECT TO DATABASE (LOG ON ANL VPN IF OUTSIDE THE ANL OFFICE)
 drv <- dbDriver("PostgreSQL")
@@ -25,8 +29,6 @@ observers <- dbReadTable(conn, "Observers")
 treeLists <- dbReadTable(conn, "ObservingLists")
 datAll <- dbReadTable(conn, "FormSubmission")
 
-# observers[order(observers$ObserverID),]
-
 ### DISCONNECT FROM DATABASE
 dbDisconnect(conn)
 
@@ -40,38 +42,72 @@ for(COL in names(datAll)[!names(datAll) %in% c("DateEntered", "DateObserved")]){
 datAll[datAll==""] <- NA
 datAll <- droplevels(datAll)
 
+# Get rid of data for trees that have been removed
+datAll <- datAll[!datAll$PlantID %in% removed$PlantNumber,]
+datAll$Species <- trimws(datAll$Species)
+
 # cleaning up some relatively minor issues with the data
 # # datAll$Genus <- gsub(" ", "", datAll$Genus)
 # datAll$Species <- gsub("  ", " ", datAll$Species)
 # datAll$Species <- tolower(datAll$Species)
 # summary(datAll)
 
+# Checking for data on some trees reported missing by one observer
+# datAll[datAll$PlantID %in% c("19-2012*1", "5-2018*4", "37-2014*1"),]
+
 # Checking for immediate issues all related to bad entry
 # Checking for observers not in our existing ID list
 datAll[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),]
+unique(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
+
 
 # Checking for trees whose PlantID isn't in our list
-datAll[!datAll$PlantID %in% c(treeLists$PlantID),] 
+# # NOTE: Need to 
+datAll[!datAll$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] 
 
 # Genus not in the three we're focusing on
 datAll[!datAll$Genus %in% c("Quercus", "Acer", "Ulmus"), ]
 
-# Finding specific epithets that don't match att all
-epithetDat <- unique(datAll$Species)
-epithetDat[!sapply(epithetDat, FUN=function(x){any(grepl(x, sppReal))})]
+# Finding specific epithets that don't match at all
+sppReal <- unique(treeLists$Taxon)
 
-treeLists[treeLists$PlantID=="185-92*2",]
-listProb <- treeLists[grepl("Quercus", treeLists$Taxon) & treeLists$List==4,] # Replace 4 with whatever list the trouble maker is assigned to; then search by that observer's name & possible a date
-listProb[order(listProb$PlantID),]
+epithetDat <- unique(datAll$Species)
+epiprob <- epithetDat[!sapply(epithetDat, FUN=function(x){any(grepl(x, sppReal))})]
+
+summary(datAll[datAll$Species %in% epiprob, ])
+
+datAll[datAll$Species %in% epiprob, ]
+
+
+treeLists[treeLists$PlantID=="15-2008*1",]
+
+# Checking for genus-species combos
+unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(unique(treeLists$Taxon)),c("Species")]))
+
+
+# This may be slow, but now checking for entries where the species doesn't match what it shoudl
+datBad <- data.frame()
+for(TREEID in unique(datAll$PlantID)){
+  datNow <- datAll[datAll$PlantID==TREEID, ]
+  WTF <- datNow[!paste(datNow$Genus, datNow$Species) == treeLists$Taxon[treeLists$PlantID==TREEID],]
+  
+  if(nrow(WTF)>0) datBad <- rbind(datBad, WTF)
+}
+dim(WTF)
+
+treeLists[treeLists$PlantID=="262-2017*2",]
+
+
+# listProb <- treeLists[grepl("Quercus", treeLists$Taxon) & treeLists$List==4,] # Replace 4 with whatever list the trouble maker is assigned to; then search by that observer's name & possible a date
+# listProb[order(listProb$PlantID),]
+# 
+# treeLists[treeLists$PlantID=="400-2013*1",]
 
 
 # Checking for trees whose genus + species don't match our list
 sppDat <- paste(datAll$Genus, datAll$Species)
-sppReal <- unique(treeLists$Taxon)
 
 
-# Need to find a way to remove leading spaces from specific epithets
-unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(unique(treeLists$Taxon)),c("Species")]))
 # treeLists[grep("humidicola", treeLists$Taxon),]
 # datAll[datAll$Species=="humidicola",]
 unique(paste(datAll$Genus[datAll$Species=="humidicola"], datAll$Species[datAll$Species=="humidicola"])) %in% treeLists$Taxon
