@@ -4,6 +4,7 @@
 library(DBI)
 library(RPostgreSQL)
 
+
 # Get a list of removed trees 
 removed <- googlesheets4::read_sheet("16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ", sheet="Removed Trees")
 names(removed)
@@ -79,13 +80,13 @@ summary(datAll[datAll$Species %in% epiprob, ])
 datAll[datAll$Species %in% epiprob, ]
 
 
-treeLists[treeLists$PlantID=="15-2008*1",]
+treeLists[treeLists$PlantID=="52-95*5",]
 
 # Checking for genus-species combos
 unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(unique(treeLists$Taxon)),c("Species")]))
 
 
-# This may be slow, but now checking for entries where the species doesn't match what it shoudl
+# This may be slow, but now checking for entries where the species doesn't match what it is in our records
 datBad <- data.frame()
 for(TREEID in unique(datAll$PlantID)){
   datNow <- datAll[datAll$PlantID==TREEID, ]
@@ -94,46 +95,7 @@ for(TREEID in unique(datAll$PlantID)){
   if(nrow(WTF)>0) datBad <- rbind(datBad, WTF)
 }
 dim(WTF)
+WTF
+# treeLists[treeLists$PlantID=="262-2017*2",]
 
-treeLists[treeLists$PlantID=="262-2017*2",]
-
-
-# listProb <- treeLists[grepl("Quercus", treeLists$Taxon) & treeLists$List==4,] # Replace 4 with whatever list the trouble maker is assigned to; then search by that observer's name & possible a date
-# listProb[order(listProb$PlantID),]
-# 
-# treeLists[treeLists$PlantID=="400-2013*1",]
-
-
-# Checking for trees whose genus + species don't match our list
-sppDat <- paste(datAll$Genus, datAll$Species)
-
-
-# treeLists[grep("humidicola", treeLists$Taxon),]
-# datAll[datAll$Species=="humidicola",]
-unique(paste(datAll$Genus[datAll$Species=="humidicola"], datAll$Species[datAll$Species=="humidicola"])) %in% treeLists$Taxon
-grep("microcarpa", treeLists$Taxon)
-treeLists[treeLists$PlantID=="15-2008*1",]
-
-
-unique(sppDat)
-unique(treeLists$Taxon)
-head(treeLists)
-summary(datAll[!paste(datAll$Genus, datAll$Species) %in% c(treeLists$Taxon),c("PlantID", "ObserverID", "Genus", "Species", "DateEntered")])
-length(unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(treeLists$Taxon),c("PlantID")])))
-length(unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(treeLists$Taxon),c("Species")])))
-length(unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(treeLists$Taxon),c("ObserverID")])))
-
-unique
-unique(paste(datAll$Genus, datAll$Species, sep=""))
-
-
-# PlantIDAll <- unique(datAll$PlantID)
-datAll[grepl("[/]", datAll$PlantID),]
-datAll[!grepl("[-]", datAll$PlantID) | !grepl("[*]", datAll$PlantID),]
-
-summary(datAll$ObserverID)
-
-# Deeper QAQC checks --> PlantIDs not in our list; PlantIDs don't match genus/species in entry; Observers not in our list
-
-
-# write.csv(datAll, "~/Google Drive/My Drive/LivingCollections_Phenology/LivingCollectionPhenology_ObservationData_LAdatAll.csv", row.names=F)
+write.csv(datAll, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
