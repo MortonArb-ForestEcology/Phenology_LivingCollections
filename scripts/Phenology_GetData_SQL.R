@@ -6,6 +6,7 @@ library(RPostgreSQL)
 
 
 # Get a list of removed trees 
+googlesheets4::gs4_auth(email="crollinson@mortonarb.org")
 removed <- googlesheets4::read_sheet("16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ", sheet="Removed Trees")
 names(removed)
 
@@ -27,11 +28,17 @@ conn <- dbConnect(
 )
 
 observers <- dbReadTable(conn, "Observers")
+assignments <- dbReadTable(conn, "ObserverListCollection")
 treeLists <- dbReadTable(conn, "ObservingLists")
 datAll <- dbReadTable(conn, "FormSubmission")
 
 ### DISCONNECT FROM DATABASE
 dbDisconnect(conn)
+
+
+### Cleaning up data
+# Removing missing trees from our tree list
+treeLists <- treeLists[!treeLists$PlantID %in% removed$PlantNumber,]
 
 summary(datAll)
 dim(datAll)
@@ -66,24 +73,29 @@ unique(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOW
 # # NOTE: Need to 
 datAll[!datAll$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] 
 
-# Genus not in the three we're focusing on
-datAll[!datAll$Genus %in% c("Quercus", "Acer", "Ulmus"), ]
+# Checking for an Observer monitoring something in their normal list (usually a typo!)
+datOdd <- data.frame()
+for(OBSID in unique(datAll$ObserverID)){
+  if(!OBSID %in% assignments$ObserverID) next
+  
+  datNow <- datAll[datAll$ObserverID==OBSID, ]
+  ObsAssign <- assignments[assignments$ObserverID==OBSID,]
+  
+  # Building the tree list the ugly way, but it'll work
+  treesAssign <- data.frame()
+  for(i in 1:nrow(ObsAssign)){
+    treesAssign <- rbind(treesAssign, treeLists[grepl(ObsAssign$Collection[i], treeLists$Taxon) & treeLists$List==ObsAssign$List[i],])
+    
+  }
+  
+  WTF <- datNow[!datNow$PlantID %in% treesAssign$PlantID,]
+  
+  if(nrow(WTF)>0) datOdd <- rbind(datOdd, WTF)
+}
+dim(datOdd)
+datOdd[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
 
-# Finding specific epithets that don't match at all
-sppReal <- unique(treeLists$Taxon)
 
-epithetDat <- unique(datAll$Species)
-epiprob <- epithetDat[!sapply(epithetDat, FUN=function(x){any(grepl(x, sppReal))})]
-
-summary(datAll[datAll$Species %in% epiprob, ])
-
-datAll[datAll$Species %in% epiprob, ]
-
-
-treeLists[treeLists$PlantID=="52-95*5",]
-
-# Checking for genus-species combos
-unique((datAll[!paste(datAll$Genus, datAll$Species) %in% c(unique(treeLists$Taxon)),c("Species")]))
 
 
 # This may be slow, but now checking for entries where the species doesn't match what it is in our records
@@ -94,8 +106,14 @@ for(TREEID in unique(datAll$PlantID)){
   
   if(nrow(WTF)>0) datBad <- rbind(datBad, WTF)
 }
-dim(WTF)
-WTF
-# treeLists[treeLists$PlantID=="262-2017*2",]
+dim(datBad)
+datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
+
+
+treeLists[treeLists$PlantID=="36-2014*1",]
+treeLists[grep("pumila", treeLists$Taxon),]
+
+datAll[grep("pumila x rubra", datAll$Species),]
+
 
 write.csv(datAll, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
