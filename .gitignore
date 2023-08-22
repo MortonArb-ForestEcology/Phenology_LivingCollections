@@ -33,3 +33,4 @@ pheno_compiled.csv
 *.dcf
 *.dcf
 scripts/phenology_status_list/pheno_compiled.csv
+data_raw/meteorology/GHCN_extracted/USC00115097_latest.csv
