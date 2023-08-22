@@ -159,7 +159,7 @@ summary(dat.ghcn13)
 head(dat.ghcn13)
 
 #Subsetting out uncecessary columns for the phenology report
-dat.ghcn14 <- dat.ghcn13[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
+dat.ghcn14 <- dat.ghcn13[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum", "NORAIN.cum", "DaysNoRain")]
 summary(dat.ghcn14)
 head(dat.ghcn14)
 
@@ -171,13 +171,15 @@ summary(dat.ghcn15)
 #attemtption to generte a graph
 #png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
-  geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2022") +
-  # scale_color_manual(name="Year") +
-  # scale_fill_manual(name="Year") +
+  aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR))+
+  geom_line()+
+  geom_line(data = dat.ghcn15[dat.ghcn15$YEAR == 2023, ], aes(color = "2023"), size = 1.0) +
+  geom_line(data = dat.ghcn15[dat.ghcn15$YEAR == 2021, ], aes(color = "2021"), size = 1.0) +
+  geom_line(data = dat.ghcn14[dat.ghcn14$YEAR == 2012, ], aes(color = "2012"), size = 1.0) +
+  scale_color_manual(values = c("2023" = "goldenrod", "2021" = "darkblue",'2012'="red3")) +
   labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
   theme_classic()
-dev.off()
+#dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn15) +
@@ -243,3 +245,28 @@ summary(dat.ghcn151)
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
 #write.csv(dat.ghcn2, file.path(path.out, "data", "Weather_ArbCOOP_historical_latest.csv"), row.names=F)
 
+#Just getting cumulative days without rain
+#png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcn14) +
+  aes(x=YDAY, y=NORAIN.cum, color=as.factor(YEAR))+
+  geom_line()+
+  geom_line(data = dat.ghcn14[dat.ghcn14$YEAR == 2023, ], aes(color = "2023"), size = 1.0) +
+  geom_line(data = dat.ghcn14[dat.ghcn14$YEAR == 2021, ], aes(color = "2021"), size = 1.0) +
+  geom_line(data = dat.ghcn14[dat.ghcn14$YEAR == 2012, ], aes(color = "2012"), size = 1.0) +
+  scale_color_manual(values = c("2023" = "goldenrod", "2021" = "darkblue",'2012'="red3")) +
+  labs(title="Cumulative Days without Rain", y="Cumulative days without rain", x="Day of Year", color="Year") +
+  theme_classic()
+#dev.off()
+
+#getting today days without rain
+ 
+#dev.off()
+
+#getting realtionship of  days without rain
+ggplot(data=dat.ghcn14) +
+  facet_wrap(DaysNoRain ~ ., ncol = 2, as.table = TRUE,scales = "free_y") +
+  aes( x= YEAR, fill=as.factor(YEAR))+
+  geom_bar()
+  labs(title="Cumulative Precipitation", y="Days without rain", x="Day of Year", color="Year") +
+  theme_classic()
+#dev.off()
