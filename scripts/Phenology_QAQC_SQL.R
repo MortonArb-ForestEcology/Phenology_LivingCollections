@@ -68,6 +68,8 @@ datAll$Species <- trimws(datAll$Species)
 datAll[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),]
 unique(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
 
+# treeLists[treeLists$PlantID=="1261-26*2", ]
+# datAll[datAll$ObserverID=="Haraf" & datAll$DateObserved=="2023-05-09",c("PlantID", "ObserverID", "Genus", "Species")]
 
 # Checking for trees whose PlantID isn't in our list
 # # NOTE: Need to 
@@ -110,10 +112,10 @@ dim(datBad)
 datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
 
 
-treeLists[treeLists$PlantID=="36-2014*1",]
-treeLists[grep("pumila", treeLists$Taxon),]
-
-datAll[grep("pumila x rubra", datAll$Species),]
+# treeLists[treeLists$PlantID=="18-2012*1",]
+# treeLists[grep("pumila", treeLists$Taxon),]
+# 
+# datAll[grep("pumila x rubra", datAll$Species),]
 
 
 write.csv(datAll, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
