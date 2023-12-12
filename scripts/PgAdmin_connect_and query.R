@@ -7,7 +7,7 @@ db_host <- "164.92.83.213" #host name/address e
 db_port <- 5432 #port
 db_name <- "arboretum" #data base name we are interested in querying, for this project, so far there is only one
 db_user <- "arboretum" # user name
-db_password <- "arboretum1234" # password for the user, we only have one user, and the password has been set to this. 
+db_password <- "arboretum1234" # password for the user, we only have one user, and the password has been set to this 
 
 # Create a connection to the database
 con <- dbConnect(
@@ -23,8 +23,7 @@ con <- dbConnect(
 if (inherits(con, "PostgreSQLConnection")) 
   {
   cat("Connected to PostgreSQL database")
-} 
-else {
+} else {
   cat("Failed to connect to PostgreSQL database")
 }
 
