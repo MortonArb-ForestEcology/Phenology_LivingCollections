@@ -3,9 +3,13 @@
 # From Ross
 library(DBI)
 library(RPostgreSQL)
-
+library(googlesheets4)
 
 # Get a list of removed trees 
+
+# googledrive::drive_auth()
+# googlesheets4::gs4_deauth()
+
 googlesheets4::gs4_auth(email="crollinson@mortonarb.org")
 removed <- googlesheets4::read_sheet("16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ", sheet="Removed Trees")
 names(removed)
@@ -67,6 +71,8 @@ datAll$Species <- trimws(datAll$Species)
 # Checking for observers not in our existing ID list
 datAll[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),]
 unique(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
+oddObservers <- summary(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
+oddObservers[oddObservers>0]
 
 # treeLists[treeLists$PlantID=="1261-26*2", ]
 # datAll[datAll$ObserverID=="Haraf" & datAll$DateObserved=="2023-05-09",c("PlantID", "ObserverID", "Genus", "Species")]
