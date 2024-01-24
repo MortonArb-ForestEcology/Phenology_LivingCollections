@@ -1,6 +1,10 @@
 # A new script with some combined collections analyses/graphs for the end of the year report
 library(ggplot2)
 library(readr)
+library(lubridate)
+library(tidyverse)
+library(gganimate)
+library(dplyr)
 #
 path.google <- "~/Google Drive/My Drive" # Mac
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
@@ -33,9 +37,9 @@ dat.all <- rbind(dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
 
 #getting the correct date format
 dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
+
 ##werid 2027 value
 summary(dat.all)
-
 #removing the "Q.macrocarpa" collection because that is not necessary for the end of year pheology report 
 dat.all <- dat.all[!(dat.all$Collection %in% c("Q. macrocarpa", "Tilia")), ]
 
@@ -84,7 +88,7 @@ cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
           "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 #Graphing
 ggplot(data=leaf.color) +
-  png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
+  #png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .,scales="free_y") + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=yday, fill=as.factor(Year),color=as.factor(Year))) +
   xlim(150, 350)+
@@ -94,13 +98,25 @@ ggplot(data=leaf.color) +
   labs(title="Mean Day of First Leaf Color Present", x="Day of Year", fill="Year")
 dev.off()
 
+###Highlight
 ggplot(data=leaf.color) +
-   png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
+  png(file.path(path.figs,"All_First_Leaf_Color_2023_highlight.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection ~ ., scales="free_y") +
+  geom_density(alpha=0.25, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  xlim(150, 350) +
+  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
+  labs(title="Mean Day of First Leaf Color Present", x="Day of Year", fill="Year")
+dev.off()
+
+ggplot(data=leaf.color) +
+  # png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ . ) + # This is the code that will stack everything
   geom_histogram(alpha=0.5, binwidth =10, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442", "2023"="purple3" )) +
-  scale_color_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442", "2023"= "purple3")) +
-  theme_bw()+
+  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
   labs(title="Leaf Color Present", x="Day of Year")
 dev.off()
 ### getting leaf color intensity
@@ -630,7 +646,214 @@ ggplot(data=fruit.drop) +
   labs(title="Average Day of Fruit Drop Observed", x="Day of Year")
 dev.off()
 
-############STILL NEED TO WORK ON THIS
+
+###Animations
+dat.lb23 <- dat.23[dat.23$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed","leaf.breaking.buds.observed","leaf.present.observed", "Collection")] 
+dat.lb23 <- dat.lb23[!is.na(dat.lb23$PlantNumber),]
+summary(dat.lb23)
+
+dat.lp23 <- dat.23[dat.23$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed","leaf.breaking.buds.observed","leaf.present.observed", "Collection")] 
+dat.lp23 <- dat.lp23[!is.na(dat.lp23$PlantNumber),]
+summary(dat.lp23)
+
+dat.lc23 <- dat.23[dat.23$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection")]  
+dat.lc23 <- dat.lc23[!is.na(dat.lc23$PlantNumber),]
+summary(dat.lc23)
+
+dat.23lam <- rbind(dat.lc23,dat.lp23,dat.lb23)
+summary(dat.23lam)
+dat.23lam$yday <- lubridate::yday(dat.23lam$Date.Observed)
+summary(dat.23lam)
+
+dat.23y <- rbind(dat.lc23,dat.lp23,dat.lb23)
+summary(dat.23y)
+dat.23y$yday <- lubridate::yday(dat.23y$Date.Observed)
+summary(dat.23y)
+
+#Finally realized I could make another ifelse statment the "else" in and ifelse statment- astounding levels of stupidity here. 
+dat.23y$pheno = with(dat.23y, ifelse(dat.23y$leaf.color.observed=="Yes", "Leaf Color Observed",
+                                     ifelse(dat.23y$leaf.present.observed=="Yes" & dat.23y$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
+                                            ifelse(dat.23y$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
+
+
+
+
+####### many versions of the same graph
+
+# Large pole dark
+p<-ggplot(dat.23y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,325) +
+  theme_dark()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+# small pole dark
+
+p<-ggplot(dat.23y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_dark()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+# no pole dark
+p<-ggplot(dat.23y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(0,325) +
+  theme_dark()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+
+## Light
+#Large pole light
+p<-ggplot(dat.23y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-100,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+#small pole light
+
+p<-ggplot(dat.23y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+# no pole light
+p<-ggplot(dat.23y) + 
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(0,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+
+animate(p, fps=8)
+
+
+
+###
+#Small pole light- facet- collections
+p<-ggplot(dat.23y) + 
+  facet_wrap_interactive(Collection~ .)+
+  geom_bar(alpha=11,aes(x=yday, fill=pheno,))+ ylim(-50,200) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+animate(p, fps=8)
+
+
+
+dat.lb23i <- dat.23[dat.23$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection", "leaf.breaking.buds.intensity", "leaf.present.intensity", "leaf.color.intensity" )] 
+dat.lb23i <- dat.lb23i[!is.na(dat.lb23i$PlantNumber),]
+summary(dat.lb23i)
+
+dat.lp23i <- dat.23[dat.23$leaf.present.observed=="Yes",c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection", "leaf.breaking.buds.intensity", "leaf.present.intensity", "leaf.color.intensity" )]
+dat.lp23i <- dat.lp23i[!is.na(dat.lp23i$PlantNumber),]
+summary(dat.lp23i)
+
+dat.lc23i <- dat.23[dat.23$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed", "leaf.breaking.buds.observed","leaf.present.observed", "Collection", "leaf.breaking.buds.intensity", "leaf.present.intensity", "leaf.color.intensity" )]  
+dat.lc23i <- dat.lc23i[!is.na(dat.lc23i$PlantNumber),]
+summary(dat.lc23i)
+
+
+dat.23z <- rbind(dat.lc23i,dat.lp23i,dat.lb23i)
+summary(dat.23z)
+dat.23z$yday <- lubridate::yday(dat.23z$Date.Observed)
+summary(dat.23z)
+
+#doesn't work exactly
+dat.23z$pheno = with(dat.23z, ifelse(dat.23z$leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| dat.23z$leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed",
+                                     ifelse(dat.23z$leaf.present.intensity %in% c("50-74%", "75-94%", ">95%") & dat.23z$leaf.breaking.buds.observed=="Yes", "Leaves Present Observed",
+                                            ifelse(dat.23z$leaf.breaking.buds.observed=="Yes", "Leaf Breaking Buds Observed", "Leaves Present Observed"))))
+
+
+#sort of works
+dat.23z$pheno = with(dat.23z, ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.observed!="Yes", "Leaf Breaking Buds Observed",
+                                     ifelse(leaf.breaking.buds.observed=="Yes" & leaf.present.observed=="Yes", "Leaves Present Observed",
+                                            ifelse(leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color Observed", "Leaves Present Observed"))))
+
+
+dat.23z$pheno = with(dat.23z, ifelse(dat.23z$leaf.color.intensity %in% c("50-74%", "75-94%",">95%")| dat.23z$leaf.present.intensity %in% c("0%", "<5%", "5-24%","25-49%") , "Leaf Color",
+                                     ifelse(dat.23z$leaf.present.observed== "Yes" & dat.23z$leaf.breaking.buds.observed=="Yes", "Leaves Present ",
+                                            ifelse(dat.23z$leaf.breaking.buds.observed=="Yes" & dat.23z$leaf.present.observed!= "Yes","Leaf Breaking Buds ", 
+                                                   ifelse(dat.23z$leaf.breaking.buds.observed=="Yes" | dat.23z$leaf.color.observed=="Yes","Leaf Breaking Buds", "Leaves Present")))))
+
+p<-ggplot(dat.23z) + 
+  facet_wrap(Collection~.)+
+  geom_bar(alpha=0.5,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+animate(p, fps=7.5)
+
+
+#View follow animate with free  y scale
+p<-ggplot(dat.23z) + 
+  facet_wrap(~Collection , scales = "free_y")+
+  geom_bar(alpha=0.5,aes(x=yday, fill=pheno,))+ ylim(-50,325) +
+  theme_bw()+
+  labs(title="Leaf Phenopases", x="Day of Year",)+
+  #coord_polar(start = 200)+
+  transition_states(yday, transition_length = 30, state_length =30)+
+  ease_aes(x = 'sine-out', y = 'sine-out') + 
+  view_follow()+
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+
+animate(p, fps=7.5)
+
+
+
+
+############STILL NEED TO WORK ON THIS #################
 ###
 #getting averages for date of  phenophases occurace in certain years
 ###########
@@ -725,3 +948,5 @@ summary(dat.frq22)
 
 dat.fda22 <- acer22[acer22$fruit.drop.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
 summary(dat.fda22)
+
+
