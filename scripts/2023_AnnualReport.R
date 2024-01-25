@@ -5,7 +5,9 @@ library(lubridate)
 library(tidyverse)
 library(gganimate)
 library(dplyr)
-#
+library(tr)
+library(transformr)
+
 path.google <- "~/Google Drive/My Drive" # Mac
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2023_02_EndOfYear_Report/figures_2023_end")
@@ -37,6 +39,7 @@ dat.all <- rbind(dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
 
 #getting the correct date format
 dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
+dat.all$Date <- as.Date(paste0("2018-", dat.all$yday), format="%Y-%j")
 
 ##werid 2027 value
 summary(dat.all)
@@ -58,7 +61,7 @@ unique(dat.spring$Collection)
 #Getting a graph of colored leaf observations
 ###########
 ###########
-dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed", "Collection")]
+dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed","Date", "Collection")]
 dat.lc <- dat.lc[!is.na(dat.lc$PlantNumber),]
 summary(dat.lc)
 head(dat.lc)
@@ -76,44 +79,45 @@ summary(dat.lc)
 
 
 #only looking at trees that showed fall color from 9/1 on before day 350
-dat.llc <- dat.lc[dat.lc$yday >= 180 & dat.lc$yday <= 350, ]
+dat.llc <- dat.lc[dat.lc$yday >= 100 & dat.lc$yday <= 350, ]
 summary(dat.llc)
 
-#aggregating quercus.lf so it shows me the date of first leaf color for  every plant number and species 
+#aggregating dat.llc so it shows me the date of first leaf color for every plant number and species 
 leaf.color <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.llc, FUN=min, na.rm=T)
 summary(leaf.color)
 head(leaf.color)
+
+leaf.color$Date <- as.Date(paste0("2018-", leaf.color$yday), format="%Y-%j")
 
 cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
           "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 #Graphing
 ggplot(data=leaf.color) +
-  #png(file.path(path.figs,"All_First_Leaf_Color.png"), height=4, width=6, units="in", res=320)+
-  facet_grid(Collection~ .,scales="free_y") + # This is the code that will stack everything
-  geom_density(alpha=0.25, aes(x=yday, fill=as.factor(Year),color=as.factor(Year))) +
-  xlim(150, 350)+
+  facet_grid(Collection~ .,scales="free_y") +
+  geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
   scale_fill_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442", "2023"="purple3" )) +
   scale_color_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442", "2023"= "purple3")) +
-  theme_bw()+
-  labs(title="Mean Day of First Leaf Color Present", x="Day of Year", fill="Year")
+  theme_bw() +
+  labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
 dev.off()
 
 ###Highlight
 ggplot(data=leaf.color) +
-  png(file.path(path.figs,"All_First_Leaf_Color_2023_highlight.png"), height=4, width=6, units="in", res=320)+
+  #png(file.path(path.figs,"All_First_Leaf_Color_2023_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ ., scales="free_y") +
-  geom_density(alpha=0.25, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
-  xlim(150, 350) +
+  geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
   scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
   scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
   theme_bw() +
-  labs(title="Mean Day of First Leaf Color Present", x="Day of Year", fill="Year")
+  labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
 dev.off()
 
 ggplot(data=leaf.color) +
   # png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ . ) + # This is the code that will stack everything
-  geom_histogram(alpha=0.5, binwidth =10, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +
+  geom_histogram(alpha=0.5, binwidth =10, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
   scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
   theme_bw() +
@@ -171,14 +175,45 @@ dev.off()
 
 #doing freq
 ggplot(data=leaf.color) +
-    png(file.path(path.figs,"All_First_Leaf_Color_freqpoly.png"), height=4, width=6, units="in", res=320)+
+    #png(file.path(path.figs,"All_First_Leaf_Color_freqpoly.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ .) + # This is the code that will stack everything
-  geom_freqpoly(alpha=0.5, bins = 45, aes(x=yday,color=as.factor(Year), fill=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442", "2023"="purple3" )) +
-  scale_color_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442", "2023"= "purple3")) +
-  theme_bw()+
-  labs(title="Average Day of First Leaf Color", x="Day of Year")
+  geom_freqpoly(alpha=0.5, bins = 45, aes(x=Date,color=as.factor(Year), fill=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
+  labs(title="Leaf Color Present", x="Day of Year")
 dev.off()
+
+p <- ggplot(data=leaf.color) +
+  facet_grid(Collection~ .,scales="free_y") +
+  geom_freqpoly(alpha=0.25,aes(x=Date, color=as.factor(Year),)) +
+  scale_x_date(date_labels="%b %d", date_breaks="1 month") + 
+  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
+  labs(title="Leaf Color Present", x="Day of Year") +
+  transition_states(Date, transition_length = 2, state_length = 1)+
+shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+            falloff = 'sine-in', exclude_phase = 'enter') 
+# check  the animation as a gif
+#animate(p, nframes = 100, fps = 7)
+anim_save(file.path(path.figs, animation = animate(p, nframes = 100), fps = 7))
+
+
+
+pa<- ggplot(data=leaf.color) +
+  facet_grid(Collection ~ .) +
+  geom_freqpoly(alpha=0.5, bins=45, aes(x=Date, color=as.factor(Year), fill=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
+  enter_fade() +
+  labs(title="Leaf Color Present", x="Day of Year") +
+  shadow_wake()
+
+# View the animation
+animate(p, nframes = 100, fps = 10)
+
 
 
 ##########
