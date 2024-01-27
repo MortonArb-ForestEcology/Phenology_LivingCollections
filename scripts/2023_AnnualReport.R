@@ -5,7 +5,6 @@ library(lubridate)
 library(tidyverse)
 library(gganimate)
 library(dplyr)
-library(tr)
 library(transformr)
 
 path.google <- "~/Google Drive/My Drive" # Mac
@@ -89,6 +88,9 @@ head(leaf.color)
 
 leaf.color$Date <- as.Date(paste0("2018-", leaf.color$yday), format="%Y-%j")
 
+# Create a ggplot
+
+
 cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
           "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 #Graphing
@@ -102,6 +104,16 @@ ggplot(data=leaf.color) +
   labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
 dev.off()
 
+
+ggplot(data=leaf.color) +
+  facet_grid(Collection~ .,scales="free_y") +
+  geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
+  scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
+  scale_fill_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442", "2023"="purple3" )) +
+  scale_color_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442", "2023"= "purple3")) +
+  theme_bw() +
+  labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
+dev.off()
 ###Highlight
 ggplot(data=leaf.color) +
   #png(file.path(path.figs,"All_First_Leaf_Color_2023_highlight.png"), height=4, width=6, units="in", res=320)+
@@ -114,6 +126,16 @@ ggplot(data=leaf.color) +
   labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
 dev.off()
 
+ggplot(data=leaf.color) +
+  facet_grid(Collection ~ ., scales="free_y") +
+  geom_line(aes(x=Date, y = after_stat(count), color=as.factor(Year))) +
+  scale_x_date(date_labels="%b %d", date_breaks="1 month") +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
+  labs(title="Count of 'Yes' over Time", x="Date", color="Year", y="Count of 'Yes'")
+
+
+####
 ggplot(data=leaf.color) +
   # png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ . ) + # This is the code that will stack everything
@@ -196,23 +218,26 @@ p <- ggplot(data=leaf.color) +
 shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
             falloff = 'sine-in', exclude_phase = 'enter') 
 # check  the animation as a gif
-#animate(p, nframes = 100, fps = 7)
+animate(p, nframes = 100, fps = 7)
+
 anim_save(file.path(path.figs, animation = animate(p, nframes = 100), fps = 7))
 
 
-
-pa<- ggplot(data=leaf.color) +
-  facet_grid(Collection ~ .) +
-  geom_freqpoly(alpha=0.5, bins=45, aes(x=Date, color=as.factor(Year), fill=as.factor(Year))) +
+# Create a ggplot
+ggplot(data=leaf.color, alpha=0.25,aes(x=Date, color=as.factor(Year)))+ 
+  facet_grid(Collection~ .,scales="free_y") +
+geom_point(stat = "count", position = "stack") +
+  scale_x_date(date_labels="%b %d", date_breaks="2 week") + 
   scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
   scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
   theme_bw() +
-  enter_fade() +
-  labs(title="Leaf Color Present", x="Day of Year") +
-  shadow_wake()
-
-# View the animation
-animate(p, nframes = 100, fps = 10)
+  labs(title = "Leaf Color Observations",
+       x = "Date",
+       y = "Number of 'Yes' Records") +
+  theme_bw()+
+ # transition_states(Date, transition_length = 2, state_length = 1)+
+  #shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+   #           falloff = 'sine-in', exclude_phase = 'enter') 
 
 
 
