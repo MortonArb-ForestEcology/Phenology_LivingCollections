@@ -224,20 +224,23 @@ anim_save(file.path(path.figs, animation = animate(p, nframes = 100), fps = 7))
 
 
 # Create a ggplot
-ggplot(data=leaf.color, alpha=0.25,aes(x=Date, color=as.factor(Year)))+ 
-  facet_grid(Collection~ .,scales="free_y") +
-geom_point(stat = "count", position = "stack") +
-  scale_x_date(date_labels="%b %d", date_breaks="2 week") + 
-  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+ggplot(data = leaf.color, aes(x = Date, color = as.factor(Year))) + 
+  geom_point(stat = "count", position = "stack", alpha = 0.25) +
+  facet_grid(Collection ~ ., scales = "free_y") +
+  scale_x_date(date_labels = "%b %d", date_breaks = "2 week") +
+  scale_fill_manual(name = "Year", values = c("2023" = "red", "others" = "gray"), guide = guide_legend(override.aes = list(fill = c("red")))) +
+  scale_color_manual(name = "Year", values = c("2023" = "red", "others" = "gray")) +
   theme_bw() +
   labs(title = "Leaf Color Observations",
        x = "Date",
        y = "Number of 'Yes' Records") +
-  theme_bw()+
- # transition_states(Date, transition_length = 2, state_length = 1)+
-  #shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
-   #           falloff = 'sine-in', exclude_phase = 'enter') 
+  theme_bw() +
+  labs(title = "Leaf Color Observations",
+       x = "Date",
+       y = "Number of 'Yes' Records") +
+  theme_bw() +
+  transition_states(Date, transition_length = 2, state_length = 1) +
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, falloff = 'sine-in', exclude_phase = 'enter')
 
 
 
