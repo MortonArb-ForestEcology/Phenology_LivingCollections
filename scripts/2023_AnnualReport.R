@@ -1146,3 +1146,146 @@ dat.fda22 <- acer22[acer22$fruit.drop.observed=="Yes", c("Date.Observed","Date.O
 summary(dat.fda22)
 
 
+############# 2 0 2 3  below #####
+##### breaking leaf buds 22
+dat.bbq23 <- quercus23[quercus23$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.breaking.buds.observed")]
+summary(dat.bbq23)
+head(dat.bbq23)
+
+dat.bba23 <- acer23[acer23$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.breaking.buds.observed")]
+summary(dat.bba23)
+head(dat.bba23)
+
+dat.bbu23 <- ulmus23[ulmus23$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.breaking.buds.observed")]
+summary(dat.bbu23)
+head(dat.bbu23)
+
+### Leaf Present Observed
+dat.lpq23 <- quercus23[quercus23$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.present.observed")]
+summary(dat.lpq23)
+head(dat.lpq23)
+
+dat.lpa23 <- acer23[acer23$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.present.observed")]
+summary(dat.lpa23)
+head(dat.lpa23)
+
+dat.lpu23 <- ulmus23[ulmus23$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.present.observed")]
+summary(dat.lpu23)
+head(dat.lpu23)
+
+### Leaf Increasing Observed
+dat.liq23 <- quercus23[quercus23$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.increasing.observed")]
+summary(dat.liq23)
+head(dat.liq23)
+
+dat.lia23 <- acer23[acer23$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.increasing.observed")]
+summary(dat.lia23)
+head(dat.lia23)
+
+dat.liu23 <- ulmus23[ulmus23$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.increasing.observed")]
+summary(dat.liu23)
+head(dat.liu23)
+
+### Leaf Color Observed
+dat.lcq23 <- quercus23[quercus23$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed")]
+summary(dat.lcq23)
+head(dat.lcq23)
+
+dat.lca23 <- acer23[acer23$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed")]
+summary(dat.lca23)
+head(dat.lca23)
+
+dat.lcu23 <- ulmus23[ulmus23$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed")]
+summary(dat.lcu23)
+head(dat.lcu23)
+
+### Leaf Falling Observed
+dat.lfq23 <- quercus23[quercus23$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.falling.observed")]
+summary(dat.lfq23)
+head(dat.lfq23)
+
+dat.lfa23 <- acer23[acer23$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.falling.observed")]
+summary(dat.lfa23)
+head(dat.lfa23)
+
+dat.lfu23 <- ulmus23[ulmus23$leaf.falling.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.falling.observed")]
+summary(dat.lfu23)
+head(dat.lfu23)
+
+
+### Flower Buds 23
+dat.fbq23 <- quercus23[quercus23$flower.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.buds.observed")]
+summary(dat.fbq23)
+head(dat.fbq23)
+
+dat.fba23 <- acer23[acer23$flower.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.buds.observed")]
+summary(dat.fba23)
+head(dat.fba23)
+
+dat.fbu23 <- ulmus23[ulmus23$flower.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.buds.observed")]
+summary(dat.fbu23)
+head(dat.fbu23)
+
+### Open Flowers 23
+dat.ofq23 <- quercus23[quercus23$flower.open.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.ofq23)
+head(dat.ofq23)
+
+dat.ofa23 <- acer23[acer23$flower.open.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.ofa23)
+head(dat.ofa23)
+
+dat.ofu23 <- ulmus23[ulmus23$flower.open.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
+summary(dat.ofu23)
+head(dat.ofu23)
+### Pollen 23
+dat.pfq23 <- quercus23[quercus23$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.pollen.observed")]
+summary(dat.pfq23)
+head(dat.pfq23)
+
+dat.pfa23 <- acer23[acer23$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.pollen.observed")]
+summary(dat.pfa23)
+head(dat.pfa23)
+
+dat.pfu23 <- ulmus23[ulmus23$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.pollen.observed")]
+summary(dat.pfu23)
+head(dat.pfu23)
+
+### Fruit Present
+dat.fpq23 <- quercus23[quercus23$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpq23)
+head(dat.fpq23)
+
+dat.fpa23 <- acer23[acer23$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpa23)
+head(dat.fpa23)
+
+dat.fpu23 <- ulmus23[ulmus23$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
+summary(dat.fpu23)
+head(dat.fpu23)
+
+### Ripe Fruit
+dat.frq23 <- quercus23[quercus23$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.frq23)
+head(dat.frq23)
+
+dat.fra23 <- acer23[acer23$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.fra23)
+head(dat.fra23)
+
+dat.fru23 <- ulmus23[ulmus23$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
+summary(dat.fru23)
+head(dat.fru23)
+
+### Fruit Drop
+dat.fdq23 <- quercus23[quercus23$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.fdq23)
+head(dat.fdq23)
+
+dat.fda23 <- acer23[acer23$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.fda23)
+head(dat.fda23)
+
+dat.fdu23 <- ulmus23[ulmus23$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
+summary(dat.fdu23)
+head(dat.fdu23)
