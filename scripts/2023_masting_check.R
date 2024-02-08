@@ -139,29 +139,29 @@ summary(dat.fpi)
 dat.fpi$Date <- as.Date(paste0("2023-", dat.fpi$yday), format="%Y-%j")
 
 ggplot(data=dat.fpi) +
-  geom_histogram(alpha=1, aes(x=Date, fill=fruit.present.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_date(date_breaks = "2 week", date_labels = "%b") + # Setting breaks for each month
-  labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Date of Year") 
-
-
-
-ggplot(data=dat.fpi) +
-  geom_histogram(alpha=1, aes(x=yday, fill=fruit.present.intensity)) +
+  png(file.path(path.figs,"Q.alba_134-U*66_fruit_present_intensity.png"), height=4, width=6, units="in", res=320)+
+  geom_histogram(alpha=1, bins= 50, aes(x=yday, fill=fruit.present.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
   theme_bw() +
   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-  labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Day of Year")+
+  labs(title="Fruit Present Intensity in Q.alba 134-U*66 by year", x="Day of Year")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off ()
 
-ggplot(data=dat.fpi) +
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity)) +
-  facet_grid(Year ~ ., scales="free_y") +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 10)) +
-  labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Day of Year")  # Modified the x-axis label
+# ggplot(data=dat.fpi) +
+#   geom_histogram(alpha=1, aes(x=Date, fill=fruit.present.intensity)) +
+#   facet_grid(Year ~ ., scales="free_x") +
+#   theme_bw() +
+#   scale_x_date(date_breaks = "2 week", date_labels = "%b") + # Setting breaks for each month
+#   labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Date of Year") 
 
+# ggplot(data=dat.fpi) +
+#   geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity)) +
+#   facet_grid(Year ~ ., scales="free_y") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
+#   labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Day of Year")  # Modified the x-axis label
+# 
 
 #getting the phenophases information I need. 
 dat.fri <- dat.1t[dat.1t$fruit.drop.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.drop.intensity")]
@@ -188,34 +188,35 @@ summary(dat.fri)
 dat.fri$Date <- as.Date(paste0("2023-", dat.fri$yday), format="%Y-%j")
 
 ggplot(data=dat.fri) +
-  geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-  labs(title="Fruit Drop Intensity", x="Date of Year") 
-
-
-
-ggplot(data=dat.fri) +
-  geom_histogram(alpha=0.5, aes(x=yday, fill=fruit.drop.intensity)) +
+  png(file.path(path.figs,"Q.alba_134-U*66_fruit_drop_intensity.png"), height=4, width=6, units="in", res=320)+
+  geom_histogram(alpha=1, bins= 50, aes(x=yday, fill=fruit.drop.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
   theme_bw() +
   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-  labs(title="Fruit Ripe Intensity in Q.alba 134-U*66", x="Day of Year")+
+  labs(title="Fruit Ripe Intensity in Q.alba 134-U*66 by year", x="Day of Year")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
 
-ggplot(data=dat.fri) +
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_y") +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 10)) +
-  labs(title="Fruit Drop Intensity in Q.alba 134-U*66", x="Day of Year")  # Modified the x-axis label
+# ggplot(data=dat.fri) +
+#   geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
+#   facet_grid(Year ~ ., scales="free_x") +
+#   theme_bw() +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
+#   labs(title="Fruit Drop Intensity", x="Date of Year") 
+
+
+# ggplot(data=dat.fri) +
+#   geom_density(alpha=0.5, aes(x=yday, fill=fruit.drop.intensity)) +
+#   facet_grid(Year ~ ., scales="free_y") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
+#   labs(title="Fruit Drop Intensity in Q.alba 134-U*66", x="Day of Year")  # Modified the x-axis label
 
 #################
 
 
 
-### doing a different tree because that one is obnoxious- and by obnoxious I mean missing some data.
+### doing a different tree because that one is obnoxious- and by obnoxious I mean maybe missing some data.
 #find the unique Plant numbers
 unique(dat.wo$PlantNumber)
 table(dat.wo$PlantNumber)
@@ -250,30 +251,32 @@ summary(dat.fpi)
 
 dat.fpi$Date <- as.Date(paste0("2023-", dat.fpi$yday), format="%Y-%j")
 
-ggplot(data=dat.fpi) +
-  geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.present.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-  labs(title="Fruit Present Intensity", x="Date of Year") 
-
-
 
 ggplot(data=dat.fpi) +
-  geom_histogram(alpha=1, aes(x=yday, fill=fruit.present.intensity)) +
+  png(file.path(path.figs,"Q.alba_682-33*1_fruit_present_intensity.png"), height=4, width=6, units="in", res=320)+
+  geom_histogram(alpha=1, bins=50, aes(x=yday, fill=fruit.present.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
   theme_bw() +
   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-  labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")+
+  labs(title="Fruit Present Intensity in Q.alba 684-33*1 by year", x="Day of Year")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
 
-ggplot(data=dat.fpi) +
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity)) +
-  facet_grid(Year ~ ., scales="free_y") +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 10)) +
-  labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
 
+# ggplot(data=dat.fpi) +
+#   geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.present.intensity)) +
+#   facet_grid(Year ~ ., scales="free_x") +
+#   theme_bw() +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
+#   labs(title="Fruit Present Intensity", x="Date of Year") 
+
+# ggplot(data=dat.fpi) +
+#   geom_density(alpha=0.5, bins=50, aes(x=yday, fill=fruit.present.intensity)) +
+#   facet_grid(Year ~ ., scales="free_y") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
+#   labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
+# 
 
 #getting the phenophases information I need. 
 dat.fri <- dat.2t[dat.2t$fruit.drop.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.drop.intensity")]
@@ -299,40 +302,43 @@ summary(dat.fri)
 
 dat.fri$Date <- as.Date(paste0("2023-", dat.fri$yday), format="%Y-%j")
 
+
 ggplot(data=dat.fri) +
-  geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
+  png(file.path(path.figs,"Q.alba_682-33*1_fruit_drop_intensity.png"), height=4, width=6, units="in", res=320)+
+  geom_histogram(alpha=1, bins=50, aes(x=yday, fill=fruit.drop.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-  labs(title="Fruit Drop Intensity", x="Date of Year") 
-
-
-
-ggplot(data=dat.fri) +
-  geom_histogram(alpha=1, aes(x=Date, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 30)) +
-  labs(title="Fruit Drop Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
-
-ggplot(data=dat.fri) +
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_y") +
   theme_bw() +
   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-  labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")+
+  labs(title="Fruit Drop Intensity in Q.alba 684-33*1 by year", x="Day of Year")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplot(data = dat.fri) +
-  geom_point(aes(x = Date, y = fruit.drop.intensity, color = fruit.drop.intensity)) +
-  facet_grid(Year ~ .) +
-  theme_bw() +
-  labs(title = "Date of  Fruit Drop Intensity in Q.alba 684-33*1", x = "Date", y = "Fruit Drop Intensity", fill = "Intensity")+
-  scale_x_date(date_breaks = "1 day", date_labels = "%b %d")
+dev.off()
 
 
+# ggplot(data=dat.fri) +
+#   geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
+#   facet_grid(Year ~ ., scales="free_x") +
+#   theme_bw() +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
+#   labs(title="Fruit Drop Intensity", x="Date of Year") 
 
-### doing this for white oak in general now 
+# ggplot(data=dat.fri) +
+#   geom_density(alpha=0.5, aes(x=yday, fill=fruit.drop.intensity)) +
+#   facet_grid(Year ~ ., scales="free_y") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
+#   labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# 
+# ggplot(data = dat.fri) +
+#   geom_point(aes(x = Date, y = fruit.drop.intensity, color = fruit.drop.intensity)) +
+#   facet_grid(Year ~ .) +
+#   theme_bw() +
+#   labs(title = "Date of  Fruit Drop Intensity in Q.alba 684-33*1", x = "Date", y = "Fruit Drop Intensity", fill = "Intensity")+
+#   scale_x_date(date_breaks = "1 day", date_labels = "%b %d")
+
+
+
+### doing this for white oak in general now so I can just use the dat.wo data frame
 
 #getting the phenophases information I need. 
 dat.fpi <- dat.wo[dat.wo$fruit.present.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
@@ -342,7 +348,6 @@ dat.fpi$Date.Observed <- as.Date(dat.fpi$Date.Observed)
 
 #Setting my yday
 dat.fpi$yday <- lubridate::yday(dat.fpi$Date.Observed)
-dat.fpi <- dat.fpi [dat.fpi$yday>=0,]
 summary(dat.fpi)
 
 
@@ -358,29 +363,30 @@ summary(dat.fpi)
 
 dat.fpi$Date <- as.Date(paste0("2023-", dat.fpi$yday), format="%Y-%j")
 
-ggplot(data=dat.fpi) +
-  geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.present.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-  labs(title="Fruit Present Intensity", x="Date of Year") 
-
-
 
 ggplot(data=dat.fpi) +
+  png(file.path(path.figs,"Q.alba_fruit_present_intensity.png"), height=4, width=6, units="in", res=320)+
   geom_histogram(alpha=1, bins= 50,aes(x=yday, fill=fruit.present.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
   theme_bw() +
   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
   labs(title="Fruit Present Intensity in Q.alba by year ", x="Day of Year")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
 
-ggplot(data=dat.fpi) +
-  geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity)) +
-  facet_grid(Year ~ ., scales="free_y") +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 10)) +
-  labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
+# ggplot(data=dat.fpi) +
+#   geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.present.intensity)) +
+#   facet_grid(Year ~ ., scales="free_x") +
+#   theme_bw() +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
+#   labs(title="Fruit Present Intensity", x="Date of Year") 
+
+# ggplot(data=dat.fpi) +
+#   geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity)) +
+#   facet_grid(Year ~ ., scales="free_y") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
+#   labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
 
 #getting the phenophases information I need. 
 dat.fri <- dat.wo[dat.wo$fruit.drop.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.drop.intensity")]
@@ -390,7 +396,6 @@ dat.fri$Date.Observed <- as.Date(dat.fri$Date.Observed)
 
 #Setting my yday
 dat.fri$yday <- lubridate::yday(dat.fri$Date.Observed)
-dat.fri <- dat.fri [dat.fri$yday>=0,]
 summary(dat.fri)
 
 
@@ -407,32 +412,33 @@ summary(dat.fri)
 dat.fri$Date <- as.Date(paste0("2023-", dat.fri$yday), format="%Y-%j")
 
 ggplot(data=dat.fri) +
-  geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-  labs(title="Fruit Drop Intensity", x="Date of Year") 
-
-
-
-ggplot(data=dat.fri) +
+  png(file.path(path.figs,"Q.alba_fruit_drop_intensity.png"), height=4, width=6, units="in", res=320)+
   geom_histogram(alpha=1, bins = 50, aes(x=yday, fill=fruit.drop.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
   theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 30)) +
-  labs(title="Fruit Drop Intensity in Q.alba", x="Day of Year")  # Modified the x-axis label
-
-ggplot(data=dat.fri) +
-  geom_density(alpha=1, bins=50, aes(x=yday, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_y") +
-  theme_bw() +
   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-  labs(title="Fruit Present Intensity in Q.alba", x="Day of Year")+
+  labs(title="Fruit Drop Intensity in Q.alba by year", x="Day of Year") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
 
-ggplot(data = dat.fri) +
-  geom_point(aes(x = Date, y = fruit.drop.intensity, color = fruit.drop.intensity)) +
-  facet_grid(Year ~ .) +
-  theme_bw() +
-  labs(title = "Date of  Fruit Drop Intensity in Q.alba 684-33*1", x = "Date", y = "Fruit Drop Intensity", fill = "Intensity")+
-  scale_x_date(date_breaks = "1 day", date_labels = "%b %d")
+# ggplot(data=dat.fri) +
+#   geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
+#   facet_grid(Year ~ ., scales="free_x") +
+#   theme_bw() +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
+#   labs(title="Fruit Drop Intensity", x="Date of Year") 
+
+# ggplot(data=dat.fri) +
+#   geom_density(alpha=1, bins=50, aes(x=yday, fill=fruit.drop.intensity)) +
+#   facet_grid(Year ~ ., scales="free_y") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
+#   labs(title="Fruit Present Intensity in Q.alba", x="Day of Year")+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# 
+# ggplot(data = dat.fri) +
+#   geom_point(aes(x = Date, y = fruit.drop.intensity, color = fruit.drop.intensity)) +
+#   facet_grid(Year ~ .) +
+#   theme_bw() +
+#   labs(title = "Date of  Fruit Drop Intensity in Q.alba 684-33*1", x = "Date", y = "Fruit Drop Intensity", fill = "Intensity")+
+#   scale_x_date(date_breaks = "1 day", date_labels = "%b %d")
