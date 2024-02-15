@@ -79,7 +79,7 @@ head(dat.ghcn2)
 
 #creating a data frame of just the last 5 years of weather data
 dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2019,]
-
+dat.ghcn3 <- dat.ghcn3[dat.ghcn2$YEAR<2024,]
 #making sure the date being shown only shows spring dates
 dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=359,]
 summary(dat.ghcn33)
@@ -255,4 +255,54 @@ summary(dat.ghcn151)
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
 #write.csv(dat.ghcn2, file.path(path.out, "data", "Weather_ArbCOOP_historical_latest.csv"), row.names=F)
+
+
+#Just getting daily percipitation
+dat.ghcnx <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP")]
+summary(dat.ghcnx)
+
+#calculating the mean daily percipation across years
+dat.ghcnxmean <- aggregate(PRCP ~ YDAY,dat=dat.ghcnx, FUN=mean, NA.rm=T)
+
+#attemtption to generte a graph
+#png(file.path(path.figs,"Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcnx) +
+  geom_bar(aes(x=YDAY, y=PRCP, color=as.factor(YEAR)))+
+  geom_smooth(data=dat.ghcnxmean)+ (aes(x=YDAY, y=PRCP))+
+  # scale_color_manual(name="Year") +
+  # scale_fill_manual(name="Year") +
+  labs(title=" Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
+  scale_x_continuous(breaks = seq(0, 365, by = 25)) +  # Set breaks every 25 days
+  theme_classic()
+dev.off()
+
+
+ggplot(data=dat.ghcnx) +
+  geom_line(aes(x=YDAY, y=PRCP, color=as.factor(YEAR)))+
+  geom_smooth(aes (x=YDAY, y=PRCP))+
+  gghighlight::gghighlight(YEAR== "2023") +
+  geom_smooth(data= dat.ghcnxmean, color = "black", linetype = "dashed", aes(x=YDAY, y=PRCP))+
+  labs(title="Precipitation", y="Precipitation in cm. C", x="Day of Year", color="Year") +
+  scale_x_continuous(breaks = seq(0, 365, by = 25)) +
+  theme_classic()
+dev.off() 
+
+# Aggregate data by month to calculate total precipitation for each month
+dat.ghcnxm <- aggregate(PRCP ~ MONTH + YEAR, dat = dat.ghcnx, FUN = sum, na.rm = TRUE)
+unique(dat.ghcnxm$YEAR)
+dat.ghcnxm <- dat.ghcn$YEAR
+#getting the mean
+dat.ghcnxmean <- aggregate(PRCP ~ MONTH,dat=dat.ghcnxm, FUN=mean, NA.rm=T)
+
+
+# Plotting
+ggplot(data = dat.ghcnxm, aes(x = factor(MONTH), y = PRCP)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  gghighlight::gghighlight(YEAR== "2023") +
+  geom_smooth(data= dat.ghcnxmean, color = "black", linetype = "dashed", aes(x=MONTH, y=PRCP))+
+  labs(title = "Monthly Precipitation 2023", y = "Total Precipitation (cm)", x = "Month") +
+  scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  theme_minimal()
+
+
 
