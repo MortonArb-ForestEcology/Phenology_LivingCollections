@@ -266,8 +266,6 @@ summary(dat.ghcn151)
 dat.ghcnx <- dat.ghcn2[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP")]
 summary(dat.ghcnx)
 
-#calculating the mean monthly  percipation across years
-dat.ghcnxmean <- aggregate(PRCP ~YDAY,dat=dat.ghcnx, FUN=mean, NA.rm=T)
 
 # png(file.path(path.figs,"Daily 2023 precipitation.png"), height=4, width=6, units="in", res=320)
 # ggplot(data=dat.ghcnx) +
@@ -283,18 +281,19 @@ dat.ghcnxmean <- aggregate(PRCP ~YDAY,dat=dat.ghcnx, FUN=mean, NA.rm=T)
 
 # Aggregate data by month to calculate total precipitation for each month in 2023
 dat.ghcnp23 <- dat.ghcnx[dat.ghcnx$YEAR == 2023, ]
-dat.ghcnSUM <- aggregate(PRCP ~ MONTH, dat = dat.ghcnp23, FUN = sum, na.rm = TRUE)
+dat.ghcn23SUM <- aggregate(PRCP ~ MONTH , dat = dat.ghcnp23, FUN = sum, na.rm = TRUE)
+dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.ghcnx, FUN = sum, na.rm = TRUE)
 
 
 # Calculate mean precipitation across all years for each month
-dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnx, FUN = mean, na.rm = TRUE)
+dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = TRUE)
 
 # Plotting monthly precipitation in 2023 with mean line
 png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
-ggplot(data = dat.ghcnSUM, aes(x = factor(MONTH), y = PRCP/10)) +
+ggplot(data = dat.ghcn23SUM, aes(x = factor(MONTH), y = PRCP)) +
   geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
   geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
-  labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (cm)", x = "Month") +
+  labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (mm)", x = "Month") +
   scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
   theme_minimal()
 dev.off()
