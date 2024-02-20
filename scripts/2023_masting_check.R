@@ -361,11 +361,11 @@ dat.fpi <- dat.fpi %>% filter(!fruit.present.intensity %in% c("0%","0"))
 dat.fpi$yday <- lubridate::yday(dat.fpi$Date.Observed)
 summary(dat.fpi)
 
-dat.fpi$Date <- as.Date(paste0("2023-", dat.fpi$yday), format="%Y-%j")
-
+#dat.fpi$Date <- as.Date(paste0("2023-", dat.fpi$yday), format="%Y-%j")
+summary(dat.fpi)
 
 ggplot(data=dat.fpi) +
-  png(file.path(path.figs,"Q.alba_fruit_present_intensity.png"), height=4, width=6, units="in", res=320)+
+ # png(file.path(path.figs,"Q.alba_fruit_present_intensity.png"), height=4, width=6, units="in", res=320)+
   geom_histogram(alpha=1, bins= 50,aes(x=yday, fill=fruit.present.intensity)) +
   facet_grid(Year ~ ., scales="free_x") +
   theme_bw() +
@@ -388,57 +388,96 @@ dev.off()
 #   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
 #   labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
 
-#getting the phenophases information I need. 
-dat.fri <- dat.wo[dat.wo$fruit.drop.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.drop.intensity")]
-summary(dat.fri)
-
-dat.fri$Date.Observed <- as.Date(dat.fri$Date.Observed)
-
-#Setting my yday
-dat.fri$yday <- lubridate::yday(dat.fri$Date.Observed)
-summary(dat.fri)
 
 
-dat.fri <- aggregate(yday ~ PlantNumber + Year + fruit.drop.intensity + Date.Observed + Date , dat=dat.fri, FUN=min, NA.rm=T)
-summary(dat.fri)
+###
 
-head(dat.fri)
+# Convert "fruit.present.intensity" to a factor with specified levels
+dat.qu$fruit.present.intensity <- factor(dat.qu$fruit.present.intensity, 
+                                          levels = c("<3", "3-10", "11-100", "101-1,000", "1,001-10,000", ">10,000"))
 
-dat.fri <- dat.fri %>% filter(!fruit.drop.intensity %in% c("0%","0"))
+dat.cnt <- aggregate(fruit.present.intensity ~ Year + yday , data = dat.qu, FUN = length)
 
-dat.fri$yday <- lubridate::yday(dat.fri$Date.Observed)
-summary(dat.fri)
 
-dat.fri$Date <- as.Date(paste0("2023-", dat.fri$yday), format="%Y-%j")
+dat.mcnt <- aggregate(Count~ yday + Year+ fruit.present.intensity,dat=dat.cnt, FUN=mean, na.rm=T)
 
-ggplot(data=dat.fri) +
-  png(file.path(path.figs,"Q.alba_fruit_drop_intensity.png"), height=4, width=6, units="in", res=320)+
-  geom_histogram(alpha=1, bins = 50, aes(x=yday, fill=fruit.drop.intensity)) +
-  facet_grid(Year ~ ., scales="free_x") +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-  labs(title="Fruit Drop Intensity in Q.alba by year", x="Day of Year") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-dev.off()
+# Plot the data using ggplot2 with facets for each year
+ ggplot(data= dat.cnt)+
+  geom_smooth(aes(x = yday, y = stat(count), color = fruit.present.intensity), method = "loess", se = FALSE) +
+  scale_y_continuous(labels = scales::comma) +  # Format y-axis labels with commas
+  labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity") +
+  theme_minimal()
+ # facet_wrap(Year~., scales = "free", nrow = 6)  # Facet by year with 2 rows
 
-# ggplot(data=dat.fri) +
-#   geom_histogram(alpha=0.5, aes(x=Date, fill=fruit.drop.intensity)) +
-#   facet_grid(Year ~ ., scales="free_x") +
-#   theme_bw() +
-#   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-#   labs(title="Fruit Drop Intensity", x="Date of Year") 
 
-# ggplot(data=dat.fri) +
-#   geom_density(alpha=1, bins=50, aes(x=yday, fill=fruit.drop.intensity)) +
-#   facet_grid(Year ~ ., scales="free_y") +
-#   theme_bw() +
-#   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
-#   labs(title="Fruit Present Intensity in Q.alba", x="Day of Year")+
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# 
-# ggplot(data = dat.fri) +
-#   geom_point(aes(x = Date, y = fruit.drop.intensity, color = fruit.drop.intensity)) +
-#   facet_grid(Year ~ .) +
-#   theme_bw() +
-#   labs(title = "Date of  Fruit Drop Intensity in Q.alba 684-33*1", x = "Date", y = "Fruit Drop Intensity", fill = "Intensity")+
-#   scale_x_date(date_breaks = "1 day", date_labels = "%b %d")
+dat.23 <- dat.cnt[dat.cnt$Year %in% c(2023), ]
+
+dat.23cnt <- aggregate(fruit.present.intensity ~  yday , data = dat.23, FUN = length)  
+
+#ggplot(dat.23cnt, aes(x = yday, y = (count, color = fruit.present.intensity)) +
+ # geom_line() +
+  #geom_smooth(aes(x = yday, y = (Count), color = fruit.present.intensity), method = "loess", se = FALSE) + # Overlay smoothed lines from the first graph
+  #scale_y_continuous(labels = scales::comma) +  # Format y-axis labels with commas
+  #labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity") +
+  #theme_minimal(),
+
+
+
+
+# Filter out rows with the specified values in fruit.present.intensity
+dat.quf <- dat.qu %>%
+  filter(fruit.present.intensity %in% c("3-10", "101-1,000", "1,001-10,000", "11-100", ">10,000", "<3"))
+
+# Count occurrences of each value at a given yday
+dat.cnt <- dat.quf %>%
+  group_by(yday, fruit.present.intensity) %>%
+  summarise(count = n())
+
+# Plot a line graph
+ggplot(dat.cnt, aes(x = yday, y = count, color = fruit.present.intensity)) +
+  geom_smooth() +
+  labs(title = "Occurrence of fruit.present.intensity over time",
+       x = "yday",
+       y = "Count of occurrences") +
+  theme_bw()
+
+dat.23 <- dat.quf[dat.quf$Year %in% c(2023), ]
+
+dat.23cnt <- dat.23 %>%
+  group_by(yday, fruit.present.intensity) %>%
+  summarise(count = n())
+
+ggplot(dat.23cnt, aes(x = yday, y = count, color = fruit.present.intensity)) +
+geom_smooth() +
+  geom_smooth(aes(x = yday, y = count, color = fruit.present.intensity), method = "loess", se = FALSE) + # Overlay smoothed lines from the first graph
+  scale_y_continuous(labels = scales::comma) +  # Format y-axis labels with commas
+  labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity")
+  
+
+dat.qu <- dat.qu[dat.qu$fruit.present.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
+summary(dat.qu)
+dat.qu <- dat.qu %>% filter(!fruit.drop.intensity %in% c("0%","0"))
+  
+ filtered_data <- dat.qu %>%
+  filter(!is.na(fruit.present.intensity) & 
+           fruit.present.intensity %in% c("3-10", "101-1,000", "1,001-10,000", "11-100", ">10,000", "<3"))
+
+ summary_table <- filtered_data %>%
+   group_by(fruit.present.intensity, yday) %>%
+   summarise(count = n())
+ 
+ ggplot(summary_table, aes(x = yday, y = count, color = fruit.present.intensity, group = fruit.present.intensity)) +
+   geom_smooth(method = "loess", formula = y ~ x, se = FALSE) +
+   labs(title = "Occurrences of Fruit Present Intensity Over Time",
+        x = "yday",
+        y = "Number of Occurrences") +
+   scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
+                                 "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+ 
+  
+#geom_smooth(aes(x = yday, y = (Count), color = fruit.present.intensity), method = "loess", se = FALSE) + # Overlay smoothed lines from the first graph
+#scale_y_continuous(labels = scales::comma) +  # Format y-axis labels with commas
+#labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity") +
+#theme_minimal(),
+  
+  
