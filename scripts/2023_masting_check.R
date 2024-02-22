@@ -114,7 +114,7 @@ unique(dat.1t$PlantNumber)
 table(dat.1t$PlantNumber)
 ###graphing for this collapsed
 
-#getting the phenophases information I need. 
+#getting the phenophases information I need.
 dat.fpi <- dat.1t[dat.1t$fruit.present.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
 summary(dat.fpi)
 
@@ -153,7 +153,7 @@ dev.off ()
 #   facet_grid(Year ~ ., scales="free_x") +
 #   theme_bw() +
 #   scale_x_date(date_breaks = "2 week", date_labels = "%b") + # Setting breaks for each month
-#   labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Date of Year") 
+#   labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Date of Year")
 
 # ggplot(data=dat.fpi) +
 #   geom_density(alpha=0.5, aes(x=yday, fill=fruit.present.intensity)) +
@@ -161,9 +161,9 @@ dev.off ()
 #   theme_bw() +
 #   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
 #   labs(title="Fruit Present Intensity in Q.alba 134-U*66", x="Day of Year")  # Modified the x-axis label
-# 
+#
 
-#getting the phenophases information I need. 
+#getting the phenophases information I need.
 dat.fri <- dat.1t[dat.1t$fruit.drop.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.drop.intensity")]
 summary(dat.fri)
 
@@ -202,7 +202,7 @@ dev.off()
 #   facet_grid(Year ~ ., scales="free_x") +
 #   theme_bw() +
 #   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-#   labs(title="Fruit Drop Intensity", x="Date of Year") 
+#   labs(title="Fruit Drop Intensity", x="Date of Year")
 
 
 # ggplot(data=dat.fri) +
@@ -227,7 +227,7 @@ dat.2t <- dat.wo[dat.wo$PlantNumber == "684-33*1",]
 unique(dat.2t$PlantNumber)
 table(dat.2t$PlantNumber)
 
-#getting the phenophases information I need. 
+#getting the phenophases information I need.
 dat.fpi <- dat.2t[dat.2t$fruit.present.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
 summary(dat.fpi)
 
@@ -268,7 +268,7 @@ dev.off()
 #   facet_grid(Year ~ ., scales="free_x") +
 #   theme_bw() +
 #   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-#   labs(title="Fruit Present Intensity", x="Date of Year") 
+#   labs(title="Fruit Present Intensity", x="Date of Year")
 
 # ggplot(data=dat.fpi) +
 #   geom_density(alpha=0.5, bins=50, aes(x=yday, fill=fruit.present.intensity)) +
@@ -276,9 +276,9 @@ dev.off()
 #   theme_bw() +
 #   scale_x_continuous(breaks = seq(150, 365, by = 10)) +
 #   labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")  # Modified the x-axis label
-# 
+#
 
-#getting the phenophases information I need. 
+#getting the phenophases information I need.
 dat.fri <- dat.2t[dat.2t$fruit.drop.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.drop.intensity")]
 summary(dat.fri)
 
@@ -319,7 +319,7 @@ dev.off()
 #   facet_grid(Year ~ ., scales="free_x") +
 #   theme_bw() +
 #   scale_x_date(date_breaks = "1 month", date_labels = "%b") + # Setting breaks for each month
-#   labs(title="Fruit Drop Intensity", x="Date of Year") 
+#   labs(title="Fruit Drop Intensity", x="Date of Year")
 
 # ggplot(data=dat.fri) +
 #   geom_density(alpha=0.5, aes(x=yday, fill=fruit.drop.intensity)) +
@@ -328,7 +328,7 @@ dev.off()
 #   scale_x_continuous(breaks = seq(150, 365, by = 7)) +
 #   labs(title="Fruit Present Intensity in Q.alba 684-33*1", x="Day of Year")+
 #   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# 
+#
 # ggplot(data = dat.fri) +
 #   geom_point(aes(x = Date, y = fruit.drop.intensity, color = fruit.drop.intensity)) +
 #   facet_grid(Year ~ .) +
@@ -340,7 +340,7 @@ dev.off()
 
 ### doing this for white oak in general now so I can just use the dat.wo data frame
 
-#getting the phenophases information I need. 
+#getting the phenophases information I need.
 dat.fpi <- dat.wo[dat.wo$fruit.present.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
 summary(dat.fpi)
 
@@ -453,26 +453,29 @@ geom_smooth() +
   scale_y_continuous(labels = scales::comma) +  # Format y-axis labels with commas
   labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity")
   
+###
 
-dat.qu <- dat.qu[dat.qu$fruit.present.observed=="Yes", c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
-summary(dat.qu)
-dat.qu <- dat.qu %>% filter(!fruit.drop.intensity %in% c("0%","0"))
-  
- filtered_data <- dat.qu %>%
+dat.qu <- dat.qu[, c("Date.Observed", "PlantNumber", "Year", "Date", "yday", "fruit.present.intensity")]
+
+dat.qu <- dat.qu %>% filter(!fruit.present.intensity %in% c("0%","0"))
+
+filtered_data <- dat.qu %>%
   filter(!is.na(fruit.present.intensity) & 
            fruit.present.intensity %in% c("3-10", "101-1,000", "1,001-10,000", "11-100", ">10,000", "<3"))
 
- summary_table <- filtered_data %>%
-   group_by(fruit.present.intensity, yday) %>%
-   summarise(count = n())
- 
- ggplot(summary_table, aes(x = yday, y = count, color = fruit.present.intensity, group = fruit.present.intensity)) +
-   geom_smooth(method = "loess", formula = y ~ x, se = FALSE) +
-   labs(title = "Occurrences of Fruit Present Intensity Over Time",
-        x = "yday",
-        y = "Number of Occurrences") +
-   scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
-                                 "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+summary_table <- filtered_data %>%
+  group_by(fruit.present.intensity, yday) %>%
+  summarise(count = n()) %>%
+  mutate(mean_count = ifelse(count > 1, mean(count), count))
+
+ggplot(summary_table, aes(x = yday, y = count, color = fruit.present.intensity, group = fruit.present.intensity)) +
+  geom_smooth(method = "loess", formula = y ~ x, se = FALSE) +
+  labs(title = "Occurrences of Fruit Present Intensity Over Time",
+       x = "yday",
+       y = "Number of Occurrences") +
+  scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
+                                "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+
  
   
 #geom_smooth(aes(x = yday, y = (Count), color = fruit.present.intensity), method = "loess", se = FALSE) + # Overlay smoothed lines from the first graph
@@ -480,4 +483,66 @@ dat.qu <- dat.qu %>% filter(!fruit.drop.intensity %in% c("0%","0"))
 #labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity") +
 #theme_minimal(),
   
-  
+# Filter data to include only rows where fruit.present.observed == "Yes"
+dat.qu <- dat.qu[dat.qu$fruit.present.observed == "Yes", ]
+
+# Remove rows where fruit.present.intensity is "0%" or "0"
+dat.qu <- dat.qu %>% filter(!fruit.present.intensity %in% c("0%", "0"))
+
+# Filter data to include only specified fruit present intensities
+filtered_data <- dat.qu %>%
+  filter(!is.na(fruit.present.intensity) & 
+           fruit.present.intensity %in% c("3-10", "101-1,000", "1,001-10,000", "11-100", ">10,000", "<3"))
+
+# Group by fruit.present.intensity and yday, calculate count of observations, and then calculate mean count
+summary_table <- filtered_data %>%
+  group_by(fruit.present.intensity, yday, Year) %>%
+  summarise(count = n()) %>%
+  group_by(fruit.present.intensity, Year) %>%
+  mutate(mean_count = ifelse(n() > 1, mean(count), count))
+
+# Plotting
+p1<-ggplot(summary_table, aes(x = yday, y = count, color = fruit.present.intensity, group = fruit.present.intensity)) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linetype = "dashed", alpha = 0.5) +  
+  labs(title = "Occurrences of Fruit Present Intensity Over Time",
+       x = "yday",
+       y = "Number of Occurrences") +
+  scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
+                                "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+
+
+dat.23 <- dat.qu[dat.qu$Year %in% c(2023), ]
+
+filtered_data <- dat.23 %>%
+  filter(!is.na(fruit.present.intensity) & 
+           fruit.present.intensity %in% c("3-10", "101-1,000", "1,001-10,000", "11-100", ">10,000", "<3"))
+
+dat.23cnt <- filtered_data %>%
+  group_by(yday, fruit.present.intensity) %>%
+  summarise(count = n())
+
+ p2<-ggplot(dat=dat.23cnt) +
+ geom_smooth(aes(x = yday, y = count, color = fruit.present.intensity), method = "lm", se = F) + # Overlay smoothed lines from the first graph
+  scale_y_continuous(labels = scales::comma) +  # Format y-axis labels with commas
+  labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity")+
+   scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
+                                 "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+ 
+ 
+ ggplot(dat=dat.23cnt) +
+   geom_smooth(aes(x = yday, y = count, color = fruit.present.intensity), method = "lm", se = F) + # Overlay smoothed lines from the first graph
+   scale_y_continuous(labels = scales::comma) +  
+   geom_smooth(summary_table, aes(x = yday, y = count, color = fruit.present.intensity, group = fruit.present.intensity),method = "lm", formula = y ~ x, se = FALSE, linetype = "dashed", alpha = 0.5) +
+   labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity")+
+   scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
+                                 "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+ 
+ ggplot(dat = dat.23cnt) +
+   geom_smooth(aes(x = yday, y = count, color = fruit.present.intensity), method = "lm", se = T) + 
+   geom_smooth(data = summary_table, aes(x = yday, y = count, color = fruit.present.intensity, group = fruit.present.intensity),
+               method = "lm", formula = y ~ x, se = FALSE, linetype = "dashed", alpha = 0.5) +
+   scale_y_continuous(labels = scales::comma) +  
+   labs(x = "Date", y = "Accumulated Count", color = "Fruit Present Intensity") +
+   scale_color_manual(values = c("3-10" = "blue", "101-1,000" = "red", "1,001-10,000" = "green",
+                                 "11-100" = "purple", ">10,000" = "orange", "<3" = "black"))
+ 
