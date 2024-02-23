@@ -3,14 +3,14 @@
 # ---------------------------------
 library(ggplot2)
 library(gghighlight)
-# path.google <- "G:/My Drive" # Windows
-path.google <- "/Volumes/GoogleDrive/My Drive" # Mac
+library(dplyr)
 
-
-path.out <- file.path(path.google, "LivingCollections_Phenology/Phenology Forecasting")
-path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2023_02_EndOfYear_Report/figures_2023_end")
+path.google <- "~/Google Drive/My Drive" # Mac
+path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
+path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2023_02_End_Of_Year_Report/figures_2023_end"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
+
 
 dir.met <- "../data_raw/meteorology"
 dir.create(dir.met, recursive=T, showWarnings = F)
@@ -75,11 +75,16 @@ for(YR in yr.min:yr.max){
 }
 summary(dat.ghcn2)
 head(dat.ghcn2)
-# dat.ghcn2[dat.ghcn2$DATE=="2020-04-09",]
+#addding this in because I'm doing 2023 right now 
+dat.ghcn2 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
+dat.ghcn2 <- dat.ghcn2[dat.ghcn2$YEAR<2024,]
 
+summary(dat.ghcn2)
+head(dat.ghcn2)
 #creating a data frame of just the last 5 years of weather data
 dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2019,]
-
+summary(dat.ghcn3)
+head(dat.ghcn3)
 #making sure the date being shown only shows spring dates
 dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=359,]
 summary(dat.ghcn33)
@@ -256,3 +261,63 @@ summary(dat.ghcn151)
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
 #write.csv(dat.ghcn2, file.path(path.out, "data", "Weather_ArbCOOP_historical_latest.csv"), row.names=F)
 
+
+#Just getting daily percipitation
+dat.ghcnx <- dat.ghcn2[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP")]
+summary(dat.ghcnx)
+
+
+# png(file.path(path.figs,"Daily 2023 precipitation.png"), height=4, width=6, units="in", res=320)
+# ggplot(data=dat.ghcnx) +
+#   geom_line(aes(x=YDAY, y=PRCP, color=as.factor(YEAR)))+
+#   geom_smooth(aes (x=YDAY, y=PRCP))+
+#   gghighlight::gghighlight(YEAR== "2023") +
+#   geom_smooth(data= dat.ghcnxmean, color = "black", linetype = "dashed", aes(x=YDAY, y=PRCP))+
+#   labs(title="Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
+#   scale_x_continuous(breaks = seq(0, 365, by = 25)) +
+#   theme_classic()
+# dev.off() 
+
+
+# Aggregate data by month to calculate total precipitation for each month in 2023
+dat.ghcnp23 <- dat.ghcnx[dat.ghcnx$YEAR == 2023, ]
+dat.ghcn23SUM <- aggregate(PRCP ~ MONTH , dat = dat.ghcnp23, FUN = sum, na.rm = TRUE)
+dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.ghcnx, FUN = sum, na.rm = TRUE)
+
+
+# Calculate mean precipitation across all years for each month
+dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = TRUE)
+
+# Plotting monthly precipitation in 2023 with mean line
+png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data = dat.ghcn23SUM, aes(x = factor(MONTH), y = PRCP)) +
+  geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
+  geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
+  labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (mm)", x = "Month") +
+  scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  theme_minimal()
+dev.off()
+
+
+dat.ghcny <- dat.ghcn2[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
+summary(dat.ghcny)
+
+
+#Aggregate data by month to calculate total precipitation for each month in 2023
+dat.ghcncp23 <- dat.ghcny[dat.ghcny$YEAR == 2023, ]
+dat.ghcncp23 <- aggregate(PRCP.cum ~ MONTH, data = dat.ghcncp23, )
+
+# Aggregate data to find the last cumulative precipitation value for each month
+
+dat.ghcncp23 <- dat.ghcncp23 %>%
+  group_by(MONTH) %>%
+  summarise(PRCP.cum = last(PRCP.cum))
+
+# Plotting
+png(file.path(path.figs,"2023_monthly_cumu_precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data = dat.ghcncp23, aes(x = factor(MONTH), y = PRCP.cum)) +
+  geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
+  labs(title = "Monthly Cumulative Precipitation 2023", y = "Total Cumulative Precipitation in cm", x = "Month") +
+  scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  theme_minimal()
+dev.off()
