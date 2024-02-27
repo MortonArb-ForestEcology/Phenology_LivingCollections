@@ -114,6 +114,10 @@ acerObs <- acerObs[!acerObs$PlantID %in% acerGone,]
 ulmusObs <- ulmusObs[!ulmusObs$PlantID %in% ulmusGone,]
 
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
+
+length(unique(quercusObs$Taxon))
+length(unique(acerObs$Taxon))
+length(unique(ulmusObs$Taxon))
 # Quercus: 230, Acer: 170, Ulmus: 140
 
 
