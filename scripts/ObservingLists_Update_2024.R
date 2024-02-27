@@ -1,19 +1,21 @@
+library(ggplot2)
 
 # Update the most recent round of observing lists to make sure removed trees are no longer listed
-path.google <- "~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/"
+path.google <- "~/Google Drive/My Drive/LivingCollections_Phenology/"
 
 # 1. Read in the existing lists --> ALWAYS START WITH THIS ----
-quercusObs <- read.csv(file.path(path.google, "Quercus", "ObservingList_Quercus_2023.csv"))
-acerObs <- read.csv(file.path(path.google, "Acer", "ObservingList_Acer_2023.csv"))
-ulmusObs <- read.csv(file.path(path.google, "Ulmus", "ObservingList_Ulmus_2023.csv"))
+quercusObs <- read.csv(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2023.csv"))
+acerObs <- read.csv(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2023.csv"))
+ulmusObs <- read.csv(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2023.csv"))
 
+# summary(quercusObs)
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # Quercus: 285, Acer: 191, Ulmus: 142
 
 # 2. remove trees no longer in BOL ----
-quercusAll <- readxl::read_xlsx(file.path(path.google, "2024-02-27_BRAHMSOnlineData_Quercus.xlsx"))
-acerAll <- readxl::read_xlsx(file.path(path.google, "2024-02-27_BRAHMSOnlineData_Acer.xlsx"))
-ulmusAll <- readxl::read_xlsx(file.path(path.google, "2024-02-27_BRAHMSOnlineData_Ulmus.xlsx"))
+quercusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2024-02-27_BRAHMSOnlineData_Quercus.xlsx"))
+acerAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2024-02-27_BRAHMSOnlineData_Acer.xlsx"))
+ulmusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2024-02-27_BRAHMSOnlineData_Ulmus.xlsx"))
 
 quercusObs <- quercusObs[quercusObs$PlantID %in% quercusAll$PlantNumber,]
 acerObs <- acerObs[acerObs$PlantID %in% acerAll$PlantNumber,]
@@ -37,15 +39,15 @@ dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # Quercus: 235, Acer: 177, Ulmus: 140
 
 #    3.b. Search last year's data for trees that say they're gone;  -----
-quercus23 <- read.csv(file.path(path.google, "../Data_observations/LivingCollectionPhenology_ObservationData_Quercus_2023_FINAL.csv"))
+quercus23 <- read.csv(file.path(path.google, "Data_observations/LivingCollectionPhenology_ObservationData_Quercus_2023_FINAL.csv"))
 quercus23$Date.Observed <- as.Date(quercus23$Date.Observed)
 summary(quercus23)
 
-acer23 <- read.csv(file.path(path.google, "../Data_observations/LivingCollectionPhenology_ObservationData_Acer_2023_FINAL.csv"))
+acer23 <- read.csv(file.path(path.google, "Data_observations/LivingCollectionPhenology_ObservationData_Acer_2023_FINAL.csv"))
 acer23$Date.Observed <- as.Date(acer23$Date.Observed)
 summary(acer23)
 
-ulmus23 <- read.csv(file.path(path.google, "../Data_observations/LivingCollectionPhenology_ObservationData_Ulmus_2023_FINAL.csv"))
+ulmus23 <- read.csv(file.path(path.google, "Data_observations/LivingCollectionPhenology_ObservationData_Ulmus_2023_FINAL.csv"))
 ulmus23$Date.Observed <- as.Date(ulmus23$Date.Observed)
 summary(ulmus23)
 
@@ -114,10 +116,89 @@ ulmusObs <- ulmusObs[!ulmusObs$PlantID %in% ulmusGone,]
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # Quercus: 230, Acer: 170, Ulmus: 140
 
+
+#####################################
 # 4. Update the existing lists to remove trees that we know are now gone ----
-# 4.1. Save the 2024 lists as a whole and chunks
+#####################################
+# Check the Distribution of Trees (small list = <15 trees)
+summary(as.factor(quercusObs$List)) # Small List: List 7 (9 trees); List 4 (11 trees); List 1 (12 trees)
+summary(as.factor(acerObs$List)) # Small List: List 2 (10 trees), List 1 (13 trees); List 5 (14 trees), List 7 (14 trees) 
+summary(as.factor(ulmusObs$List)) # No small lists 
+
+png(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2024.png"), height=8, width=8, units="in", res=180)
+ggplot(data=quercusObs) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List))) +
+  scale_shape_manual(values=c(1:18))
+dev.off()
+
+
+png(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2024.png"), height=8, width=8, units="in", res=180)
+ggplot(data=acerObs) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List))) +
+  scale_shape_manual(values=c(1:18))
+dev.off()
+
+
+png(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2024.png"), height=8, width=8, units="in", res=180)
+ggplot(data=ulmusObs) +
+  coord_equal() +
+  geom_point(aes(x=BgLongitude, y=BgLatitude, color=as.factor(List), shape=as.factor(List))) +
+  scale_shape_manual(values=c(1:18))
+dev.off()
+
+
+write.csv(quercusObs, file=file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2024.csv"), row.names=F)
+write.csv(acerObs, file=file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2024.csv"), row.names=F)
+write.csv(ulmusObs, file=file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2024.csv"), row.names=F)
+
+for(OBSLIST in unique(quercusObs$List)){
+  write.csv(quercusObs[quercusObs$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Quercus", paste0("ObservingList_Quercus_2024_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+}
+
+for(OBSLIST in unique(acerObs$List)){
+  write.csv(acerObs[acerObs$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Acer", paste0("ObservingList_Acer_2024_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+}
+
+for(OBSLIST in unique(ulmusObs$List)){
+  write.csv(ulmusObs[ulmusObs$List==OBSLIST,], file=file.path(path.google, "Observing Lists", "Ulmus", paste0("ObservingList_Ulmus_2024_LIST-", stringr::str_pad(OBSLIST, 2, "left", "0"), ".csv")), row.names=F)
+}
+
+# ~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~
+# Combine all lists and put them in the PhenoApp Folder
+# ~~~~~~~~~~~~~~~~
+listsAll <- rbind(quercusObs, acerObs, ulmusObs)
+
+write.csv(listsAll, file=file.path(path.google, "Observing Lists", "ObservingList_AllCombined_2024.csv"), row.names=F)
+write.csv(listsAll, file=file.path(path.google, "DataApp", "ObservingList_AllCombined_2024.csv"), row.names=F)
+
+
 
 # 4.2. Move the 2023 lists to the "OLD" folder
+quercus23 <- dir(file.path(path.google, "Observing Lists", "Quercus"), "2023")
+for(i in 1:length(quercus23)){
+  file.copy(from=file.path(path.google, "Observing Lists", "Quercus", quercus23[i]),
+            to=file.path(path.google, "Observing Lists", "OLD", "Quercus", quercus23[i]))
+  
+  file.remove(file.path(path.google, "Observing Lists", "Quercus", quercus23[i]))
+}
 
 
+acer23 <- dir(file.path(path.google, "Observing Lists", "Acer"), "2023")
+for(i in 1:length(acer23)){
+  file.copy(from=file.path(path.google, "Observing Lists", "Acer", acer23[i]),
+            to=file.path(path.google, "Observing Lists", "OLD", "Acer", acer23[i]))
+  
+  file.remove(file.path(path.google, "Observing Lists", "Acer", acer23[i]))
+}
 
+ulmus23 <- dir(file.path(path.google, "Observing Lists", "Ulmus"), "2023")
+for(i in 1:length(ulmus23)){
+  file.copy(from=file.path(path.google, "Observing Lists", "Ulmus", ulmus23[i]),
+            to=file.path(path.google, "Observing Lists", "OLD", "Ulmus", ulmus23[i]))
+  
+  file.remove(file.path(path.google, "Observing Lists", "Ulmus", ulmus23[i]))
+}
