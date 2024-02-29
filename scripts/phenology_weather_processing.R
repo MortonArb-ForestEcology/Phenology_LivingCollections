@@ -77,21 +77,21 @@ summary(dat.ghcn2)
 head(dat.ghcn2)
 #addding this in because I'm doing 2023 right now 
 dat.ghcn2 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
-dat.ghcn2 <- dat.ghcn2[dat.ghcn2$YEAR<2024,]
+#dat.ghcn2 <- dat.ghcn2[dat.ghcn2$YEAR<2024,]
 
 summary(dat.ghcn2)
 head(dat.ghcn2)
 #creating a data frame of just the last 5 years of weather data
-dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2019,]
+dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR<=2024,]
 summary(dat.ghcn3)
 head(dat.ghcn3)
 #making sure the date being shown only shows spring dates
-dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=359,]
+dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=59,]
 summary(dat.ghcn33)
 head(dat.ghcn33)
 
 #Subsetting out uncecessary columns for the phenology report
-dat.ghcn4 <- dat.ghcn33[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum")]
+dat.ghcn4 <- dat.ghcn33[ ,c("YEAR","MONTH", "TMAX", "TMIN","PRCP", "DATE", "YDAY", "TMEAN", "PRCP.cum", "GDD5.cum","GDD0.cum")]
 summary(dat.ghcn4)
 head(dat.ghcn4)
 
@@ -103,7 +103,7 @@ summary(dat.ghcn5)
 dat.ghcn5mean <- aggregate(PRCP.cum ~ YDAY,dat=dat.ghcn5, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
   geom_smooth(data=dat.ghcn5mean)+ (aes(x=YDAY, y=PRCP.cum))+
@@ -131,11 +131,12 @@ dat.ghcn6mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
   #png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
- geom_smooth(aes (x=YDAY, y=TMEAN))+
-  gghighlight::gghighlight(YEAR== "2023") +
+ #geom_smooth(aes (x=YDAY, y=TMEAN))+
+  gghighlight::gghighlight(YEAR== "2024") +
    geom_smooth(data= dat.ghcn6mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
-  scale_x_continuous(breaks = seq(0, 365, by = 25)) +
+  scale_x_continuous(breaks = seq(0, 60, by = 5)) +
+  scale_y_continuous(breaks = seq(-30, 10, by = 5)) +
   theme_classic()
 dev.off() 
 
@@ -149,13 +150,14 @@ ggplot(data=dat.ghcn6) +
 dat.ghcn7 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD5.cum")]
 summary(dat.ghcn7)
 
-dat.ghcn7 <- dat.ghcn7 [dat.ghcn7$YDAY<=180,]
+dat.ghcn7 <- dat.ghcn7 [dat.ghcn7$YDAY<=59,]
 summary(dat.ghcn7)
 
 #attemtption to generte a graph
 #png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn7) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  gghighlight::gghighlight(YEAR== "2024") +
   labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
@@ -163,7 +165,31 @@ dev.off()
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn7) +
   geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", fill="Year", color="Year")
+###
+##GDD0##
+#Just getting GDD5
+dat.ghcn8 <- dat.ghcn4[ ,c("YEAR", "MONTH", "DATE", "YDAY", "GDD0.cum")]
+summary(dat.ghcn8)
+
+dat.ghcn8 <- dat.ghcn8 [dat.ghcn8$YDAY<=59,]
+summary(dat.ghcn8)
+
+#attemtption to generte a graph
+#png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
+ggplot(data=dat.ghcn8) +
+  geom_line(aes(x=YDAY, y=GDD0.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
+  gghighlight::gghighlight(YEAR== "2024") +
+  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD", x="Day of Year", color="Year") +
+  theme_classic()
+dev.off()
+
+#using a smooth point graph I don't know if this is relevant
+ggplot(data=dat.ghcn7) +
+  geom_smooth(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
+
+
 
 ################# Graphing for everything since 200#################
 dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
