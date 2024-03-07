@@ -44,49 +44,52 @@ dbDisconnect(conn)
 # Removing missing trees from our tree list
 treeLists <- treeLists[!treeLists$PlantID %in% removed$PlantNumber,]
 
-summary(datAll)
-dim(datAll)
+# Subset data to just date entered in the current year
+datNow <- datAll[!is.na(datAll$DateEntered) & datAll$DateEntered>=as.Date(paste0(lubridate::year(Sys.Date()), "-01-01")),]
+summary(datNow)
+dim(datNow)
 
-for(COL in names(datAll)[!names(datAll) %in% c("DateEntered", "DateObserved")]){
-  datAll[,COL] <- as.factor(datAll[,COL])
+for(COL in names(datNow)[!names(datNow) %in% c("DateEntered", "DateObserved", "Comments")]){
+  datNow[,COL] <- as.factor(datNow[,COL])
 }
 
-datAll[datAll==""] <- NA
-datAll <- droplevels(datAll)
+datNow[datNow==""] <- NA
+datNow <- droplevels(datNow)
 
 # Get rid of data for trees that have been removed
-datAll <- datAll[!datAll$PlantID %in% removed$PlantNumber,]
-datAll$Species <- trimws(datAll$Species)
+datNow <- datNow[!datNow$PlantID %in% removed$PlantNumber,]
+datNow$Species <- trimws(datNow$Species)
+summary(datNow)
 
 # cleaning up some relatively minor issues with the data
-# # datAll$Genus <- gsub(" ", "", datAll$Genus)
-# datAll$Species <- gsub("  ", " ", datAll$Species)
-# datAll$Species <- tolower(datAll$Species)
-# summary(datAll)
+# # datNow$Genus <- gsub(" ", "", datNow$Genus)
+# datNow$Species <- gsub("  ", " ", datNow$Species)
+# datNow$Species <- tolower(datNow$Species)
+# summary(datNow)
 
 # Checking for data on some trees reported missing by one observer
-# datAll[datAll$PlantID %in% c("19-2012*1", "5-2018*4", "37-2014*1"),]
+# datNow[datNow$PlantID %in% c("19-2012*1", "5-2018*4", "37-2014*1"),]
 
 # Checking for immediate issues all related to bad entry
 # Checking for observers not in our existing ID list
-datAll[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),]
-unique(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
-oddObservers <- summary(datAll$ObserverID[!datAll$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
+datNow[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),]
+unique(datNow$ObserverID[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
+oddObservers <- summary(datNow$ObserverID[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
 oddObservers[oddObservers>0]
 
 # treeLists[treeLists$PlantID=="1261-26*2", ]
-# datAll[datAll$ObserverID=="Haraf" & datAll$DateObserved=="2023-05-09",c("PlantID", "ObserverID", "Genus", "Species")]
+# datNow[datNow$ObserverID=="Haraf" & datNow$DateObserved=="2023-05-09",c("PlantID", "ObserverID", "Genus", "Species")]
 
 # Checking for trees whose PlantID isn't in our list
 # # NOTE: Need to 
-datAll[!datAll$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] 
+datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] 
 
 # Checking for an Observer monitoring something in their normal list (usually a typo!)
 datOdd <- data.frame()
-for(OBSID in unique(datAll$ObserverID)){
+for(OBSID in unique(datNow$ObserverID)){
   if(!OBSID %in% assignments$ObserverID) next
   
-  datNow <- datAll[datAll$ObserverID==OBSID, ]
+  datNow <- datNow[datNow$ObserverID==OBSID, ]
   ObsAssign <- assignments[assignments$ObserverID==OBSID,]
   
   # Building the tree list the ugly way, but it'll work
@@ -108,8 +111,8 @@ datOdd[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObser
 
 # This may be slow, but now checking for entries where the species doesn't match what it is in our records
 datBad <- data.frame()
-for(TREEID in unique(datAll$PlantID)){
-  datNow <- datAll[datAll$PlantID==TREEID, ]
+for(TREEID in unique(datNow$PlantID)){
+  datNow <- datNow[datNow$PlantID==TREEID, ]
   WTF <- datNow[!paste(datNow$Genus, datNow$Species) == treeLists$Taxon[treeLists$PlantID==TREEID],]
   
   if(nrow(WTF)>0) datBad <- rbind(datBad, WTF)
@@ -121,7 +124,7 @@ datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObser
 # treeLists[treeLists$PlantID=="18-2012*1",]
 # treeLists[grep("pumila", treeLists$Taxon),]
 # 
-# datAll[grep("pumila x rubra", datAll$Species),]
+# datNow[grep("pumila x rubra", datNow$Species),]
 
 
-write.csv(datAll, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
+write.csv(datNow, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
