@@ -82,7 +82,9 @@ oddObservers[oddObservers>0]
 
 # Checking for trees whose PlantID isn't in our list
 # # NOTE: Need to 
-datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] 
+summary(datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] )
+PlantIDsummary <- summary(datNow$PlantID[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber)] )
+PlantIDsummary[PlantIDsummary>0]
 
 # Checking for an Observer monitoring something in their normal list (usually a typo!)
 datOdd <- data.frame()
