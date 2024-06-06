@@ -91,7 +91,7 @@ datOdd <- data.frame()
 for(OBSID in unique(datNow$ObserverID)){
   if(!OBSID %in% assignments$ObserverID) next
   
-  datNow <- datNow[datNow$ObserverID==OBSID, ]
+  datTMP <- datNow[datNow$ObserverID==OBSID, ]
   ObsAssign <- assignments[assignments$ObserverID==OBSID,]
   
   # Building the tree list the ugly way, but it'll work
@@ -101,14 +101,15 @@ for(OBSID in unique(datNow$ObserverID)){
     
   }
   
-  WTF <- datNow[!datNow$PlantID %in% treesAssign$PlantID,]
+  WTF <- datTMP[!datTMP$PlantID %in% treesAssign$PlantID,]
   
   if(nrow(WTF)>0) datOdd <- rbind(datOdd, WTF)
 }
 dim(datOdd)
 datOdd[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
 
-
+# Saving the list of trees to check
+write.csv(datOdd, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_ObservationData_All_latest.csv")), row.names=F)
 
 
 # This may be slow, but now checking for entries where the species doesn't match what it is in our records
