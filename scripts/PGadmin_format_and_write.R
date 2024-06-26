@@ -6,6 +6,7 @@ library(bit)
 library(dplyr)
 ####Pathing
 #BR: Make this work later 
+
 #pgadminconnect
 db_host <- "164.92.83.213" #host name/address e  
 db_port <- 5432 #port
@@ -60,7 +61,7 @@ names(dat.pg23)
 ##  =^.^=  =^.^=  =^.^= BR: Do a better job pathing this =^.^=  =^.^= =^.^=
 gs4_auth()
 ac19 <- read_csv("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations/LivingCollectionPhenology_ObservationData_Acer_2019_FINAL.csv")
-View(ac19)
+#View(ac19)
 names(ac19)
 
 #renaming the column names of pgadmin data to match those of existing pheno data
@@ -89,7 +90,7 @@ dat.pg23 <- dat.pg23[, new_order]
 
 # Viewing the and checking
 dat.pg23
-View(dat.pg23)
+  #View(dat.pg23)
 ### checking with rbind
 #dat.fake <- rbind(ac19,dat.pg23)
 
@@ -120,26 +121,24 @@ table(dat.pg23$leaf.present.observed)
 
 ## If this works write out CSVs by collection
 
-# Using the unique collection names in the Collection column
-unique_collections <- unique(dat.pg23$Collection)
+# Using the unique collection names and years in the Collection and Year columns
+unique_combinations <- unique(dat.pg23[, c("Collection", "Year")])
 
-for (collection_name in unique_collections) {
-  # Create a subset for the current collection
-  subset_data <- dat.pg23[dat.pg23$Collection == collection_name, ]
+for (i in 1:nrow(unique_combinations)) {
+  collection_name <- unique_combinations$Collection[i]
+  year <- unique_combinations$Year[i]
   
-  # Extract the year for naming purposes
-  year <- unique(subset_data$Year)
+  # Create a subset for the current collection and year
+  subset_data <- dat.pg23[dat.pg23$Collection == collection_name & dat.pg23$Year == year, ]
   
   # Generate a CSV file name based on the specified format
   csv_file_name <- paste0("LivingCollectionPhenology_ObservationData_", gsub(" ", "_", collection_name), "_", year, "_FINAL.csv")
   
-  # Write out the subset to a CSV file - Brendon improve this pathing 
+  # Write out the subset to a CSV file
   write.csv(subset_data, csv_file_name, row.names = FALSE)
   
   cat("CSV file", csv_file_name, "created for collection", collection_name, "and year", year, "\n")
 }
-
-
 ##
 # Disconnect from the pgadming data base
 dbDisconnect(con)
