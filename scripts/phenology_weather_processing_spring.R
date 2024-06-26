@@ -4,12 +4,11 @@
 library(ggplot2)
 library(gghighlight)
 
-# path.google <- "G:/My Drive" # Windows
-path.google <- "/Volumes/GoogleDrive/My Drive/" # Mac
-
-
-path.out <- file.path(path.google, "LivingCollections_Phenology/Phenology Forecasting")
-path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2022_02_EndOfYear_Report/figures_2022_end")
+path.google <- "~/Google Drive/My Drive" # Mac
+path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
+#path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2023_02_EndOfYear_Report/figures_2023_end")
+# this is for google -># 
+path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_01_Mid_Year_Report/figures_2024"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -79,10 +78,10 @@ head(dat.ghcn2)
 # dat.ghcn2[dat.ghcn2$DATE=="2020-04-09",]
 
 #creating a data frame of just the last 5 years of weather data
-dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2018,]
+dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR>=2019,]
 
 #making sure the date being shown only shows spring dates
-dat.ghcn3 <- dat.ghcn3[dat.ghcn3$YDAY<=149,]
+dat.ghcn3 <- dat.ghcn3[dat.ghcn3$YDAY<=153,]
 dat.ghcn3 <- dat.ghcn3[dat.ghcn3$YDAY>=59,]
 summary(dat.ghcn3)
 head(dat.ghcn3)
@@ -153,8 +152,8 @@ ggplot(data=dat.ghcn7) +
 dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
 
 #making sure the date being shown only shows spring dates
-dat.ghcn13 <- dat.ghcn13[dat.ghcn13$YDAY<=149,]
-dat.ghcn13 <- dat.ghcn13[dat.ghcn13$YDAY>=59,]
+dat.ghcn13 <- dat.ghcn13[dat.ghcn13$YDAY<=152,]
+dat.ghcn13 <- dat.ghcn13[dat.ghcn13$YDAY>=1,]
 summary(dat.ghcn13)
 head(dat.ghcn13)
 
@@ -169,17 +168,15 @@ summary(dat.ghcn15)
 
 
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Cumulative Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR))+
   geom_line()+
-  geom_line(data = dat.ghcn15[dat.ghcn15$YEAR == 2023, ], aes(color = "2023"), size = 1.0) +
-  geom_line(data = dat.ghcn15[dat.ghcn15$YEAR == 2021, ], aes(color = "2021"), size = 1.0) +
-  geom_line(data = dat.ghcn14[dat.ghcn14$YEAR == 2012, ], aes(color = "2012"), size = 1.0) +
-  scale_color_manual(values = c("2023" = "goldenrod", "2021" = "darkblue",'2012'="red3")) +
-  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
+  geom_line(data = dat.ghcn15[dat.ghcn15$YEAR == 2024, ], aes(color = "2024"), size = 1.0) +
+  scale_color_manual(values = c('2024'="red3")) +
+  labs(title="Cumulative Precipitation 2008-2024", y="Precipitation in mm", x="Day of Year", color="Year") +
   theme_classic()
-#dev.off()
+dev.off()
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn15) +
@@ -193,11 +190,11 @@ dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn16)
 
 #graph of Mean Temperature
-#png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
   geom_line(aes(x=YDAY, y=TMEAN, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2022") +
-  labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
+  gghighlight::gghighlight(YEAR== "2024") +
+  labs(title="Average Daily Temperature 2008-2024", y="Temperature deg. C", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
 
@@ -214,11 +211,11 @@ summary(dat.ghcn17)
 summary(dat.ghcn17)
 
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn17) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2022") +
-  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
+  gghighlight::gghighlight(YEAR== "2024") +
+  labs(title="Cumulative Growing Degree Days 2008-2024", y="Cumulative GDD5", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
 
