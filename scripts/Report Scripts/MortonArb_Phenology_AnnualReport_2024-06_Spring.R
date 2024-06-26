@@ -953,7 +953,7 @@ animate(p, fps = 8)
 
 # Small pole light - facet by collections
 p <- ggplot(dat.24y) + 
-  facet_wrap(Collection ~ .) +
+  facet_grid(Collection ~ .) +
   geom_bar(alpha = 1, aes(x = yday, fill = pheno)) + 
   ylim(-50, 200) +
   theme_bw() +
