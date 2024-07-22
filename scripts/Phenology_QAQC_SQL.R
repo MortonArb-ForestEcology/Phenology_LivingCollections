@@ -86,7 +86,7 @@ summary(datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] 
 PlantIDsummary <- summary(datNow$PlantID[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber)] )
 PlantIDsummary[PlantIDsummary>0]
 
-# Checking for an Observer monitoring something in their normal list (usually a typo!)
+# Checking for an Observer monitoring something NOT in their normal list (usually a typo!)
 datOdd <- data.frame()
 for(OBSID in unique(datNow$ObserverID)){
   if(!OBSID %in% assignments$ObserverID) next
