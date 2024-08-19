@@ -405,6 +405,8 @@ model_cumulative <- lm(yday ~ GDD2.cumu2f, data = dat.merged7)
 
 # Summary of the model
 summary(model_cumulative)
+slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope
 
 # Visualize the relationship
 ggplot(dat.merged7, aes(x = GDD2.cumu2f, y = yday)) +
@@ -440,7 +442,8 @@ model_cumulative <- lm(yday ~ GDD2.cumu2f, data = dat.merged9)
 
 # Summary of the model
 summary(model_cumulative)
-
+slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope
 # Visualize the relationship
 ggplot(dat.merged9, aes(x = GDD2.cumu2f, y = yday)) +
   geom_point() +
@@ -475,6 +478,8 @@ model_cumulative <- lm(yday ~ GDD2.cumu2f, data = dat.merged11)
 
 # Summary of the model
 summary(model_cumulative)
+slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope
 
 # Visualize the relationship
 ggplot(dat.merged11, aes(x = GDD2.cumu2f, y = yday)) +
@@ -516,7 +521,8 @@ model_cumulative <- lm(yday ~ GDD5.cumu2f, data = dat.merged13)
 
 # Summary of the model
 summary(model_cumulative)
-
+slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope
 # Visualize the relationship
 ggplot(dat.merged13, aes(x = GDD5.cumu2f, y = yday)) +
   geom_point() +
@@ -551,6 +557,8 @@ model_cumulative <- lm(yday ~ GDD5.cumu2f, data = dat.merged15)
 
 # Summary of the model
 summary(model_cumulative)
+slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope
 
 # Visualize the relationship
 ggplot(dat.merged15, aes(x = GDD5.cumu2f, y = yday)) +
@@ -586,6 +594,8 @@ model_cumulative <- lm(yday ~ GDD5.cumu2f, data = dat.merged17)
 
 # Summary of the model
 summary(model_cumulative)
+slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope
 
 # Visualize the relationship
 ggplot(dat.merged17, aes(x = GDD5.cumu2f, y = yday)) +
