@@ -148,7 +148,7 @@ unique(dat.spring$Collection)
 dat.huh <- dat.all[dat.all$Year == "2027", ]
 head(dat.huh)
 #it's dale in 12/11/ 2022
-
+##### Combining met data and pheno data
 #### doing just Quercus macrocarpa
 quma <- dat.all[dat.all$Species=="Quercus macrocarpa",]
 summary(quma)
@@ -176,14 +176,18 @@ summary(model)
 slope <- coef(model)["GDD2.cum"]
 slope
 
-# Visualize the relationship
 ggplot(dat.merged, aes(x = GDD2.cum, y = yday)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
   labs(title = "Phenological Sensitivity, First Open Flower, Q.macrocarpa",
        x = "Cumulative GDD2",
        y = "First Flower, DOY") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
 
 #### doing just Quercus alba
 quab <- dat.all[dat.all$Species=="Quercus alba",]
@@ -204,7 +208,7 @@ quab.fo <- quab.fo[quab.fo$yday<=152,]
 dat.merged1 <- merge(quab.fo, dat.ghcn4, by.x = "Date.Observed", by.y = "DATE")
 
 # Fit linear model
-model <- lm(yday ~ GDD2, data = dat.merged1)
+model <- lm(yday ~ GDD2.cum, data = dat.merged1)
 
 # Summary of the model
 summary(model)
@@ -220,7 +224,12 @@ ggplot(dat.merged1, aes(x = GDD2.cum, y = yday)) +
   labs(title = "Phenological Sensitivity, First Open Flower Q.alba",
        x = "Cumulative GDD2",
        y = "First Flower,DOY") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
 
 #### doing all Quercus 
 dat.qu <- dat.spring [dat.spring$Collection=="Quercus",]
@@ -260,7 +269,13 @@ ggplot(dat.merged2, aes(x = GDD2.cum, y = yday)) +
   labs(title = "Phenological Sensitivity, First Flower Quercus",
        x = "Cumulative GDD2",
        y = "First Flower, DOY") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 #############################################################################
 ####doing GDD5
 
@@ -298,7 +313,13 @@ ggplot(dat.merged3, aes(x = GDD5.cum, y = yday)) +
   labs(title = "Phenological Sensitivity, First Open Flower Q.macrocarpa",
        x = "Cumulative GDD5",
        y = "First Flower, DOY") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 #### doing just Quercus alba
 quab <- dat.all[dat.all$Species=="Quercus alba",]
@@ -318,7 +339,7 @@ quab.fo <- quab.fo[quab.fo$yday<=152,]
 dat.merged4 <- merge(quab.fo, dat.ghcn4, by.x = "Date.Observed", by.y = "DATE")
 
 # Fit linear model
-model <- lm(yday ~ GDD5, data = dat.merged4)
+model <- lm(yday ~ GDD5.cum, data = dat.merged4)
 
 # Summary of the model
 summary(model)
@@ -334,7 +355,13 @@ ggplot(dat.merged4, aes(x = GDD5.cum, y = yday)) +
   labs(title = "Phenological Sensitivity, First Open Flower,Q.alba",
        x = "Cumulative GDD5",
        y = "First Flower, DOY") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 #### doing all Quercus 
 dat.qu <- dat.spring [dat.spring$Collection=="Quercus",]
@@ -350,9 +377,6 @@ summary(dat.qufo)
 dat.qufo$yday <- lubridate::yday(dat.qufo$Date.Observed)
 summary(dat.qufo)
 dat.qufo <- dat.qufo[dat.qufo$yday<=152,]
-## cutting off dates because oaks shouldn't be flowering in fall
-dat.qufo <- dat.qufo[dat.qufo$yday<=152,]
-
 
 # Merging phenology data with meteorological data based on Date
 dat.merged5 <- merge(dat.qufo, dat.ghcn4, by.x = "Date.Observed", by.y = "DATE")
@@ -374,7 +398,13 @@ ggplot(dat.merged5, aes(x = GDD5.cum, y = yday)) +
   labs(title = "Phenological Sensitivity, First Open Flower, Quercus",
        x = "Cumulative GDD5",
        y = "First Flower, DOY") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 #################################
 ###Attempting with GDD up to the  point of flowering
 ##################################
@@ -415,7 +445,13 @@ ggplot(dat.merged7, aes(x = GDD2.cumu2f, y = yday)) +
   labs(title = "Phenological Sensitivity,First Flower, Q.macrocarpa",
        x = "Cumulative GDD2 up to Flowering",
        y = "Day of Year (First Flower)") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 
 #### doing just Quercus alba
@@ -435,7 +471,7 @@ qual.fo <- qual.fo[qual.fo$yday<=152,]
 # Merging phenology data with meteorological data based on Date
 dat.merged8 <- merge(qual.fo, dat.ghcn4, by.x = "Date.Observed", by.y = "DATE")
 #only selecting GDD2 up to the point of flowering
-dat.merged9 <- dat.merged8 %>% group_by(PlantNumber) %>% mutate(GDD2.cumu2f = cumsum(GDD2))
+dat.merged9 <- dat.merged8 %>% group_by(PlantNumber) %>% mutate(GDD2.cumu2f =cumsum(GDD2))
 
 # Use the cumulative GDD2 up to the point of flowering in the model
 model_cumulative <- lm(yday ~ GDD2.cumu2f, data = dat.merged9)
@@ -451,7 +487,13 @@ ggplot(dat.merged9, aes(x = GDD2.cumu2f, y = yday)) +
   labs(title = "Phenological Sensitivity,First Flower, Q.alba",
        x = "Cumulative GDD2 up to Flowering",
        y = "Day of Year (First Flower)") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 
 #### doing Quercus 
@@ -485,10 +527,16 @@ slope
 ggplot(dat.merged11, aes(x = GDD2.cumu2f, y = yday)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(title = "Phenological Sensitivity,First Flower, Q.alba",
+  labs(title = "Phenological Sensitivity,First Flower,All quercus",
        x = "Cumulative GDD2 up to Flowering",
        y = "Day of Year (First Flower)") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 #### 
 ##GDD5
@@ -521,7 +569,7 @@ model_cumulative <- lm(yday ~ GDD5.cumu2f, data = dat.merged13)
 
 # Summary of the model
 summary(model_cumulative)
-slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope <- coef(model_cumulative)["GDD5.cumu2f"]
 slope
 # Visualize the relationship
 ggplot(dat.merged13, aes(x = GDD5.cumu2f, y = yday)) +
@@ -530,7 +578,13 @@ ggplot(dat.merged13, aes(x = GDD5.cumu2f, y = yday)) +
   labs(title = "Phenological Sensitivity,First Flower, Q.macrocarpa",
        x = "Cumulative GDD5 up to Flowering",
        y = "Day of Year (First Flower)") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 
 #### doing just Quercus alba
@@ -550,14 +604,14 @@ qual.fo <- qual.fo[qual.fo$yday<=152,]
 # Merging phenology data with meteorological data based on Date
 dat.merged14 <- merge(qual.fo, dat.ghcn4, by.x = "Date.Observed", by.y = "DATE")
 #only selecting GDD5 up to the point of flowering
-dat.merged15 <- dat.merged14 %>% group_by(PlantNumber) %>% mutate(GDD5.cumu2f = cumsum(GDD5))
+dat.merged15 <- dat.merged14 %>% group_by(PlantNumber) %>%  mutate(GDD5.cumu2f = cumsum(GDD5))
 
 # Use the cumulative GDD5 up to the point of flowering in the model
 model_cumulative <- lm(yday ~ GDD5.cumu2f, data = dat.merged15)
 
 # Summary of the model
 summary(model_cumulative)
-slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope <- coef(model_cumulative)["GDD5.cumu2f"]
 slope
 
 # Visualize the relationship
@@ -567,7 +621,13 @@ ggplot(dat.merged15, aes(x = GDD5.cumu2f, y = yday)) +
   labs(title = "Phenological Sensitivity,First Flower, Q.alba",
        x = "Cumulative GDD5 up to Flowering",
        y = "Day of Year (First Flower)") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
 
 
 #### doing Quercus 
@@ -587,21 +647,29 @@ dat.allq.fo <- dat.allq.fo[dat.allq.fo$yday<=152,]
 # Merging phenology data with meteorological data based on Date
 dat.merged16 <- merge(dat.allq.fo, dat.ghcn4, by.x = "Date.Observed", by.y = "DATE")
 #only selecting GDD5 up to the point of flowering
-dat.merged17 <- dat.merged16 %>% group_by(PlantNumber) %>% mutate(GDD5.cumu2f = cumsum(GDD5))
+dat.merged17 <- dat.merged16 %>% group_by(PlantNumber) %>%  mutate(GDD5.cumu2f = cumsum(GDD5))
 
 # Use the cumulative GDD5 up to the point of flowering in the model
 model_cumulative <- lm(yday ~ GDD5.cumu2f, data = dat.merged17)
 
 # Summary of the model
 summary(model_cumulative)
-slope <- coef(model_cumulative)["GDD2.cumu2f"]
+slope <- coef(model_cumulative)["GDD5.cumu2f"]
 slope
 
 # Visualize the relationship
 ggplot(dat.merged17, aes(x = GDD5.cumu2f, y = yday)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(title = "Phenological Sensitivity,First Flower, Q.alba",
+  labs(title = "Phenological Sensitivity,First Flower, Quercus",
        x = "Cumulative GDD5 up to Flowering",
        y = "Day of Year (First Flower)") +
-  theme_minimal()
+  theme_minimal() +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("Slope =", round(slope, 2)),
+           hjust = 1.1, vjust = 1.5, 
+           size = 4, color = "black", 
+           fontface = "italic")
+
+####
+
