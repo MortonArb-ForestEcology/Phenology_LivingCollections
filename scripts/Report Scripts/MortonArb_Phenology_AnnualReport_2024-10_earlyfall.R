@@ -163,7 +163,7 @@ dat.lcp$yday <- lubridate::yday(dat.lcp$Date.Observed)
 dat.lcp$yweek <- lubridate::week(dat.lcp$Date.Observed)
 
 # Filter the data for fall color (after 9/1 and before day 350)
-dat.llcp <- dat.lcp[dat.lcp$yday >= 220 & dat.lcp$yday <= 300, ]
+dat.llcp <- dat.lcp[dat.lcp$yday >= 180 & dat.lcp$yday <= 300, ]
 
 # Define the proportion of "Yes" observations
 prop.yes <- function(x) {
@@ -171,7 +171,7 @@ prop.yes <- function(x) {
 }
 
 # Aggregate to calculate the proportion of "Yes" observations by PlantNumber, Species, Year, Collection, and Week
-leaf.color <- aggregate(leaf.color.observed ~ PlantNumber + Species + Year + Collection + yweek, 
+leaf.color <- aggregate(leaf.color.observed ~ PlantNumber + Species + Year + Collection + yweek +yday, 
                         data = dat.llcp, FUN = prop.yes)
 
 # Summary and inspection
@@ -182,18 +182,77 @@ head(leaf.color)
 leaf.color$Date <- as.Date(paste0(leaf.color$Year, "-", leaf.color$yweek, "-1"), format="%Y-%U-%u")
 head(leaf.color)
 leaf.color.2024 <- leaf.color[leaf.color$Year == 2024, ]
-
 head(leaf.color.2024)
+
 ggplot(data=leaf.color.2024) + 
   facet_grid(Collection ~ ., scales="free_y") +   # Facet by Collection
-  geom_bar(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +   
-  scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) + 
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) + 
+  geom_bar(alpha=0.25, aes(x=yday, fill=as.factor(Year), color=as.factor(Year))) +   
   theme_bw() + 
   labs(title="Weekly Proportion of 'Yes' Leaf Color Observations", x="Date", fill="Year") +
-  geom_line(aes(x=Date, y=leaf.color.observed, color=as.factor(Year))) +  # Plot the weekly proportion as a line
   ylab("Proportion of 'Yes' Observations")   # Add a label for the y-axis
+
+ggplot(data=leaf.color.2024) + 
+  facet_grid(Collection ~ ., scales="free_y") +   # Facet by Collection
+  geom_smooth(aes(x=yday, y=leaf.color.observed), size=1) +    # Line graph
+  theme_bw() +
+  labs(title="Weekly Proportion of 'Yes' Leaf Color Observations", x="Date", fill="Year") +
+  ylab("Proportion of 'Yes' Observations")   # Add a label for the y-axis
+
+ggplot(data=leaf.color) + 
+  facet_grid(Collection ~ ., scales="free_y") +   # Facet by Collection
+  geom_smooth(aes(x=yday, y=leaf.color.observed, color=as.factor(Year)), size=1) +    # Line graph
+  gghighlight::gghighlight(YEAR== "2024") +
+  geom_smooth(data= leaf.color, color = "red",  aes(x=Date ,y=leaf.color.observed))+
+  theme_bw() +
+  labs(title="Weekly Proportion of 'Yes' Leaf Color Observations", x="Date", fill="Year") +
+  ylab("Proportion of 'Yes' Observations")   # Add a label for the y-axis
+
+
+
+ggplot(data=leaf.color) + 
+  facet_grid(Collection ~ ., scales="free_y") +   # Facet by Collection
+  geom_line(aes(x=Date, y=leaf.color.observed, color= as.factor(Year))) + 
+  geom_smooth(aes(x= Date, y= leaf.color.observed))+          
+  gghighlight::gghighlight(Year== "2024") +
+  geom_smooth(data= leaf.color, color = "red",  aes(x=Date ,y=leaf.color.observed))+
+  theme_bw() + 
+  labs(title="Weekly Proportion of 'Yes' Leaf Color Observations", x="Day of Year (yday)", fill="Year") + 
+  ylab("Proportion of 'Yes' Observations")   # Label for y-axis
+
+ggplot(data=leaf.color) + 
+  facet_grid(Collection ~ ., scales="free_y") +   # Facet by Collection
+  geom_smooth(aes(x=yday, y=leaf.color.observed, color=as.factor(Year)), size=1) +    # Line graph
+  gghighlight::gghighlight(Year == 2024, label_key = Year) +  # Highlight Year 2024
+  theme_bw() +
+  labs(title="Weekly Proportion of 'Yes' Leaf Color Observations", x="Day of Year (yday)", fill="Year") +
+  ylab("Proportion of 'Yes' Observations")   # Add a label for the y-axis
+
+# Subset the data as before
+dat.lcp <- dat.all[dat.all$leaf.color.observed == "Yes" | dat.all$leaf.color.observed == "No", 
+                   c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed", "Date", "Collection")]
+dat.lcp <- dat.lcp[!is.na(dat.lcp$PlantNumber),] 
+
+# Create the yday and yweek columns
+dat.lcp$yday <- lubridate::yday(dat.lcp$Date.Observed)
+dat.lcp$yweek <- lubridate::week(dat.lcp$Date.Observed)
+
+# Filter the data for fall color (after 9/1 and before day 350)
+dat.llcp <- dat.lcp[dat.lcp$yday >= 180 & dat.lcp$yday <= 300, ]
+
+# Filter the data for 2024
+dat.llcp.2024 <- dat.llcp[dat.llcp$Year == 2024, ]
+
+#Plot a stacked histogram showing both "Yes" and "No" values for 2024
+ggplot(data = dat.llcp.2024, aes(x = yday, fill = leaf.color.observed)) +
+  facet_grid(Collection ~ ., scales="free_y") + 
+  geom_histogram(binwidth = 5, position = "stack") +  # Weekly bins, stacked for cumulative counts
+  scale_fill_manual(values = c("Yes" = "darkblue", "No" = "goldenrod")) +  # Customize the colors for Yes and No
+  theme_bw() + 
+  labs(title = "Weekly 'Yes' and 'No' observations of Leaf Color Observations", 
+       x = "Day of Year (yday)", 
+       y = "Count of Observations", 
+       fill = "'Yes' or 'No'")  # Label for fill legend
+
 
 ### getting leaf color intensity
 dat.lci <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.intensity", "Collection")]
