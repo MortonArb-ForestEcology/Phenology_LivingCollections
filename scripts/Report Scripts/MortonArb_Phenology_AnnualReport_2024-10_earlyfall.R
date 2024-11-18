@@ -15,9 +15,8 @@ path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_0
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
-# -----------------------------------
-# 1. Arb Data
-# -----------------------------------
+#Reading in arb data -----------------------------------
+
 
 #Reading in the historic data for the previous years
 
@@ -65,8 +64,7 @@ head(dat.huh)
 #it's dale in 12/11/ 2022
 
 #Getting a graph of colored leaf observations
-###########
-###########
+
 dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed","Date", "Collection")]
 dat.lc <- dat.lc[!is.na(dat.lc$PlantNumber),]
 summary(dat.lc)
