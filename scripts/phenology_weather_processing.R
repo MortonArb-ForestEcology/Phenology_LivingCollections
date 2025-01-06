@@ -7,7 +7,7 @@ library(dplyr)
 
 path.google <- "~/Google Drive/My Drive" # Mac
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
-path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2023_02_End_Of_Year_Report/figures_2023_end"
+path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_02_End_Of_Year_Report/figures_2024_end"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -86,7 +86,7 @@ dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR<=2024,]
 summary(dat.ghcn3)
 head(dat.ghcn3)
 #making sure the date being shown only shows spring dates
-dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=59,]
+dat.ghcn33 <- dat.ghcn3[dat.ghcn3$YDAY<=365,]
 summary(dat.ghcn33)
 head(dat.ghcn33)
 
@@ -103,7 +103,7 @@ summary(dat.ghcn5)
 dat.ghcn5mean <- aggregate(PRCP.cum ~ YDAY,dat=dat.ghcn5, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"2024_Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
   geom_smooth(data=dat.ghcn5mean)+ (aes(x=YDAY, y=PRCP.cum))+
@@ -212,7 +212,7 @@ dat.ghcn15mean <- aggregate(PRCP.cum ~ YDAY,data=dat.ghcn15, FUN=mean, NA.rm=T)
 #png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2023")     +
+  #gghighlight::gghighlight(YEAR== "2024")     +
   geom_smooth(data=dat.ghcn15mean)+ (aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
@@ -220,6 +220,22 @@ ggplot(data=dat.ghcn15) +
   scale_x_continuous(breaks = seq(0, 365, by = 25)) +
   theme_classic()
 dev.off()
+#graphing only drought years
+# Filter the data to include only the selected years
+dat.drought <- dat.ghcn15 %>% filter(YEAR %in% c(2024, 2023, 2021, 2012))
+
+
+ggplot(data=dat.drought) +
+  geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
+  #gghighlight::gghighlight(YEAR== "2024")     +
+  geom_smooth(data=dat.ghcn15mean)+ (aes(x=YDAY, y=PRCP.cum))+
+  # scale_color_manual(name="Year") +
+  # scale_fill_manual(name="Year") +
+  labs(title="Cumulative Precipitation", y="Precipitation in cm", x="Day of Year", color="Year") +
+  scale_x_continuous(breaks = seq(0, 365, by = 25)) +
+  theme_classic()
+
+
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn15) +
@@ -281,7 +297,7 @@ dat.ghcn151 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn151)
 dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YDAY<=359,]
 summary(dat.ghcn151)
-dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2023,]
+dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2024,]
 summary(dat.ghcn151)
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
@@ -306,17 +322,18 @@ summary(dat.ghcnx)
 
 
 # Aggregate data by month to calculate total precipitation for each month in 2023
-dat.ghcnp23 <- dat.ghcnx[dat.ghcnx$YEAR == 2023, ]
-dat.ghcn23SUM <- aggregate(PRCP ~ MONTH , dat = dat.ghcnp23, FUN = sum, na.rm = TRUE)
+dat.ghcnp24 <- dat.ghcnx[dat.ghcnx$YEAR == 2024, ]
+dat.ghcn24SUM <- aggregate(PRCP ~ MONTH , dat = dat.ghcnp24, FUN = sum, na.rm = TRUE)
 dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.ghcnx, FUN = sum, na.rm = TRUE)
 
-
+#Filter the data to include only the selected years
+dat.drought2 <- dat.ghcnx %>% filter(YEAR %in% c(2024, 2023, 2021, 2012))
 # Calculate mean precipitation across all years for each month
 dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = TRUE)
 
 # Plotting monthly precipitation in 2023 with mean line
-png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
-ggplot(data = dat.ghcn23SUM, aes(x = factor(MONTH), y = PRCP)) +
+#png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data = dat.ghcn24SUM, aes(x = factor(MONTH), y = PRCP)) +
   geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
   geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
   labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (mm)", x = "Month") +
@@ -324,26 +341,17 @@ ggplot(data = dat.ghcn23SUM, aes(x = factor(MONTH), y = PRCP)) +
   theme_minimal()
 dev.off()
 
+#Filter the data to include only the selected years
+dat.drought2 <- dat.ghcnx %>% filter(YEAR %in% c(2024, 2023, 2021, 2012))
+dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.drought2, FUN = sum, na.rm = TRUE)
 
-dat.ghcny <- dat.ghcn2[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
-summary(dat.ghcny)
+# Calculate mean precipitation across all years for each month
+dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = TRUE)
 
-
-#Aggregate data by month to calculate total precipitation for each month in 2023
-dat.ghcncp23 <- dat.ghcny[dat.ghcny$YEAR == 2023, ]
-dat.ghcncp23 <- aggregate(PRCP.cum ~ MONTH, data = dat.ghcncp23, )
-
-# Aggregate data to find the last cumulative precipitation value for each month
-
-dat.ghcncp23 <- dat.ghcncp23 %>%
-  group_by(MONTH) %>%
-  summarise(PRCP.cum = last(PRCP.cum))
-
-# Plotting
-png(file.path(path.figs,"2023_monthly_cumu_precipitation.png"), height=4, width=6, units="in", res=320)
-ggplot(data = dat.ghcncp23, aes(x = factor(MONTH), y = PRCP.cum)) +
+ggplot(data = dat.ghcn24SUM, aes(x = factor(MONTH), y = PRCP)) +
   geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
-  labs(title = "Monthly Cumulative Precipitation 2023", y = "Total Cumulative Precipitation in cm", x = "Month") +
+  geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
+  labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (mm)", x = "Month") +
   scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
   theme_minimal()
 dev.off()
