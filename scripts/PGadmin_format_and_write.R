@@ -132,7 +132,7 @@ for (i in 1:nrow(unique_combinations)) {
   subset_data <- dat.pg24[dat.pg24$Collection == collection_name & dat.pg24$Year == year, ]
   
   # Generate a CSV file name based on the specified format
-  csv_file_name <- paste0("LivingCollectionPhenology_ObservationData_", gsub(" ", "_", collection_name), "_", year, "_sofar.csv")
+  csv_file_name <- paste0("LivingCollectionPhenology_ObservationData_", gsub(" ", "_", collection_name), "_", year, "_FINAL.csv")
   
   # Write out the subset to a CSV file
   write.csv(subset_data, csv_file_name, row.names = FALSE)
