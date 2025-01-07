@@ -11,7 +11,7 @@ path.google <- "~/Google Drive/My Drive" # Mac
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2023_02_EndOfYear_Report/figures_2023_end")
 # this is for google -># 
-path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2023_02_End_Of_Year_Report/figures_2023_end"
+path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_02_End_Of_Year_Report/figures_2024_end"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -33,8 +33,14 @@ ulmus23 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationDat
 ##binding 
 dat.23<- rbind(ulmus23, quercus23, acer23)
 
+#reading in 2023 data
+acer24<- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Acer_2024_FINAL.csv"))
+quercus24 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Quercus_2024_FINAL.csv"))
+ulmus24 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Ulmus_2024_FINAL.csv"))
+##binding 
+dat.24<- rbind(ulmus24, quercus24, acer24)
 ##one line to bind them all
-dat.all <- rbind(dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
+dat.all <- rbind(dat.24,dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
 
 #getting the correct date format
 dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
@@ -59,7 +65,9 @@ unique(dat.spring$Collection)
 dat.huh <- dat.all[dat.all$Year == "2027", ]
 head(dat.huh)
 #it's dale in 12/11/ 2022
-
+# Looking at who has the incorrect "acer" obervations
+dat.ugh <- dat.all[dat.all$Collection == "acer", ]
+head(dat.ugh)
 #Getting a graph of colored leaf observations
 ###########
 ###########
