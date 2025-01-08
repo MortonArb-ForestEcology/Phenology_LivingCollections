@@ -138,27 +138,18 @@ ggplot(data=leaf.color) +
   theme_bw() +
   labs(title="Count of 'Yes' over Time", x="Date", color="Year", y="Count of 'Yes'")
 
-# First, let's create a dataset with the mean values for all years except 2024
-historical_mean <- leaf.color[leaf.color$Year != "2024", ] %>%
-  group_by(Collection, yday) %>%
-  summarise(mean_density = mean(n(), na.rm = TRUE))
+#Selecting out 2024
+historical_mean <- leaf.color[leaf.color$Year != "2024", ] %>%group_by(Collection, yday) %>%
+summarise(mean_density = mean(n(), na.rm = TRUE))
 
 # Now create the plot comparing 2024 to the historical mean
 ggplot() +
-  png(file.path(path.figs,"First_Leaf_Color_Historic.png"), height=4, width=6, units="in", res=320)+
+  png(file.path(path.figs,"First_Leaf_Color_Historic.png"), height=5, width=7, units="in", res=320)+
   facet_grid(Collection ~ ., scales = "free_y") +
   # Add the historical mean as a gray band
-  geom_density(data = leaf.color[leaf.color$Year != "2024", ], 
-               aes(x = Date), 
-               fill = "gray80", 
-               alpha = 0.25) +
-  # Add 2024 data as a bold line
-  geom_density(data = leaf.color[leaf.color$Year == "2024", ], 
-               aes(x = Date), 
-               fill = "blue", 
-               alpha = 0.25) +
-  scale_x_date(date_labels = "%b %d", 
-               date_breaks = "1 month") +
+  geom_density(data = leaf.color[leaf.color$Year != "2024", ], aes(x = Date),fill = "gray80",  alpha = 0.25) +
+  geom_density(data = leaf.color[leaf.color$Year == "2024", ], aes(x = Date), fill = "blue",alpha = 0.25) +
+  scale_x_date(date_labels = "%b %d",date_breaks = "1 month") +
   theme_bw() +
   labs(title = "2024 Leaf Color Timing vs. Historical Pattern (2018-2023)", x = "Date", y = "Density") +
   theme(legend.position = "top")
