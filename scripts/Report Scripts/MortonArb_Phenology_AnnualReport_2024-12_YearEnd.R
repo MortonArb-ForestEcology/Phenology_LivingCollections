@@ -7,6 +7,8 @@ library(gganimate)
 library(dplyr)
 library(transformr)
 
+
+# 1. Pathing -----------------------------------------------------------------
 path.google <- "~/Google Drive/My Drive" # Mac
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2023_02_EndOfYear_Report/figures_2023_end")
@@ -15,11 +17,11 @@ path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_0
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
-# -----------------------------------
-# 1. Arb Data
-# -----------------------------------
 
-#Reading in the historic data for the previous years
+# 2. Arb Data------
+
+
+##* Reading in the historic data for the previous years----
 
 dat.22 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_All_2022_FINAL.csv"))
 dat.21 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_All_2021_FINAL.csv"))
@@ -42,6 +44,8 @@ dat.24<- rbind(ulmus24, quercus24, acer24)
 ##one line to bind them all
 dat.all <- rbind(dat.24,dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
 
+
+##* Formatting date and checks----
 #getting the correct date format
 dat.all$yday <- lubridate::yday(dat.all$Date.Observed)
 dat.all$Date <- as.Date(paste0("2018-", dat.all$yday), format="%Y-%j")
@@ -54,7 +58,8 @@ dat.all <- dat.all[!(dat.all$Collection %in% c("Q. macrocarpa", "Tilia")), ]
 #Checking what is present in the collection column to see if it's been removed
 unique(dat.all$Collection)
 
-#Setting a spring only data frame because we did not make observations in spring 2020
+##* Setting a spring only data frame---- 
+#because we did not make observations in spring 2020
 dat.spring <- dat.all[dat.all$Year != "2020", ]
 #further excluding all elm observations for 2021 since we did not observe phenology that spring
 dat.spring <- dat.spring[!(dat.spring$Collection == "Ulmus" & dat.spring$Year == "2021"), ]
@@ -66,9 +71,9 @@ dat.huh <- dat.all[dat.all$Year == "2027", ]
 head(dat.huh)
 #it's dale in 12/11/ 2022
 
+# 3. Colored leaves Present----
 #Getting a graph of colored leaf observations
-###########
-###########
+
 dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed","Date", "Collection")]
 dat.lc <- dat.lc[!is.na(dat.lc$PlantNumber),]
 summary(dat.lc)
@@ -97,7 +102,7 @@ head(leaf.color)
 
 leaf.color$Date <- as.Date(paste0("2023-", leaf.color$yday), format="%Y-%j")
 
-#Graphing
+##* Graphing####
 ggplot(data=leaf.color) +
   facet_grid(Collection~ .,scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
@@ -138,11 +143,14 @@ ggplot(data=leaf.color) +
   theme_bw() +
   labs(title="Count of 'Yes' over Time", x="Date", color="Year", y="Count of 'Yes'")
 
+###** Historical mean----
+
+###Plotting 2024 vs historic dates of first leaf color
 #Selecting out 2024
 historical_mean <- leaf.color[leaf.color$Year != "2024", ] %>%group_by(Collection, yday) %>%
 summarise(mean_density = mean(n(), na.rm = TRUE))
 
-# Now create the plot comparing 2024 to the historical mean
+# Graphing 2024 to the historical mean
 ggplot() +
   png(file.path(path.figs,"First_Leaf_Color_Historic.png"), height=5, width=7, units="in", res=320)+
   facet_grid(Collection ~ ., scales = "free_y") +
@@ -155,6 +163,8 @@ ggplot() +
   theme(legend.position = "top")
 dev.off()
 ####
+
+
 ggplot(data=leaf.color) +
   # png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection~ . ) + # This is the code that will stack everything
@@ -164,6 +174,8 @@ ggplot(data=leaf.color) +
   theme_bw() +
   labs(title="Leaf Color Present", x="Day of Year")
 dev.off()
+
+#4. Leaf color instensity ---- 
 ### getting leaf color intensity
 dat.lci <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.intensity", "Collection")]
 summary(dat.lci)
@@ -192,6 +204,8 @@ head(dat.lci)
 
 dat.lci$yday <- lubridate::yday(dat.lci$Date.Observed)
 summary(dat.lci)
+
+##* Graphing----
 png(file.path(path.figs,"Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.lci) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.color.intensity,))+
@@ -201,43 +215,6 @@ ggplot(data=dat.lci) +
   theme_bw()+
   labs(title="Leaf color Intensity", x="Day of Year",)
 dev.off()
-
-###########
-###########
-#Getting a graph of colored leaf observations
-###########
-###########
-
-
-#doing freq
-ggplot(data=leaf.color) +
-    #png(file.path(path.figs,"All_First_Leaf_Color_freqpoly.png"), height=4, width=6, units="in", res=320)+
-  facet_grid(Collection~ .) + # This is the code that will stack everything
-  geom_freqpoly(alpha=0.5, bins = 45, aes(x=Date,color=as.factor(Year), fill=as.factor(Year))) +
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
-  theme_bw() +
-  labs(title="Leaf Color Present", x="Day of Year")
-dev.off()
-
-
-###animating
-p <- ggplot(data=leaf.color) +
-  facet_grid(Collection~ .,scales="free_y") +
-  geom_freqpoly(alpha=0.25,aes(x=Date, color=as.factor(Year),)) +
-  scale_x_date(date_labels="%b %d", date_breaks="1 month") + 
-  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
-  theme_bw() +
-  labs(title="Leaf Color Present", x="Day of Year") +
-  transition_states(Date, transition_length = 2, state_length = 1)+
-shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
-            falloff = 'sine-in', exclude_phase = 'enter') 
-# check  the animation as a gif
-animate(p, nframes = 100, fps = 7)
-
-anim_save(file.path(path.figs, animation = animate(p, nframes = 100), fps = 7))
-
 
 # Create a ggplot
 ggplot(data = leaf.color, aes(x = Date, color = as.factor(Year))) + 
@@ -259,12 +236,8 @@ ggplot(data = leaf.color, aes(x = Date, color = as.factor(Year))) +
   shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, falloff = 'sine-in', exclude_phase = 'enter')
 
 
+#5. Falling leaves----
 
-##########
-##########
-#Getting a graph of falling leaf observations
-###########
-###########
 dat.fl <- dat.all[dat.all$leaf.falling.observed=="Yes",  c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.falling.observed", "Date", "Collection")]
 dat.fl <- dat.fl[!is.na(dat.fl$PlantNumber),]
 summary(dat.fl)
@@ -294,7 +267,7 @@ head(falling.leaves)
 falling.leaves$Date <- as.Date(paste0("2018-", falling.leaves$yday), format="%Y-%j")
 
 
-#Graphing
+##* Graphing----
 ggplot(data=falling.leaves) +
   png(file.path(path.figs,"All_First_Falling_Leaf_dens_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ .) + # This is the code that will stack everything
@@ -307,11 +280,9 @@ ggplot(data=falling.leaves) +
   theme_bw()
 
   dev.off()
-###########
-###########
-#Getting a graph of breaking leaf bud observations
-###########
-###########
+
+#6. Breaking leaf buds----
+
 dat.lb <- dat.spring[dat.spring$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.breaking.buds.observed","Date", "Collection")]
 dat.lb <- dat.lb[!is.na(dat.lb$PlantNumber),]
 summary(dat.lb)
@@ -339,7 +310,8 @@ summary(breaking.buds)
 head(breaking.buds)
 
 breaking.buds$Date <- as.Date(paste0("2023-", breaking.buds$yday), format="%Y-%j")
-#Graphing
+
+##* Graphing----
 png(file.path(path.figs,"Leaf_Breaking_Buds_dens_highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=breaking.buds) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
@@ -351,11 +323,9 @@ ggplot(data=breaking.buds) +
   labs(title="Mean Day of First Breaking Leaf Buds", x="Date", fill="Year")
 dev.off()
 
-###########
-###########
-#Getting a graph of leaves present observations
-###########
-###########
+
+#7. Leaves Present----
+
 dat.lp <- dat.spring[dat.spring$leaf.present.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.present.observed", "Date", "Collection")]
 dat.lp <- dat.lp[!is.na(dat.lp$PlantNumber),]
 summary(dat.lp)
@@ -383,7 +353,8 @@ summary(leaves.present)
 head(leaves.present)
 
 leaves.present$Date <- as.Date(paste0("2023-", leaves.present$yday), format="%Y-%j")
-#Graphing
+
+##* Graphing----
 png(file.path(path.figs,"All_First_Leaf_Present_dens_highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=leaves.present) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
@@ -394,11 +365,8 @@ ggplot(data=leaves.present) +
   theme_bw() +
   labs(title="Mean Day of First Leaves Present", x="Date", fill="Year")
 dev.off()
-###########
-###########
-#Getting a graph of leaves present intensity 
-###########
-###########
+
+#8. Leaves present intensity----
 dat.lpi <- dat.all[dat.all$leaf.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.present.intensity", "Date", "Collection")]
 summary(dat.lpi)
 dat.lpi <- dat.lpi[!is.na(dat.lpi$PlantNumber),]
@@ -433,7 +401,7 @@ dat.lpi$Date <- as.Date(paste0("2024-", dat.lpi$yday), format="%Y-%j")
 #leaves.present.intensity <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.lpi, FUN=min, NA.rm=T)
 #summary(leaves.present.intensity)
 #head(leaves.present.intensity)
-
+##* Graphing----
 png(file.path(path.figs,"All_Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
 ggplot(data=dat.lpi) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=leaf.present.intensity,))+
@@ -445,9 +413,8 @@ ggplot(data=dat.lpi) +
 dev.off()
 
 
-#Getting a graph of flower present intensity 
-###########
-###########
+#9. Flower present intensity---- 
+
 dat.fpi <- dat.spring[dat.spring$flower.open.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "flower.open.intensity", "Date", "Collection")]
 summary(dat.fpi)
 dat.fpi <- dat.fpi[!is.na(dat.fpi$PlantNumber),]
@@ -483,7 +450,7 @@ dat.fpi <- dat.fpi %>% filter(!flower.open.intensity %in% c("Select an option", 
 unique(dat.fpi$flower.open.intensity)
 
 dat.fpi$Date <- as.Date(paste0("2024-", dat.fpi$yday), format="%Y-%j")
-
+##* Graphing----
 png(file.path(path.figs,"All_Flower_Open_Intensity.png"), height=4, width=6, units="in", res=320)+
 ggplot(data=dat.fpi) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=flower.open.intensity,))+
@@ -496,7 +463,7 @@ dev.off()
 
 
 
-#####Fruit present intensity 
+#10. Fruit present intensity---- 
 
 dat.fri <- dat.spring[dat.spring$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.intensity", "Date", "Collection")]
 summary(dat.fri)
@@ -533,7 +500,7 @@ dat.fri <- dat.fri %>% filter(!fruit.present.intensity %in% c("Select an option"
 unique(dat.fri$fruit.present.intensity)
 
 dat.fri$Date <- as.Date(paste0("2024-", dat.fri$yday), format="%Y-%j")
-
+## * Graphing----
 png(file.path(path.figs,"All_Fruit_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
   ggplot(data=dat.fri) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=fruit.present.intensity,))+
@@ -546,11 +513,8 @@ dev.off()
 
 
 
-###########
-###########
-#Getting a graph of leaves increasing in size observations
-###########
-###########
+# 11. Leaves increasing in size----
+
 dat.li <- dat.spring[dat.spring$leaf.increasing.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.increasing.observed", "Date", "Collection")]
 dat.li <- dat.li[!is.na(dat.li$PlantNumber),]
 summary(dat.li)
@@ -579,7 +543,7 @@ summary(leaves.increasing)
 head(leaves.increasing)
 
 leaves.increasing$Date <- as.Date(paste0("2018-", leaves.increasing$yday), format="%Y-%j")
-#Graphing
+## * Graphing----
 png(file.path(path.figs,"All_Leaf_Increasing_dens_highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=leaves.increasing) +
   facet_grid(Collection~ ., scales = "free_y") + # This is the code that will stack everything
@@ -599,11 +563,9 @@ ggplot(data=leaves.increasing) +
   theme_bw()+
   labs(title="Average Day of Leaves Increasing in Size Observed", x="Day of Year")
 dev.off()
-###########
-###########
-#Getting a graph of flower buds observations
-##########
-###########
+
+# 12. Getting a graph of flower buds observations----
+
 dat.fb <- dat.spring[dat.spring$flower.buds.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.buds.observed", "Date","Collection")]
 dat.fb <- dat.fb[!is.na(dat.fb$PlantNumber),]
 summary(dat.fb)
@@ -638,7 +600,8 @@ summary(flower.buds)
 head(flower.buds)
 
 flower.buds$Date <- as.Date(paste0("2024-", flower.buds$yday), format="%Y-%j")
-#Graphing
+
+## * Graphing----
 png(file.path(path.figs,"All_Flowers_or_Flower_Buds_highlight.png"), height=4, width=6, units="in", res=320)+
 ggplot(data=flower.buds) +
   facet_grid(Collection~ ., scales="free") + # This is the code that will stack everything
@@ -651,11 +614,9 @@ ggplot(data=flower.buds) +
 dev.off()
 
 
-###########
-###########
-#Getting a graph of open flowers observations
-###########
-###########
+
+# 13. Open flowers----
+
 dat.fo <- dat.spring[dat.spring$flower.open.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.open.observed", "Date", "Collection")]
 dat.fo <- dat.fo[!is.na(dat.fo$PlantNumber),]
 summary(dat.fo)
@@ -683,7 +644,8 @@ summary(flower.open)
 head(flower.open)
 
 flower.open$Date <- as.Date(paste0("2018-", flower.open$yday), format="%Y-%j")
-#Graphing
+
+## * Graphing----
 png(file.path(path.figs,"All_Flowers_Open_Highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.open) +
   facet_grid(Collection~ ., scales = "free_y") + # This is the code that will stack everything
@@ -695,11 +657,9 @@ ggplot(data=flower.open) +
   labs(title="Mean Day of Open Flowers Observed", x="Day of Year")
 dev.off()
 
-###########
-###########
-#Getting a graph of pollen observations
-###########
-###########
+
+# 14. Pollen----
+
 dat.fp <- dat.spring[dat.spring$flower.pollen.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "flower.pollen.observed","Date", "Collection")]
 dat.fp <- dat.fp[!is.na(dat.fp$PlantNumber),]
 summary(dat.fp)
@@ -727,7 +687,8 @@ summary(flower.pollen)
 head(flower.pollen)
 
 flower.pollen$Date <- as.Date(paste0("2024-", flower.pollen$yday), format="%Y-%j")
-#Graphing
+
+## * Graphing----
 png(file.path(path.figs,"All_Flowers_Pollen_highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.pollen) +
   facet_grid(Collection ~ ., scales="free_y") +
@@ -739,10 +700,7 @@ ggplot(data=flower.pollen) +
   labs(title="Average Day of Flower Pollen Observed", x="Day of Year")
 dev.off()
 
-
-######## Need to add fruit phenophases Now
-
-#########subsetting out for fruit present
+# 15. Fruit present----
 
 dat.fr <- dat.spring[dat.spring$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed", "Date", "Collection")]
 summary(dat.fr)
@@ -771,6 +729,7 @@ head(fruit.present)
 
 fruit.present$Date <- as.Date(paste0("2018-", fruit.present$yday), format="%Y-%j")
 
+## * Graphing----
 ggplot(data=fruit.present) +
     png(file.path(path.figs,"All_Fruit_present_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ ., scales="free_y") +
@@ -782,8 +741,7 @@ ggplot(data=fruit.present) +
   labs(title="Mean Day of First Fruit Present", x="Date", fill="Year")
 dev.off()
 
-########
-#subsetting out for ripe fruit
+# 16. Ripe fruit----
 dat.rf <- dat.spring[dat.spring$fruit.ripe.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed","Date","Collection")]
 summary(dat.rf)
 dat.rf <- dat.rf[!is.na(dat.rf$PlantNumber),]
@@ -811,6 +769,7 @@ head(ripe.fruit)
 
 ripe.fruit$Date <- as.Date(paste0("2024-", ripe.fruit$yday), format="%Y-%j")
 
+## * Graphing----
 ggplot(data=ripe.fruit) +
    png(file.path(path.figs,"All_Ripe_Fruit_Present_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ ., scales="free_y") +
@@ -823,8 +782,8 @@ ggplot(data=ripe.fruit) +
 
 dev.off()
 
-##############
-#subsetting out for fruit drop
+
+# 17. Fruit drop----
 dat.fd <- dat.spring[dat.spring$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed", "Date","Collection")]
 summary(dat.fd)
 dat.fd <- dat.fd[!is.na(dat.fd$PlantNumber),]
@@ -852,6 +811,7 @@ head(fruit.drop)
 
 fruit.drop$Date <- as.Date(paste0("2024-", fruit.drop$yday), format="%Y-%j")
 
+## * Graphing----
 ggplot(data=fruit.drop) +
   png(file.path(path.figs,"All_Fruit_Drop_Present_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ ., scales="free_y") +
@@ -865,6 +825,37 @@ dev.off()
 
 
 ###Animations
+
+
+#doing freq
+ggplot(data=leaf.color) +
+  #png(file.path(path.figs,"All_First_Leaf_Color_freqpoly.png"), height=4, width=6, units="in", res=320)+
+  facet_grid(Collection~ .) + # This is the code that will stack everything
+  geom_freqpoly(alpha=0.5, bins = 45, aes(x=Date,color=as.factor(Year), fill=as.factor(Year))) +
+  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  theme_bw() +
+  labs(title="Leaf Color Present", x="Day of Year")
+dev.off()
+
+
+# 18. Animations----
+p <- ggplot(data=leaf.color) +
+  facet_grid(Collection~ .,scales="free_y") +
+  geom_freqpoly(alpha=0.25,aes(x=Date, color=as.factor(Year),)) +
+  scale_x_date(date_labels="%b %d", date_breaks="1 month") + 
+  scale_fill_manual(name="Year", values=c("2023"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2023"="red", "others"="gray")) +
+  theme_bw() +
+  labs(title="Leaf Color Present", x="Day of Year") +
+  transition_states(Date, transition_length = 2, state_length = 1)+
+  shadow_mark(1, size = 2, alpha = TRUE, wrap = TRUE, #exclude_layer = c(2, 3),
+              falloff = 'sine-in', exclude_phase = 'enter') 
+# check  the animation as a gif
+animate(p, nframes = 100, fps = 7)
+
+anim_save(file.path(path.figs, animation = animate(p, nframes = 100), fps = 7))
+
 dat.lb23 <- dat.24[dat.24$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.color.observed","leaf.breaking.buds.observed","leaf.present.observed", "Collection")] 
 dat.lb23 <- dat.lb23[!is.na(dat.lb23$PlantNumber),]
 summary(dat.lb23)
@@ -1070,10 +1061,10 @@ animate(p, fps=7.5)
 
 
 
-############STILL NEED TO WORK ON THIS #################
+############Misc: In progress #################
 ###
 #getting averages for date of  phenophases occurace in certain years
-###########
+
 ####Open flowers quercus
 dat.ofa18 <- quercus18[quercus18$flower.open.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "flower.open.observed")]
 summary(dat.of)
@@ -1093,7 +1084,8 @@ summary(dat.afpa19)
 #2021 acer
 dat.afpa21 <- acer21[acer21$fruit.present.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.observed")]
 summary(dat.afpa21)
-##### Ripe fruit####
+
+##### Ripe fruit
 #quercus 21
 dat.rfa21 <- quercus21[quercus21$fruit.ripe.observed=="Yes", c("Date.Observed","Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.observed")]
 summary(dat.rfa21)
@@ -1167,7 +1159,7 @@ dat.fda22 <- acer22[acer22$fruit.drop.observed=="Yes", c("Date.Observed","Date.O
 summary(dat.fda22)
 
 
-############# 2 0 2 3  below #####
+##** 2023  below #####
 ##### breaking leaf buds 22
 dat.bbq23 <- quercus23[quercus23$leaf.breaking.buds.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "leaf.breaking.buds.observed")]
 summary(dat.bbq23)
