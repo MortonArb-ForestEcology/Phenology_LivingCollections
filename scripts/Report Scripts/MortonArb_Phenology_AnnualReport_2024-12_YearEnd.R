@@ -145,6 +145,7 @@ historical_mean <- leaf.color[leaf.color$Year != "2024", ] %>%
 
 # Now create the plot comparing 2024 to the historical mean
 ggplot() +
+  png(file.path(path.figs,"First_Leaf_Color_Historic.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ ., scales = "free_y") +
   # Add the historical mean as a gray band
   geom_density(data = leaf.color[leaf.color$Year != "2024", ], 
@@ -161,6 +162,7 @@ ggplot() +
   theme_bw() +
   labs(title = "2024 Leaf Color Timing vs. Historical Pattern (2018-2023)", x = "Date", y = "Density") +
   theme(legend.position = "top")
+dev.off()
 ####
 ggplot(data=leaf.color) +
   # png(file.path(path.figs,"All_First_Leaf_Color_hist.png"), height=4, width=6, units="in", res=320)+
