@@ -256,7 +256,7 @@ summary(dat.fl)
 
 
 #only looking at trees that showed falling leavesin the last half of the year
-dat.ffl <- dat.fl [dat.fl$yday>=180,]
+dat.ffl <- dat.fl [dat.fl$yday>=120,]
 summary(dat.ffl)
 
 falling.leaves <- aggregate(yday ~ PlantNumber + Species + Year + Collection , data=dat.ffl, FUN=min, na.rm=T)
@@ -602,7 +602,7 @@ head(flower.buds)
 flower.buds$Date <- as.Date(paste0("2024-", flower.buds$yday), format="%Y-%j")
 
 ## * Graphing----
-png(file.path(path.figs,"All_Flowers_or_Flower_Buds_highlight.png"), height=4, width=6, units="in", res=320)+
+#png(file.path(path.figs,"All_Flowers_or_Flower_Buds_highlight.png"), height=4, width=6, units="in", res=320)+
 ggplot(data=flower.buds) +
   facet_grid(Collection~ ., scales="free") + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
@@ -646,7 +646,7 @@ head(flower.open)
 flower.open$Date <- as.Date(paste0("2018-", flower.open$yday), format="%Y-%j")
 
 ## * Graphing----
-png(file.path(path.figs,"All_Flowers_Open_Highlight.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"All_Flowers_Open_Highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.open) +
   facet_grid(Collection~ ., scales = "free_y") + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
