@@ -85,6 +85,7 @@ oddObservers[oddObservers>0]
 summary(datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] )
 PlantIDsummary <- summary(datNow$PlantID[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber)] )
 PlantIDsummary[PlantIDsummary>0]
+datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),1:6]
 
 # Checking for an Observer monitoring something NOT in their normal list (usually a typo!)
 datOdd <- data.frame()
@@ -131,3 +132,4 @@ datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObser
 
 
 write.csv(datNow, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
+
