@@ -1302,3 +1302,137 @@ head(dat.fda23)
 dat.fdu23 <- ulmus23[ulmus23$fruit.drop.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.drop.observed")]
 summary(dat.fdu23)
 head(dat.fdu23)
+
+
+
+# New stuff ----
+# Function to calculate median date and first week proportions for a specific phenophase and collection
+analyze_phenophase <- function(data, collection_name, phenophase_column) {
+  # First, verify the column exists
+  if(!(phenophase_column %in% names(data))) {
+    cat("Warning: Column", phenophase_column, "not found in data\n")
+    return(NULL)
+  }
+  
+  # First, verify the collection exists in the data
+  if(!(collection_name %in% unique(data$Collection))) {
+    cat("Warning: Collection", collection_name, "not found in data\n")
+    return(NULL)
+  }
+  
+  # Subset data for specific collection
+  collection_data <- data[data$Collection == collection_name, ]
+  
+  # Split into 2024 and historical
+  data_2024 <- collection_data[collection_data$Year == "2024", ]
+  data_historical <- collection_data[collection_data$Year != "2024", ]
+  
+  # Handle NA values in phenophase column
+  data_2024[is.na(data_2024[,phenophase_column]), phenophase_column] <- "No"
+  data_historical[is.na(data_historical[,phenophase_column]), phenophase_column] <- "No"
+  
+  # Check if we have any observations
+  n_2024 <- sum(data_2024[,phenophase_column] == "Yes", na.rm=TRUE)
+  n_historical <- sum(data_historical[,phenophase_column] == "Yes", na.rm=TRUE)
+  
+  if(n_2024 == 0 || n_historical == 0) {
+    return(list(
+      collection = collection_name,
+      phenophase = phenophase_column,
+      median_2024 = NA,
+      median_historical = NA,
+      prop_first_week_march_2024 = NA,
+      prop_first_week_march_historical = NA,
+      n_2024 = n_2024,
+      n_historical = n_historical
+    ))
+  }
+  
+  # Calculate median dates using the yday values
+  yday_2024 <- data_2024$yday[data_2024[,phenophase_column] == "Yes"]
+  yday_historical <- data_historical$yday[data_historical[,phenophase_column] == "Yes"]
+  
+  median_2024 <- median(yday_2024, na.rm=TRUE)
+  median_historical <- median(yday_historical, na.rm=TRUE)
+  
+  # Calculate first week of March proportions (yday 60-67)
+  prop_2024 <- sum(yday_2024 >= 60 & yday_2024 <= 67, na.rm=TRUE) / length(yday_2024)
+  prop_historical <- sum(yday_historical >= 60 & yday_historical <= 67, na.rm=TRUE) / length(yday_historical)
+  
+  # Return results
+  return(list(
+    collection = collection_name,
+    phenophase = phenophase_column,
+    median_2024 = median_2024,
+    median_historical = median_historical,
+    prop_first_week_march_2024 = prop_2024,
+    prop_first_week_march_historical = prop_historical,
+    n_2024 = n_2024,
+    n_historical = n_historical
+  ))
+}
+
+# Print current unique collections to verify what's in the data
+cat("Collections present in data:\n")
+print(unique(dat.all$Collection))
+
+# Verify phenophase columns exist
+cat("\nChecking if phenophase columns exist:\n")
+phenophases <- c(
+  "leaf.breaking.buds.observed",
+  "leaf.present.observed",
+  "leaf.increasing.observed",
+  "leaf.color.observed",
+  "leaf.falling.observed",
+  "flower.buds.observed",
+  "flower.open.observed",
+  "flower.pollen.observed",
+  "fruit.present.observed",
+  "fruit.ripe.observed",
+  "fruit.drop.observed"
+)
+
+for(phase in phenophases) {
+  cat(phase, ":", phase %in% names(dat.all), "\n")
+}
+
+# Create empty list to store results
+results <- list()
+
+# Run analysis for each combination
+collections <- c("Acer", "Quercus", "Ulmus")
+for(col in collections) {
+  cat("\nProcessing collection:", col, "\n")
+  for(pheno in phenophases) {
+    cat("  Processing phenophase:", pheno, "\n")
+    result <- analyze_phenophase(dat.all, col, pheno)
+    if(!is.null(result)) {
+      results[[paste(col, pheno, sep="_")]] <- result
+    }
+  }
+}
+
+# Function to print results in a readable format
+print_phenology_results <- function(results) {
+  for(name in names(results)) {
+    r <- results[[name]]
+    cat("\n=======================================================\n")
+    cat("Collection:", r$collection, "\n")
+    cat("Phenophase:", r$phenophase, "\n")
+    if(!is.na(r$median_2024)) {
+      cat("Median Day of Year 2024:", round(r$median_2024), 
+          " (", format(as.Date("2024-01-01") + round(r$median_2024) - 1, "%B %d"), ")\n")
+      cat("Median Day of Year Historical:", round(r$median_historical),
+          " (", format(as.Date("2024-01-01") + round(r$median_historical) - 1, "%B %d"), ")\n")
+      cat("Proportion in First Week of March 2024:", round(r$prop_first_week_march_2024 * 100, 1), "%\n")
+      cat("Proportion in First Week of March Historical:", round(r$prop_first_week_march_historical * 100, 1), "%\n")
+      cat("Number of observations 2024:", r$n_2024, "\n")
+      cat("Number of observations Historical:", r$n_historical, "\n")
+    } else {
+      cat("No observations available for comparison\n")
+    }
+  }
+}
+
+# Print results
+print_phenology_results(results)

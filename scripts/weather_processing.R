@@ -98,7 +98,7 @@ summary(dat.ghcn5)
 dat.ghcn5mean <- aggregate(PRCP.cum ~ YDAY,dat=dat.ghcn5, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
   geom_smooth(data=dat.ghcn5mean)+ (aes(x=YDAY, y=PRCP.cum))+
@@ -127,7 +127,7 @@ dat.ghcn6mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
   geom_smooth(aes (x=YDAY, y=TMEAN))+
-  gghighlight::gghighlight(YEAR== "2023") +
+  gghighlight::gghighlight(YEAR== "2024") +
   geom_smooth(data= dat.ghcn6mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   scale_x_continuous(breaks = seq(0, 365, by = 25)) +
@@ -181,7 +181,7 @@ dat.ghcn15mean <- aggregate(PRCP.cum ~ YDAY,data=dat.ghcn15, FUN=mean, NA.rm=T)
 #png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2023")     +
+  gghighlight::gghighlight(YEAR== "2024")     +
   geom_smooth(data=dat.ghcn15mean)+ (aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
@@ -200,17 +200,27 @@ dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn16)
 dat.ghcn16mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
 
-#graph of Mean Temperature
-#png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
+# Create date conversions
+yd2date <- as.Date(1:365, origin="2008-01-01")
+mo.day <- format(yd2date, "%b %d")
+
+png(file.path(path.figs,"Mean Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
-  geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
-  geom_smooth(aes (x=YDAY, y=TMEAN))+
-  gghighlight::gghighlight(YEAR== "2023") +
-  geom_smooth(data= dat.ghcn16mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
-  labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
-  scale_x_continuous(breaks = seq(0, 365, by = 25)) +  # Set breaks every 25 days
-  theme_classic()
-dev.off() 
+  geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR))) +
+  geom_smooth(aes(x=YDAY, y=TMEAN)) +
+  gghighlight::gghighlight(YEAR== "2024") +
+  geom_smooth(data=dat.ghcn16mean, color="black", linetype="dashed", aes(x=YDAY, y=TMEAN)) +
+  labs(title="Average Daily Temperature", y="Temperature", x="Date", color="Year") +
+  scale_x_continuous(
+    breaks = seq(1, 365, by = 30), 
+    labels = mo.day[seq(1, 365, by = 30)] 
+  ) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
+
+
+
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn16) +
@@ -224,14 +234,31 @@ summary(dat.ghcn17)
 dat.ghcn17 <- dat.ghcn17 [dat.ghcn17$YDAY<=180,]
 summary(dat.ghcn17)
 
+yd2date <- as.Date(1:366, origin="2008-01-01")
+mo.day <- format(yd2date , "%b %d")
+
 #attemtption to generte a graph
 #png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn17) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2023") +
+  gghighlight::gghighlight(YEAR== "2024") +
   labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
+
+ggplot(data=dat.ghcn17) +
+  #png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)+
+  geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR))) +
+  gghighlight::gghighlight(YEAR== "2024") +
+  labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Date", color="Year") +
+  scale_x_continuous(
+    breaks = seq(1, 180, by = 30), 
+    labels = mo.day[seq(1, 180, by = 30)] 
+  ) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
 
 #using a smooth point graph I don't know if this is relevant
 ggplot(data=dat.ghcn17) +
