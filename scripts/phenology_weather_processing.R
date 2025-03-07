@@ -191,7 +191,7 @@ ggplot(data=dat.ghcn7) +
 
 
 
-################# Graphing for everything since 200#################
+#----################# Graphing for everything since 200#################
 dat.ghcn13 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
 summary(dat.ghcn13)
 head(dat.ghcn13)
@@ -245,14 +245,14 @@ ggplot(data=dat.ghcn15) +
 #doing the same thing as lines 73-83 above but for TMEAN
 dat.ghcn16 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "TMEAN")]
 summary(dat.ghcn16)
-dat.ghcn16mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
+dat.ghcn16mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn16, FUN=mean, NA.rm=T)
 
 #graph of Mean Temperature
 #png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
   geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
   geom_smooth(aes (x=YDAY, y=TMEAN))+
-  gghighlight::gghighlight(YEAR== "2023") +
+  gghighlight::gghighlight(YEAR== "2024") +
   geom_smooth(data= dat.ghcn16mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   scale_x_continuous(breaks = seq(0, 365, by = 25)) +  # Set breaks every 25 days
