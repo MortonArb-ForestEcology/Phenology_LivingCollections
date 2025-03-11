@@ -1374,7 +1374,7 @@ analyze_phenophase <- function(data, collection_name, phenophase_column) {
 
 # Print current unique collections to verify what's in the data
 cat("Collections present in data:\n")
-print(unique(dat.all$Collection))
+print(unique(dat.spring$Collection))
 
 # Verify phenophase columns exist
 cat("\nChecking if phenophase columns exist:\n")
@@ -1393,7 +1393,7 @@ phenophases <- c(
 )
 
 for(phase in phenophases) {
-  cat(phase, ":", phase %in% names(dat.all), "\n")
+  cat(phase, ":", phase %in% names(dat.spring), "\n")
 }
 
 # Create empty list to store results
@@ -1405,7 +1405,7 @@ for(col in collections) {
   cat("\nProcessing collection:", col, "\n")
   for(pheno in phenophases) {
     cat("  Processing phenophase:", pheno, "\n")
-    result <- analyze_phenophase(dat.all, col, pheno)
+    result <- analyze_phenophase(dat.spring, col, pheno)
     if(!is.null(result)) {
       results[[paste(col, pheno, sep="_")]] <- result
     }
