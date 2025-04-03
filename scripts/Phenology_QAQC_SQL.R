@@ -36,6 +36,9 @@ assignments <- dbReadTable(conn, "ObserverListCollection")
 treeLists <- dbReadTable(conn, "ObservingLists")
 datAll <- dbReadTable(conn, "FormSubmission")
 
+# Remove "Test" from datAll off the bat
+datAll <- datAll[datAll$ObserverID!="Test",]
+
 ### DISCONNECT FROM DATABASE
 dbDisconnect(conn)
 
@@ -52,9 +55,10 @@ dim(datNow)
 for(COL in names(datNow)[!names(datNow) %in% c("DateEntered", "DateObserved", "Comments")]){
   datNow[,COL] <- as.factor(datNow[,COL])
 }
-
+dim(datNow)
 datNow[datNow==""] <- NA
 datNow <- droplevels(datNow)
+dim(datNow)
 
 # Get rid of data for trees that have been removed
 datNow <- datNow[!datNow$PlantID %in% removed$PlantNumber,]
@@ -72,7 +76,7 @@ summary(datNow)
 
 # Checking for immediate issues all related to bad entry
 # Checking for observers not in our existing ID list
-datNow[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),]
+dim(datNow[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),])
 unique(datNow$ObserverID[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
 oddObservers <- summary(datNow$ObserverID[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
 oddObservers[oddObservers>0]
@@ -85,7 +89,8 @@ oddObservers[oddObservers>0]
 summary(datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),] )
 PlantIDsummary <- summary(datNow$PlantID[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber)] )
 PlantIDsummary[PlantIDsummary>0]
-datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),1:6]
+treeQ <- datNow[!datNow$PlantID %in% c(treeLists$PlantID, removed$PlantNumber),1:6]
+treeQ[order(treeQ$PlantID),]
 
 # Checking for an Observer monitoring something NOT in their normal list (usually a typo!)
 datOdd <- data.frame()
@@ -112,12 +117,13 @@ datOdd[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObser
 # Saving the list of trees to check
 write.csv(datOdd, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_ObservationData_All_latest.csv")), row.names=F)
 
+dim(datNow)
 
 # This may be slow, but now checking for entries where the species doesn't match what it is in our records
 datBad <- data.frame()
 for(TREEID in unique(datNow$PlantID)){
-  datNow <- datNow[datNow$PlantID==TREEID, ]
-  WTF <- datNow[!paste(datNow$Genus, datNow$Species) == treeLists$Taxon[treeLists$PlantID==TREEID],]
+  datTmp <- datNow[datNow$PlantID==TREEID, ]
+  WTF <- datTmp[!paste(datTmp$Genus, datTmp$Species) == treeLists$Taxon[treeLists$PlantID==TREEID],]
   
   if(nrow(WTF)>0) datBad <- rbind(datBad, WTF)
 }
@@ -129,7 +135,7 @@ datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObser
 # treeLists[grep("pumila", treeLists$Taxon),]
 # 
 # datNow[grep("pumila x rubra", datNow$Species),]
-
+summary(datNow)
 
 write.csv(datNow, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("LivingCollectionPhenology_ObservationData_All_", lubridate::year(Sys.Date()), "_latest.csv")), row.names=F)
 
