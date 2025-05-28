@@ -130,6 +130,8 @@ for(TREEID in unique(datNow$PlantID)){
 dim(datBad)
 datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
 
+write.csv(datBad, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_ObservationData_WeirdNames.csv")), row.names=F)
+
 
 # treeLists[treeLists$PlantID=="18-2012*1",]
 # treeLists[grep("pumila", treeLists$Taxon),]
