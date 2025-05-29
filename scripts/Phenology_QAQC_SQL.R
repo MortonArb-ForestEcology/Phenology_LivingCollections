@@ -129,9 +129,52 @@ for(TREEID in unique(datNow$PlantID)){
 }
 dim(datBad)
 datBad[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
+summary(droplevels(datBad$ObserverID))
+
+datBad[datBad$ObserverID=="Kozak Miller",c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
 
 write.csv(datBad, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_ObservationData_WeirdNames.csv")), row.names=F)
 
+# Doing a summary of observers
+length(unique(datNow$ObserverID))
+length(unique(assignments$ObserverID))
+
+obsSummary <- data.frame(ObserverID = unique(assignments$ObserverID))
+for(i in 1:nrow(obsSummary)){
+  OBID <- obsSummary$ObserverID[i]
+  datObs <- datNow[datNow$ObserverID==OBID,]
+  if(nrow(datObs)==0) next
+  
+  obsSummary[i, "nObs"] <- nrow(datObs)
+  obsSummary[i,"lastObs"] <- max(datObs$DateObserved)
+}
+
+summary(obsSummary)
+unique(datNow$ObserverID)[!unique(datNow$ObserverID) %in% unique(obsSummary$ObserverID)]
+
+
+write.csv(obsSummary, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_Summary-Observer.csv")), row.names=F)
+
+# Doing a summary by list as well
+dim(treeLists)
+summary(treeLists)
+
+for(i in 1:nrow(treeLists)){
+  TREE <- treeLists$PlantID[i]
+  datTree <- datNow[datNow$PlantID==TREE, ]
+  treeLists[i,"nObs"] <- nrow(datTree)
+  treeLists[i,"lastObs"] <- max(datTree$DateObserved)
+  
+}
+treeLists$Collection <- unlist(lapply(strsplit(treeLists$Taxon, " "), function(x){x[1]}))
+head(treeLists)
+summary(treeLists)
+
+listCheck <- aggregate(nObs ~ Collection + List, data=treeLists, FUN = sum)
+listCheck$meanObs <- round(aggregate(nObs ~ Collection + List, data=treeLists, FUN = mean)[,"nObs"],0)
+listCheck$lastObs <- aggregate(lastObs ~ Collection + List, data=treeLists, FUN = max)[,"lastObs"]
+listCheck <- listCheck[order(listCheck$Collection, listCheck$List),]
+write.csv(obsSummary, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_Summary-List.csv")), row.names=F)
 
 # treeLists[treeLists$PlantID=="18-2012*1",]
 # treeLists[grep("pumila", treeLists$Taxon),]
