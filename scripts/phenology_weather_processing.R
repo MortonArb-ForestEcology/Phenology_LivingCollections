@@ -6,6 +6,7 @@ library(gghighlight)
 library(dplyr)
 
 path.google <- "~/Google Drive/My Drive" # Mac
+
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
 path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_02_End_Of_Year_Report/figures_2024_end"
 if(!dir.exists("../data")) dir.create("../data/")
@@ -59,7 +60,7 @@ calc.indices <- function(dat){
   return(dat)
 }
 
-# For the "historical" GHCN data
+# For the "historical" GHCN data blorp
 dat.ghcn <- read.csv(file.path(path.ghcn, "USC00115097_latest.csv"))
 dat.ghcn$DATE <- as.Date(dat.ghcn$DATE)
 summary(dat.ghcn)
