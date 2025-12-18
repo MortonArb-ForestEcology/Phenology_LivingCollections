@@ -13,7 +13,7 @@ path.google <- "~/Google Drive/My Drive" # Mac
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
 #path.figs <- file.path(path.google, "LivingCollections_Phenology/Reports/2023_02_EndOfYear_Report/figures_2023_end")
 # this is for google -># 
-path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_02_End_Of_Year_Report/figures_2024_end"
+path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2025_02_End_Of_Year_Report/figures_2025_end"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -41,8 +41,16 @@ quercus24 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationD
 ulmus24 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Ulmus_2024_FINAL.csv"))
 ##binding 
 dat.24<- rbind(ulmus24, quercus24, acer24)
+
+#reading in 2025 data
+acer25<- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Acer_2025_FINAL.csv"))
+quercus25 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Quercus_2025_FINAL.csv"))
+ulmus25 <- read_csv(file.path(path.dat,"LivingCollectionPhenology_ObservationData_Ulmus_2025_FINAL.csv"))
+##binding 
+dat.25<- rbind(ulmus25, quercus25, acer25)
+
 ##one line to bind them all
-dat.all <- rbind(dat.24,dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
+dat.all <- rbind(dat.25,dat.24,dat.23, dat.22, dat.21, dat.20, dat.19, dat.18)
 
 
 ##* Formatting date and checks----
@@ -73,6 +81,8 @@ head(dat.huh)
 
 # 3. Colored leaves Present----
 #Getting a graph of colored leaf observations
+
+
 
 dat.lc <- dat.all[dat.all$leaf.color.observed=="Yes", c("Date.Observed", "Species", "PlantNumber", "Year", "leaf.color.observed","Date", "Collection")]
 dat.lc <- dat.lc[!is.na(dat.lc$PlantNumber),]
@@ -107,8 +117,8 @@ ggplot(data=leaf.color) +
   facet_grid(Collection~ .,scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442", "2023"="purple3","2024"="orange" )) +
-  scale_color_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442", "2023"= "purple3","2024"="orange")) +
+  scale_fill_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"= "#F0E442", "2023"="purple3","2024"="orange","2025"="red" )) +
+  scale_color_manual(name="Year", values=c("2018"="#CC79A7", "2019"="#009E73", "2020"="gray", "2021"="#0072B2", "2022"="#F0E442", "2023"= "purple3","2024"="orange","2025"="red")) +
   theme_bw() +
   labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
 dev.off()
@@ -129,8 +139,8 @@ ggplot(data=leaf.color) +
   facet_grid(Collection ~ ., scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of First Leaf Color Present", x="Date", fill="Year")
 dev.off()
@@ -147,7 +157,7 @@ ggplot(data=leaf.color) +
 
 ###Plotting 2024 vs historic dates of first leaf color
 #Selecting out 2024
-historical_mean <- leaf.color[leaf.color$Year != "2024", ] %>%group_by(Collection, yday) %>%
+historical_mean <- leaf.color[leaf.color$Year != "2025", ] %>%group_by(Collection, yday) %>%
 summarise(mean_density = mean(n(), na.rm = TRUE))
 
 # Graphing 2024 to the historical mean
@@ -155,11 +165,11 @@ ggplot() +
   png(file.path(path.figs,"First_Leaf_Color_Historic.png"), height=5, width=7, units="in", res=320)+
   facet_grid(Collection ~ ., scales = "free_y") +
   # Add the historical mean as a gray band
-  geom_density(data = leaf.color[leaf.color$Year != "2024", ], aes(x = Date),fill = "gray80",  alpha = 0.25) +
-  geom_density(data = leaf.color[leaf.color$Year == "2024", ], aes(x = Date), fill = "blue",alpha = 0.25) +
+  geom_density(data = leaf.color[leaf.color$Year != "2025", ], aes(x = Date),fill = "gray80",  alpha = 0.25) +
+  geom_density(data = leaf.color[leaf.color$Year == "2025", ], aes(x = Date), fill = "blue",alpha = 0.25) +
   scale_x_date(date_labels = "%b %d",date_breaks = "1 month") +
   theme_bw() +
-  labs(title = "2024 Leaf Color Timing vs. Historical Pattern (2018-2023)", x = "Date", y = "Density") +
+  labs(title = "2025 Leaf Color Timing vs. Historical Pattern (2018-2024)", x = "Date", y = "Density") +
   theme(legend.position = "top")
 dev.off()
 ####
@@ -269,12 +279,12 @@ falling.leaves$Date <- as.Date(paste0("2018-", falling.leaves$yday), format="%Y-
 
 ##* Graphing----
 ggplot(data=falling.leaves) +
-  png(file.path(path.figs,"All_First_Falling_Leaf_dens_highlight.png"), height=4, width=6, units="in", res=320)+
+png(file.path(path.figs,"All_First_Falling_Leaf_dens_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of Falling Leaves Present", x="Date", fill="Year")+
   theme_bw()
@@ -317,8 +327,8 @@ ggplot(data=breaking.buds) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of First Breaking Leaf Buds", x="Date", fill="Year")
 dev.off()
@@ -360,8 +370,8 @@ ggplot(data=leaves.present) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of First Leaves Present", x="Date", fill="Year")
 dev.off()
@@ -393,6 +403,8 @@ summary(dat.lpi)
 head(dat.lpi)
 #filtering out 0%
 dat.lpi <- dat.lpi %>% filter( leaf.present.intensity != "0%")
+dat.lpi <- dat.lpi %>% filter( leaf.present.intensity != "Select an option")
+
 
 dat.lpi$yday <- lubridate::yday(dat.lpi$Date.Observed)
 summary(dat.lpi)
@@ -402,13 +414,13 @@ dat.lpi$Date <- as.Date(paste0("2024-", dat.lpi$yday), format="%Y-%j")
 #summary(leaves.present.intensity)
 #head(leaves.present.intensity)
 ##* Graphing----
-png(file.path(path.figs,"All_Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
+png(file.path(path.figs,"All_Leaf_Present_Intensity.png"), height= 5, width= 7, units="in", res=320)
 ggplot(data=dat.lpi) +
-  geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=leaf.present.intensity,))+
+  geom_histogram(alpha=1.5, binwidth =15, aes(x=Date, fill=leaf.present.intensity,))+
   facet_grid(Year~Collection)+
   scale_x_date(date_labels="%b %d", date_breaks="3 month") +
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1), size = 8) +
   labs(title="Leaves Present Intensity", x="Day of Year",)
 dev.off()
 
@@ -451,7 +463,7 @@ unique(dat.fpi$flower.open.intensity)
 
 dat.fpi$Date <- as.Date(paste0("2024-", dat.fpi$yday), format="%Y-%j")
 ##* Graphing----
-png(file.path(path.figs,"All_Flower_Open_Intensity.png"), height=4, width=6, units="in", res=320)+
+#png(file.path(path.figs,"All_Flower_Open_Intensity.png"), height=4, width=6, units="in", res=320)+
 ggplot(data=dat.fpi) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=flower.open.intensity,))+
   facet_grid(Year~Collection, scales="free")+
@@ -501,7 +513,7 @@ unique(dat.fri$fruit.present.intensity)
 
 dat.fri$Date <- as.Date(paste0("2024-", dat.fri$yday), format="%Y-%j")
 ## * Graphing----
-png(file.path(path.figs,"All_Fruit_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
+#png(file.path(path.figs,"All_Fruit_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
   ggplot(data=dat.fri) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=fruit.present.intensity,))+
   facet_grid(Year~Collection, scales="free")+
@@ -549,8 +561,8 @@ ggplot(data=leaves.increasing) +
   facet_grid(Collection~ ., scales = "free_y") + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of Leaves Increasing in Size Observed", x="Day of Year")
 dev.off()
@@ -582,9 +594,9 @@ mean(dat.fb$Date.Observed,na.rm=T)
 dat.fb$yday <- lubridate::yday(dat.fb$Date.Observed)
 summary(dat.fb)
 
-min(dat.fb$Date.Observed[dat.fb$Year == 2024], na.rm = TRUE)
-max(dat.fb$Date.Observed[dat.fb$Year == 2024], na.rm = TRUE)
-range(dat.fb$Date.Observed[dat.fb$Year == 2024], na.rm = TRUE)
+min(dat.fb$Date.Observed[dat.fb$Year == 2025], na.rm = TRUE)
+max(dat.fb$Date.Observed[dat.fb$Year == 2025], na.rm = TRUE)
+range(dat.fb$Date.Observed[dat.fb$Year == 2025], na.rm = TRUE)
 
 #only looking at trees that showed flower buds in the first half of the year
 #dat.fb <- dat.fb [dat.fb$yday<=180,]
@@ -602,13 +614,13 @@ head(flower.buds)
 flower.buds$Date <- as.Date(paste0("2024-", flower.buds$yday), format="%Y-%j")
 
 ## * Graphing----
-#png(file.path(path.figs,"All_Flowers_or_Flower_Buds_highlight.png"), height=4, width=6, units="in", res=320)+
+png(file.path(path.figs,"All_Flowers_or_Flower_Buds_highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.buds) +
   facet_grid(Collection~ ., scales="free") + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Average Day of Flower Buds or Flowers Observed", x="Day of Year")
 dev.off()
@@ -646,13 +658,13 @@ head(flower.open)
 flower.open$Date <- as.Date(paste0("2018-", flower.open$yday), format="%Y-%j")
 
 ## * Graphing----
-#png(file.path(path.figs,"All_Flowers_Open_Highlight.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"All_Flowers_Open_Highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=flower.open) +
   facet_grid(Collection~ ., scales = "free_y") + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of Open Flowers Observed", x="Day of Year")
 dev.off()
@@ -694,8 +706,8 @@ ggplot(data=flower.pollen) +
   facet_grid(Collection ~ ., scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Average Day of Flower Pollen Observed", x="Day of Year")
 dev.off()
@@ -735,8 +747,8 @@ ggplot(data=fruit.present) +
   facet_grid(Collection ~ ., scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of First Fruit Present", x="Date", fill="Year")
 dev.off()
@@ -775,8 +787,8 @@ ggplot(data=ripe.fruit) +
   facet_grid(Collection ~ ., scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of First Ripe Fruit Present", x="Date", fill="Year")
 
@@ -817,8 +829,8 @@ ggplot(data=fruit.drop) +
   facet_grid(Collection ~ ., scales="free_y") +
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
-  scale_fill_manual(name="Year", values=c("2024"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
-  scale_color_manual(name="Year", values=c("2024"="red", "others"="gray")) +
+  scale_fill_manual(name="Year", values=c("2025"="red", "others"="gray"), guide=guide_legend(override.aes=list(fill=c("red")))) +
+  scale_color_manual(name="Year", values=c("2025"="red", "others"="gray")) +
   theme_bw() +
   labs(title="Mean Day of First Fruit Drop Present", x="Date", fill="Year")
 dev.off()
@@ -1323,51 +1335,51 @@ analyze_phenophase <- function(data, collection_name, phenophase_column) {
   # Subset data for specific collection
   collection_data <- data[data$Collection == collection_name, ]
   
-  # Split into 2024 and historical
-  data_2024 <- collection_data[collection_data$Year == "2024", ]
-  data_historical <- collection_data[collection_data$Year != "2024", ]
+  # Split into 2025 and historical
+  data_2025 <- collection_data[collection_data$Year == "2025", ]
+  data_historical <- collection_data[collection_data$Year != "2025", ]
   
   # Handle NA values in phenophase column
-  data_2024[is.na(data_2024[,phenophase_column]), phenophase_column] <- "No"
+  data_2025[is.na(data_2025[,phenophase_column]), phenophase_column] <- "No"
   data_historical[is.na(data_historical[,phenophase_column]), phenophase_column] <- "No"
   
   # Check if we have any observations
-  n_2024 <- sum(data_2024[,phenophase_column] == "Yes", na.rm=TRUE)
+  n_2025 <- sum(data_2025[,phenophase_column] == "Yes", na.rm=TRUE)
   n_historical <- sum(data_historical[,phenophase_column] == "Yes", na.rm=TRUE)
   
-  if(n_2024 == 0 || n_historical == 0) {
+  if(n_2025 == 0 || n_historical == 0) {
     return(list(
       collection = collection_name,
       phenophase = phenophase_column,
-      median_2024 = NA,
+      median_2025 = NA,
       median_historical = NA,
-      prop_first_week_march_2024 = NA,
+      prop_first_week_march_2025 = NA,
       prop_first_week_march_historical = NA,
-      n_2024 = n_2024,
+      n_2025 = n_2025,
       n_historical = n_historical
     ))
   }
   
   # Calculate median dates using the yday values
-  yday_2024 <- data_2024$yday[data_2024[,phenophase_column] == "Yes"]
+  yday_2025 <- data_2025$yday[data_2025[,phenophase_column] == "Yes"]
   yday_historical <- data_historical$yday[data_historical[,phenophase_column] == "Yes"]
   
-  median_2024 <- median(yday_2024, na.rm=TRUE)
+  median_2025 <- median(yday_2025, na.rm=TRUE)
   median_historical <- median(yday_historical, na.rm=TRUE)
   
   # Calculate first week of March proportions (yday 60-67)
-  prop_2024 <- sum(yday_2024 >= 60 & yday_2024 <= 67, na.rm=TRUE) / length(yday_2024)
+  prop_2025 <- sum(yday_2025 >= 60 & yday_2025 <= 67, na.rm=TRUE) / length(yday_2025)
   prop_historical <- sum(yday_historical >= 60 & yday_historical <= 67, na.rm=TRUE) / length(yday_historical)
   
   # Return results
   return(list(
     collection = collection_name,
     phenophase = phenophase_column,
-    median_2024 = median_2024,
+    median_2025 = median_2025,
     median_historical = median_historical,
-    prop_first_week_march_2024 = prop_2024,
+    prop_first_week_march_2025 = prop_2025,
     prop_first_week_march_historical = prop_historical,
-    n_2024 = n_2024,
+    n_2025 = n_2025,
     n_historical = n_historical
   ))
 }
@@ -1419,14 +1431,14 @@ print_phenology_results <- function(results) {
     cat("\n=======================================================\n")
     cat("Collection:", r$collection, "\n")
     cat("Phenophase:", r$phenophase, "\n")
-    if(!is.na(r$median_2024)) {
-      cat("Median Day of Year 2024:", round(r$median_2024), 
-          " (", format(as.Date("2024-01-01") + round(r$median_2024) - 1, "%B %d"), ")\n")
+    if(!is.na(r$median_2025)) {
+      cat("Median Day of Year 2025:", round(r$median_2025), 
+          " (", format(as.Date("2025-01-01") + round(r$median_2025) - 1, "%B %d"), ")\n")
       cat("Median Day of Year Historical:", round(r$median_historical),
-          " (", format(as.Date("2024-01-01") + round(r$median_historical) - 1, "%B %d"), ")\n")
-      cat("Proportion in First Week of March 2024:", round(r$prop_first_week_march_2024 * 100, 1), "%\n")
+          " (", format(as.Date("2025-01-01") + round(r$median_historical) - 1, "%B %d"), ")\n")
+      cat("Proportion in First Week of March 2025:", round(r$prop_first_week_march_2025 * 100, 1), "%\n")
       cat("Proportion in First Week of March Historical:", round(r$prop_first_week_march_historical * 100, 1), "%\n")
-      cat("Number of observations 2024:", r$n_2024, "\n")
+      cat("Number of observations 2025:", r$n_2025, "\n")
       cat("Number of observations Historical:", r$n_historical, "\n")
     } else {
       cat("No observations available for comparison\n")
@@ -1436,3 +1448,4 @@ print_phenology_results <- function(results) {
 
 # Print results
 print_phenology_results(results)
+

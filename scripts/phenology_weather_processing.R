@@ -8,7 +8,7 @@ library(dplyr)
 path.google <- "~/Google Drive/My Drive" # Mac
 
 path.dat <- file.path(path.google,"/LivingCollections_Phenology/Data_Observations")
-path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2024_02_End_Of_Year_Report/figures_2024_end"
+path.figs <- "~/Google Drive/My Drive/LivingCollections_Phenology/Reports/2025_02_End_Of_Year_Report/figures_2025_end"
 if(!dir.exists("../data")) dir.create("../data/")
 if(!dir.exists("../figures/")) dir.create("../figures/")
 
@@ -83,7 +83,7 @@ dat.ghcn2 <- dat.ghcn2[dat.ghcn2$YEAR>=2008,]
 summary(dat.ghcn2)
 head(dat.ghcn2)
 #creating a data frame of just the last 5 years of weather data
-dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR<=2024,]
+dat.ghcn3 <- dat.ghcn2[dat.ghcn2$YEAR<=2025,]
 summary(dat.ghcn3)
 head(dat.ghcn3)
 #making sure the date being shown only shows spring dates
@@ -104,7 +104,7 @@ summary(dat.ghcn5)
 dat.ghcn5mean <- aggregate(PRCP.cum ~ YDAY,dat=dat.ghcn5, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"2024_Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"2025_Cumulative_Precipitation.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn5) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
   geom_smooth(data=dat.ghcn5mean)+ (aes(x=YDAY, y=PRCP.cum))+
@@ -129,11 +129,11 @@ dat.ghcn6mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn6, FUN=mean, NA.rm=T)
 #(color = "green", linetype = "dashed", aes(x=YDAY, Y=TMEAN))+
 #graph of Mean Temperature
 
-  #png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Average Daily Temperature.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn6) +
   geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
  #geom_smooth(aes (x=YDAY, y=TMEAN))+
-  gghighlight::gghighlight(YEAR== "2024") +
+  gghighlight::gghighlight(YEAR== "2025") +
    geom_smooth(data= dat.ghcn6mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   scale_x_continuous(breaks = seq(0, 60, by = 5)) +
@@ -158,7 +158,7 @@ summary(dat.ghcn7)
 #png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn7) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2024") +
+  gghighlight::gghighlight(YEAR== "2025") +
   labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
@@ -177,10 +177,10 @@ dat.ghcn8 <- dat.ghcn8 [dat.ghcn8$YDAY<=59,]
 summary(dat.ghcn8)
 
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Cumulative GDD5.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn8) +
   geom_line(aes(x=YDAY, y=GDD0.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2024") +
+  gghighlight::gghighlight(YEAR== "2025") +
   labs(title="Cumulative Growing Degree Days", y="Cumulative GDD", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
@@ -210,10 +210,10 @@ summary(dat.ghcn15)
 dat.ghcn15mean <- aggregate(PRCP.cum ~ YDAY,data=dat.ghcn15, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  #gghighlight::gghighlight(YEAR== "2024")     +
+  gghighlight::gghighlight(YEAR== "2025")     +
   geom_smooth(data=dat.ghcn15mean)+ (aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
@@ -249,11 +249,11 @@ summary(dat.ghcn16)
 dat.ghcn16mean <- aggregate(TMEAN ~ YDAY,dat=dat.ghcn16, FUN=mean, NA.rm=T)
 
 #graph of Mean Temperature
-#png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Average Daily Temperature Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn16) +
   geom_line(aes(x=YDAY, y=TMEAN, color=as.factor(YEAR)))+
   geom_smooth(aes (x=YDAY, y=TMEAN))+
-  gghighlight::gghighlight(YEAR== "2024") +
+  gghighlight::gghighlight(YEAR== "2025") +
   geom_smooth(data= dat.ghcn16mean, color = "black", linetype = "dashed", aes(x=YDAY, y=TMEAN))+
   labs(title="Average Daily Temperature", y="Temperature deg. C", x="Day of Year", color="Year") +
   scale_x_continuous(breaks = seq(0, 365, by = 25)) +  # Set breaks every 25 days
@@ -273,10 +273,10 @@ dat.ghcn17 <- dat.ghcn17 [dat.ghcn17$YDAY<=180,]
 summary(dat.ghcn17)
 
 #attemtption to generte a graph
-#png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
+png(file.path(path.figs,"Cumulative GDD5 Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn17) +
   geom_line(aes(x=YDAY, y=GDD5.cum, fill=as.factor(YEAR), color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2023") +
+  gghighlight::gghighlight(YEAR== "2025") +
   labs(title="Cumulative Growing Degree Days", y="Cumulative GDD5", x="Day of Year", color="Year") +
   theme_classic()
 dev.off()
@@ -287,7 +287,7 @@ ggplot(data=dat.ghcn17) +
   labs(title="Cumulative Growing Degree Days", y="?", x="Day of Year", fill="Year", color="Year")
 
 #Getting cumulative precipitation for just this year
-dat.ghcn18 <- dat.ghcn2[dat.ghcn2$YEAR=="2023", c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
+dat.ghcn18 <- dat.ghcn2[dat.ghcn2$YEAR=="2025", c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn18)
 #looking at cumulative precipitation only before December first since most trees will have gone dormant by then.
 dat.ghcn18 <- dat.ghcn18 [dat.ghcn18$YDAY<=359,]
@@ -298,7 +298,7 @@ dat.ghcn151 <- dat.ghcn14[ ,c("YEAR", "MONTH", "DATE", "YDAY", "PRCP.cum")]
 summary(dat.ghcn151)
 dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YDAY<=359,]
 summary(dat.ghcn151)
-dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2024,]
+dat.ghcn151 <- dat.ghcn151 [dat.ghcn151$YEAR<2025,]
 summary(dat.ghcn151)
 
 #writing a csv out need to change the data fram to what ever .ghcn I'm writing
@@ -323,8 +323,8 @@ summary(dat.ghcnx)
 
 
 # Aggregate data by month to calculate total precipitation for each month in 2023
-dat.ghcnp24 <- dat.ghcnx[dat.ghcnx$YEAR == 2024, ]
-dat.ghcn24SUM <- aggregate(PRCP ~ MONTH , dat = dat.ghcnp24, FUN = sum, na.rm = TRUE)
+dat.ghcnp25 <- dat.ghcnx[dat.ghcnx$YEAR == 2025, ]
+dat.ghcn25SUM <- aggregate(PRCP ~ MONTH , dat = dat.ghcnp25, FUN = sum, na.rm = TRUE)
 dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.ghcnx, FUN = sum, na.rm = TRUE)
 
 #Filter the data to include only the selected years
@@ -333,11 +333,11 @@ dat.drought2 <- dat.ghcnx %>% filter(YEAR %in% c(2024, 2023, 2021, 2012))
 dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = TRUE)
 
 # Plotting monthly precipitation in 2023 with mean line
-#png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
-ggplot(data = dat.ghcn24SUM, aes(x = factor(MONTH), y = PRCP)) +
+png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
+ggplot(data = dat.ghcn25SUM, aes(x = factor(MONTH), y = PRCP)) +
   geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
   geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
-  labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (mm)", x = "Month") +
+  labs(title = "Monthly Precipitation 2025", y = "Monthly Precipitation (mm)", x = "Month") +
   scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
   theme_minimal()
 dev.off()
@@ -349,7 +349,7 @@ dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.drought2, FUN = sum, na
 # Calculate mean precipitation across all years for each month
 dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = TRUE)
 
-ggplot(data = dat.ghcn24SUM, aes(x = factor(MONTH), y = PRCP)) +
+ggplot(data = dat.ghcn25SUM, aes(x = factor(MONTH), y = PRCP)) +
   geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
   geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
   labs(title = "Monthly Precipitation 2023", y = "Monthly Precipitation (mm)", x = "Month") +

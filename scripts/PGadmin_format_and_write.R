@@ -35,26 +35,26 @@ if (inherits(con, "PostgreSQLConnection"))
 tables <- dbGetQuery(con, "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
 
 # select the "FormSubmission" and put into the dat.all data fram, this is the table containing all the data entered from the app. 
-dat.pg24 <- dbGetQuery(con, 'SELECT * FROM public."FormSubmission"')
+dat.pg25 <- dbGetQuery(con, 'SELECT * FROM public."FormSubmission"')
 
 ###Script to write out PGAdmin phenology data to match existing format of old phenolgy data 
 ## Renaming and organizing columns 
 # Get the column names of the pgadmin data
-names(dat.pg24)
+names(dat.pg25)
 # Renaming genus and species columns to create a column "species which has both the genus and species names
 # and a column named collection which contains only the genus name
-colnames(dat.pg24)[which(colnames(dat.pg24) == "Species")] <- "delete"
-colnames(dat.pg24)[which(colnames(dat.pg24) == "Genus")] <- "Collection"
-names(dat.pg24)
+colnames(dat.pg25)[which(colnames(dat.pg25) == "Species")] <- "delete"
+colnames(dat.pg25)[which(colnames(dat.pg25) == "Genus")] <- "Collection"
+names(dat.pg25)
 # Combining these two columns into the new Species column
-dat.pg24$Species <- paste(dat.pg24$Collection, dat.pg24$delete)
-names(dat.pg24)
+dat.pg25$Species <- paste(dat.pg25$Collection, dat.pg25$delete)
+names(dat.pg25)
 # deleteing the extra column titles "delete" here
-dat.pg24 <- dat.pg24[, !(names(dat.pg24) == "delete")]
-names(dat.pg24)
+dat.pg25 <- dat.pg25[, !(names(dat.pg25) == "delete")]
+names(dat.pg25)
 
-dat.pg24$Year <- format(as.Date(dat.pg24$DateObserved), "%Y")
-names(dat.pg24)
+dat.pg25$Year <- format(as.Date(dat.pg25$DateObserved), "%Y")
+names(dat.pg25)
 
 
 #get the column names of existing phenology data
@@ -65,7 +65,7 @@ ac19 <- read_csv("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Obser
 names(ac19)
 
 #renaming the column names of pgadmin data to match those of existing pheno data
-colnames(dat.pg24)<- c("PlantNumber","Observer","Collection","Timestamp","Date.Observed","leaf.present.observed",
+colnames(dat.pg25)<- c("PlantNumber","Observer","Collection","Timestamp","Date.Observed","leaf.present.observed",
                        "leaf.breaking.buds.observed","leaf.color.observed","leaf.increasing.observed","leaf.falling.observed",
                        "flower.buds.observed","flower.open.observed","flower.pollen.observed","fruit.present.observed",
                        "fruit.ripe.observed","fruit.drop.observed","leaf.present.intensity","leaf.breaking.buds.intensity",
@@ -73,7 +73,7 @@ colnames(dat.pg24)<- c("PlantNumber","Observer","Collection","Timestamp","Date.O
                        "fruit.present.intensity","fruit.ripe.intensity","fruit.drop.intensity","leaf.increasing.intensity",
                        "Notes", "Species", "Year")
 #Check
-names(dat.pg24)
+names(dat.pg25)
  # Specify the new order of columns
 new_order <- c("Timestamp", "Observer", "Date.Observed", "Species", "PlantNumber",
                "Notes", "leaf.breaking.buds.observed", "leaf.breaking.buds.intensity",
@@ -86,15 +86,15 @@ new_order <- c("Timestamp", "Observer", "Date.Observed", "Species", "PlantNumber
                "fruit.drop.intensity", "Collection", "Year")
 
 # Reorganize the columns
-dat.pg24 <- dat.pg24[, new_order]
+dat.pg25 <- dat.pg25[, new_order]
 
 # Viewing the and checking
-dat.pg24
-  #View(dat.pg24)
+dat.pg25
+  #View(dat.pg25)
 ### checking with rbind
-#dat.fake <- rbind(ac19,dat.pg24)
+#dat.fake <- rbind(ac19,dat.pg25)
 
-table(dat.pg24$leaf.present.observed)
+table(dat.pg25$leaf.present.observed)
 ###If this works ensure the values for y and n are changed to Yes and No,  and "d is "Did not look for" 
 colupdate <- c("leaf.present.observed", "leaf.breaking.buds.observed", 
                        "leaf.color.observed", "leaf.increasing.observed", 
@@ -104,7 +104,7 @@ colupdate <- c("leaf.present.observed", "leaf.breaking.buds.observed",
                        "fruit.drop.observed")
 
 # Update "y" to "Yes" and "n" to "No" in the specified columns
-dat.pg24 <- dat.pg24 %>%
+dat.pg25 <- dat.pg25 %>%
   mutate_at(
     vars(colupdate),
     funs(
@@ -117,19 +117,19 @@ dat.pg24 <- dat.pg24 %>%
     )
   )
 ### Checking to see with a table of the unique values in the leaf present column
-table(dat.pg24$leaf.present.observed)
+table(dat.pg25$leaf.present.observed)
 
 ## If this works write out CSVs by collection
 
 # Using the unique collection names and years in the Collection and Year columns
-unique_combinations <- unique(dat.pg24[, c("Collection", "Year")])
+unique_combinations <- unique(dat.pg25[, c("Collection", "Year")])
 
 for (i in 1:nrow(unique_combinations)) {
   collection_name <- unique_combinations$Collection[i]
   year <- unique_combinations$Year[i]
   
   # Create a subset for the current collection and year
-  subset_data <- dat.pg24[dat.pg24$Collection == collection_name & dat.pg24$Year == year, ]
+  subset_data <- dat.pg25[dat.pg25$Collection == collection_name & dat.pg25$Year == year, ]
   
   # Generate a CSV file name based on the specified format
   csv_file_name <- paste0("LivingCollectionPhenology_ObservationData_", gsub(" ", "_", collection_name), "_", year, "_FINAL.csv")
