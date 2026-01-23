@@ -210,7 +210,7 @@ summary(dat.ghcn15)
 dat.ghcn15mean <- aggregate(PRCP.cum ~ YDAY,data=dat.ghcn15, FUN=mean, NA.rm=T)
 
 #attemtption to generte a graph
-png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
   gghighlight::gghighlight(YEAR== "2025")     +
@@ -334,14 +334,20 @@ dat.ghcnxmean <- aggregate(PRCP ~ MONTH, dat = dat.ghcnSUM, FUN = mean, na.rm = 
 
 # Plotting monthly precipitation in 2023 with mean line
 png(file.path(path.figs,"2023_monthly_precipitation.png"), height=4, width=6, units="in", res=320)
-ggplot(data = dat.ghcn25SUM, aes(x = factor(MONTH), y = PRCP)) +
-  geom_bar(stat = "identity", fill = "lightblue4", color = "black") +
-  geom_line(data = dat.ghcnxmean, aes(x= MONTH, y = PRCP), color = "black", linetype = "dashed") +
-  labs(title = "Monthly Precipitation 2025", y = "Monthly Precipitation (mm)", x = "Month") +
-  scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
-  theme_minimal()
+ggplot() +geom_bar(data = dat.ghcn25SUM, aes(x = factor(MONTH), y = PRCP, fill = "2025"), 
+           stat = "identity", color = "black") +
+  geom_line(data = dat.ghcnxmean, aes(x = MONTH, y = PRCP, linetype = "Mean monthly precipitation"), 
+            color = "black") +
+  scale_fill_manual(values = "lightblue4", name = NULL) +
+  scale_linetype_manual(values = "dashed", name = NULL) +
+  labs(title = "Monthly Precipitation 2025", 
+       y = "Monthly Precipitation (mm)", 
+       x = "Month") +
+  scale_x_discrete(labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 dev.off()
-
 #Filter the data to include only the selected years
 dat.drought2 <- dat.ghcnx %>% filter(YEAR %in% c(2024, 2023, 2021, 2012))
 dat.ghcnSUM <- aggregate(PRCP ~ MONTH + YEAR , dat = dat.drought2, FUN = sum, na.rm = TRUE)
