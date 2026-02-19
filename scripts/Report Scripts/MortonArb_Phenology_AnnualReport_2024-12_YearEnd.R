@@ -218,13 +218,23 @@ summary(dat.lci)
 ##* Graphing----
 png(file.path(path.figs,"Leaf_Present_Intensity.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.lci) +
-  geom_histogram(alpha=1.5, binwidth =10, aes(x=yday, fill=leaf.color.intensity,))+
-  facet_grid(Collection~ .)+
-  #scale_fill_manual(name= "leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
-  #scale_color_manual(name="leaf.present.intensity", values=c("101-1,000"="red", "1,001-10,000"="orange", "11-100"="yellow", "3-10"="green", ">10,000"="blue", "0"="NA", "NA"="NA")) +
-  theme_bw()+
-  labs(title="Leaf color Intensity", x="Day of Year",)
+  geom_histogram(alpha=1.5, binwidth=10, aes(x=yday, fill=leaf.color.intensity)) +
+  facet_grid(Collection ~ .) +
+  scale_fill_discrete(
+    name = "Leaf Color Intensity",
+    limits = c("0%", "<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%"),
+    na.translate = FALSE
+  ) +
+  scale_x_continuous(
+    breaks = c(213, 244, 274, 305, 335),
+    labels = c("Aug 1", "Sep 1", "Oct 1", "Nov 1", "Dec 1")
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title="Leaf color Intensity", x="Date")
 dev.off()
+
+
 
 # Create a ggplot
 ggplot(data = leaf.color, aes(x = Date, color = as.factor(Year))) + 
@@ -279,7 +289,7 @@ falling.leaves$Date <- as.Date(paste0("2018-", falling.leaves$yday), format="%Y-
 
 ##* Graphing----
 ggplot(data=falling.leaves) +
-png(file.path(path.figs,"All_First_Falling_Leaf_dens_highlight.png"), height=4, width=6, units="in", res=320)+
+#png(file.path(path.figs,"All_First_Falling_Leaf_dens_highlight.png"), height=4, width=6, units="in", res=320)+
   facet_grid(Collection ~ .) + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
   scale_x_date(date_labels="%b %d", date_breaks="1 month") +  # Format x-axis as month and date with a 1 month break
@@ -322,7 +332,7 @@ head(breaking.buds)
 breaking.buds$Date <- as.Date(paste0("2023-", breaking.buds$yday), format="%Y-%j")
 
 ##* Graphing----
-png(file.path(path.figs,"Leaf_Breaking_Buds_dens_highlight.png"), height=4, width=6, units="in", res=320)
+#png(file.path(path.figs,"Leaf_Breaking_Buds_dens_highlight.png"), height=4, width=6, units="in", res=320)
 ggplot(data=breaking.buds) +
   facet_grid(Collection~ .) + # This is the code that will stack everything
   geom_density(alpha=0.25, aes(x=Date, fill=as.factor(Year), color=as.factor(Year))) +
@@ -414,7 +424,7 @@ dat.lpi$Date <- as.Date(paste0("2024-", dat.lpi$yday), format="%Y-%j")
 #summary(leaves.present.intensity)
 #head(leaves.present.intensity)
 ##* Graphing----
-png(file.path(path.figs,"All_Leaf_Present_Intensity.png"), height= 5, width= 7, units="in", res=320)
+#png(file.path(path.figs,"All_Leaf_Present_Intensity.png"), height= 5, width= 7, units="in", res=320)
 ggplot(data=dat.lpi) +
   geom_histogram(alpha=1.5, binwidth =15, aes(x=Date, fill=leaf.present.intensity,))+
   facet_grid(Year~Collection)+
@@ -475,7 +485,7 @@ dev.off()
 
 
 
-#10. Fruit present intensity---- 
+#10. Fruit present and ripe fruit intensity---- 
 
 dat.fri <- dat.spring[dat.spring$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.present.intensity", "Date", "Collection")]
 summary(dat.fri)
@@ -513,7 +523,7 @@ unique(dat.fri$fruit.present.intensity)
 
 dat.fri$Date <- as.Date(paste0("2024-", dat.fri$yday), format="%Y-%j")
 ## * Graphing----
-#png(file.path(path.figs,"All_Fruit_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
+png(file.path(path.figs,"All_Fruit_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
   ggplot(data=dat.fri) +
   geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=fruit.present.intensity,))+
   facet_grid(Year~Collection, scales="free")+
@@ -523,6 +533,52 @@ dat.fri$Date <- as.Date(paste0("2024-", dat.fri$yday), format="%Y-%j")
   labs(title="Fruit Present Intensity", x="Day of Year",)
 dev.off()
 
+
+dat.rfi <- dat.spring[dat.spring$fruit.present.observed=="Yes", c("Date.Observed", "Species", "Year", "PlantNumber", "fruit.ripe.intensity", "Date", "Collection")]
+summary(dat.rfi)
+dat.rfi <- dat.rfi[!is.na(dat.rfi$PlantNumber),]
+summary(dat.rfi)
+
+#Checking to make sure date ranges are correct
+min(dat.rfi$Date.Observed)
+max(dat.rfi$Date.Observed)
+mean(dat.rfi$Date.Observed)
+range(dat.rfi$Date.Observed)
+
+#Setting my yday
+dat.rfi$yday <- lubridate::yday(dat.rfi$Date.Observed)
+summary(dat.rfi)
+
+#setting my yday to only show dates later in the season and the current date
+#dat.rfi <- dat.rfi [dat.rfi$yday>=180,]
+#dat.rfi <- dat.rfi [dat.rfi$yday<=Sys.Date(),]
+#summary(dat.rfi)
+
+#removing "0 and NA's
+dat.rfi <- aggregate(yday ~ PlantNumber + Species + Year + Collection + fruit.ripe.intensity + Date.Observed , dat=dat.rfi, FUN=min, NA.rm=T)
+summary(dat.rfi)
+head(dat.rfi)
+
+dat.rfi$yday <- lubridate::yday(dat.rfi$Date.Observed)
+summary(dat.rfi)
+
+##thereas a weird value of "Select an option, removing this and coming back later to fix it
+unique(dat.rfi$fruit.ripe.intensity)
+# Remove rows where fruit.present.intensity is "Select an option" and 0%
+dat.rfi <- dat.rfi %>% filter(!fruit.ripe.intensity %in% c("Select an option", "0%"))
+unique(dat.rfi$fruit.ripe.intensity)
+
+dat.rfi$Date <- as.Date(paste0("2024-", dat.rfi$yday), format="%Y-%j")
+## * Graphing----
+#png(file.path(path.figs,"All_Fruit_Present_Intensity.png"), height=4, width=6, units="in", res=320)+
+ggplot(data=dat.rfi) +
+  geom_histogram(alpha=1.5, binwidth =10, aes(x=Date, fill=fruit.ripe.intensity,))+
+  facet_grid(Year~Collection, scales="free")+
+  scale_x_date(date_labels="%b %d", date_breaks="3 month") +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title="Fruit Present Intensity", x="Day of Year",)
+dev.off()
 
 
 # 11. Leaves increasing in size----
