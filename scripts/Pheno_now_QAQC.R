@@ -14,6 +14,11 @@ stale.threshold <- 10  # days since last observation before flagging
 
 dir.out <- "~/Google Drive/My Drive/LivingCollections_Phenology/QAQC data check"
 
+# Create the tracking sheet, then replace with the captured ID
+# after first run comment this out and just keep the qaqc.sheet.id line
+#new.sheet     <- googlesheets4::gs4_create("Phenology QAQC Tracking")
+qaqc.sheet.id <- "1fElgeUZrxTfhiy1Kgt8ix70AsdWaURtmqC-p_pMpi0U"
+
 # 1. PULL DATA------------------------------------------------------------------------------------------------------------------------------------------------
 ###connect to removed trees sheet ----
 googlesheets4::gs4_auth(email = "breidy@mortonarb.org") # will need to be changed to seprate google account
@@ -126,24 +131,22 @@ datNow$Taxon.expected <- NULL
 ##Observers monitoring trees outside their assigned list----
 # Loookup ObserverID vs all PlantIDs they are assigned to
 # Function to merge lists of assignments and treelist with observer ID
-assign.merge    <- merge(assignments, treeLists, by.x = c("Collection", "List"), by.y  = c("Collection", "List"),all.x = TRUE)
+assign.merge    <- merge(assignments, treeLists, by = "List", all.x = TRUE)
 assigned.plants <- aggregate(PlantID ~ ObserverID, data = assign.merge, FUN = function(x) unique(as.character(x)))
 
-#Function to look at trees being observed by an observer outside of their list
-datNow$AssignedPlants    <- assigned.plants$PlantID[ match(as.character(datNow$ObserverID), assigned.plants$ObserverID)]
+# Flag observations outside assigned plants
+datNow$AssignedPlants    <- assigned.plants$PlantID[match(as.character(datNow$ObserverID), assigned.plants$ObserverID)]
 datNow$OutsideAssignment <- mapply(function(pid, alist) {
   if (is.null(alist)) return(NA)
   !pid %in% alist
 }, datNow$PlantID, datNow$AssignedPlants)
 
-qaqc.outside.assign <- datNow[!is.na(datNow$OutsideAssignment) & datNow$OutsideAssignment == TRUE,c("PlantID", "ObserverID", "Genus", "Species", "DateObserved")]
+qaqc.outside.assign <- datNow[!is.na(datNow$OutsideAssignment) & datNow$OutsideAssignment == TRUE, c("PlantID", "ObserverID", "Genus", "Species", "DateObserved")]
 qaqc.outside.assign <- qaqc.outside.assign[order(qaqc.outside.assign$ObserverID), ]
 qaqc.outside.assign
 
-#remove columns for assigned plants and plants outside of observer list
 datNow$AssignedPlants    <- NULL
 datNow$OutsideAssignment <- NULL
-
 
 
 # 5. DATE QAQC-----------------------------------------------------------------------------------------
@@ -157,9 +160,16 @@ qaqc.missing.date # records with no date observed
 qaqc.future.date <- datNow[!is.na(datNow$DateObserved) & datNow$DateObserved > Sys.Date(),c("PlantID", "ObserverID", "DateObserved", "DateEntered")]
 qaqc.future.date # records where the tree has been observed on a date in the future 
 
-## DateObserved year doesn't match current year -----
-qaqc.wrong.year <- datNow[!is.na(datNow$DateObserved) &lubridate::year(datNow$DateObserved) != yr.now,c("PlantID", "ObserverID", "DateObserved", "DateEntered")]
-qaqc.wrong.year  # Observations with wrong year
+qaqc.wrong.year <- datNow[
+  !is.na(datNow$DateObserved) & lubridate::year(datNow$DateObserved) != yr.now,
+  c("PlantID", "ObserverID", "DateObserved", "DateEntered")]
+qaqc.wrong.year
+
+## DateEntered year doesn't match current year -----
+qaqc.wrong.entry.year <- datNow[
+  lubridate::year(datNow$DateEntered) != yr.now,
+  c("PlantID", "ObserverID", "DateObserved", "DateEntered")]
+qaqc.wrong.entry.year
 
 ## DateEntered before DateObserved -----
 qaqc.entered.before.observed <- datNow[!is.na(datNow$DateObserved) &datNow$DateEntered < datNow$DateObserved,c("PlantID", "ObserverID", "DateObserved", "DateEntered")]
@@ -179,7 +189,8 @@ qaqc.stale.observers <- qaqc.stale.observers[order(-qaqc.stale.observers$DaysSin
 qaqc.stale.observers  # Observers overdue for submission
 
 ## Observers with no observations this year -----
-qaqc.no.obs.observers <- observers[!observers$ObserverID %in% datNow$ObserverID, c("ObserverID")]
+qaqc.no.obs.observers <- data.frame(
+  ObserverID = observers$ObserverID[!observers$ObserverID %in% datNow$ObserverID])
 qaqc.no.obs.observers
 
 ## Trees with no observation in ten days -----
@@ -192,8 +203,12 @@ qaqc.stale.trees <- qaqc.stale.trees[order(-qaqc.stale.trees$DaysSinceObs), ]
 qaqc.stale.trees  # Trees overdue for observation
 
 ## Trees in the active list with zero observations this year -----
-qaqc.unobserved.trees <- qaqc.unobserved.trees[order(qaqc.unobserved.trees$Collection, qaqc.unobserved.trees$Taxon), ]
-qaqc.unobserved.trees  # Trees with no observations at all this year
+all.active.plants     <- treeLists[!treeLists$PlantID %in% removed$PlantNumber, ]
+qaqc.unobserved.trees <- all.active.plants[
+  !all.active.plants$PlantID %in% datNow$PlantID,
+  c("PlantID", "Taxon")]
+qaqc.unobserved.trees <- qaqc.unobserved.trees[order(qaqc.unobserved.trees$Taxon), ]
+qaqc.unobserved.trees
 
 # Summary of number of observations made by each observer and the days since they last observed
 ## Observer submission summary -----
@@ -306,29 +321,53 @@ if (!is.null(qaqc.sequence)) qaqc.sequence <- qaqc.sequence[order(qaqc.sequence$
 qaqc.sequence
 
 
-# 8. Export ---------------------------------------------------------------------------------------
-# Writing out an xlsx file to check errors 
-## Setting up a list of errors------
+# 8. Export to Google Sheets -----------------------------------------------------------------------
+# Builds one combined table with a QAQC_Check column and writes in a single API call.
+# Each run creates a new tab named with today's date.
+
+## Helper: prep each error table with check name, Fixed, and Notes columns ----
+prep.sheet <- function(df, check.name) {
+  if (is.null(df) || nrow(df) == 0) {
+    df <- data.frame(Note = paste("No", check.name, "errors found"),
+                     stringsAsFactors = FALSE)
+  }
+  df$QAQC_Check <- check.name
+  df$Fixed      <- ""
+  df$Notes      <- ""
+  df
+}
+
+## Build named list of all error tables ----
 qaqc.errors <- list(
-  bad_observer_id         = qaqc.bad.observers,
-  bad_plant_id            = qaqc.bad.plants,
-  species_mismatch        = qaqc.species.mismatch,
-  outside_assignment      = qaqc.outside.assign,
-  missing_date_observed   = qaqc.missing.date,
-  future_date             = qaqc.future.date,
-  wrong_year              = qaqc.wrong.year,
-  entered_before_observed = qaqc.entered.before.observed,
-  stale_observer          = qaqc.stale.observers,
-  no_obs_observer         = qaqc.no.obs.observers,
-  stale_tree              = qaqc.stale.trees,
-  unobserved_tree         = qaqc.unobserved.trees,
-  intensity_mismatch      = qaqc.intensity.mismatch,
-  obs_without_intensity   = qaqc.obs.no.intensity,
-  sequence_violation      = qaqc.sequence
+  bad_observer_id         = prep.sheet(qaqc.bad.observers,           "bad_observer_id"),
+  bad_plant_id            = prep.sheet(qaqc.bad.plants,              "bad_plant_id"),
+  species_mismatch        = prep.sheet(qaqc.species.mismatch,        "species_mismatch"),
+  outside_assignment      = prep.sheet(qaqc.outside.assign,          "outside_assignment"),
+  missing_date_observed   = prep.sheet(qaqc.missing.date,            "missing_date_observed"),
+  future_date             = prep.sheet(qaqc.future.date,             "future_date"),
+  wrong_year_observed     = prep.sheet(qaqc.wrong.year,              "wrong_year_observed"),
+  wrong_year_entered      = prep.sheet(qaqc.wrong.entry.year,        "wrong_year_entered"),
+  entered_before_observed = prep.sheet(qaqc.entered.before.observed, "entered_before_observed"),
+  stale_observer          = prep.sheet(qaqc.stale.observers,         "stale_observer"),
+  no_obs_observer         = prep.sheet(qaqc.no.obs.observers,        "no_obs_observer"),
+  stale_tree              = prep.sheet(qaqc.stale.trees,             "stale_tree"),
+  unobserved_tree         = prep.sheet(qaqc.unobserved.trees,        "unobserved_tree"),
+  intensity_mismatch      = prep.sheet(qaqc.intensity.mismatch,      "intensity_mismatch"),
+  obs_without_intensity   = prep.sheet(qaqc.obs.no.intensity,        "obs_without_intensity"),
+  sequence_violation      = prep.sheet(qaqc.sequence,                "sequence_violation")
 )
 
-#pathing xlsx file out
-write.xlsx(qaqc.errors,
-           file = file.path(dir.out, paste0("QAQC_", date.now, "_errors.xlsx")))
+## Combine all into one data frame ----
+qaqc.combined <- do.call(dplyr::bind_rows, qaqc.errors)
 
+# Move QAQC_Check, Fixed, Notes to the front
+front.cols    <- c("QAQC_Check", "Fixed", "Notes")
+other.cols    <- setdiff(names(qaqc.combined), front.cols)
+qaqc.combined <- qaqc.combined[, c(front.cols, other.cols)]
 
+## Write to Google Sheets in one call ----
+tab.name <- as.character(date.now)
+googlesheets4::sheet_add(ss = qaqc.sheet.id, sheet = tab.name)
+googlesheets4::sheet_write(data = qaqc.combined, ss = qaqc.sheet.id, sheet = tab.name)
+
+message("QAQC written to tab '", tab.name, "' in Google Sheet ", qaqc.sheet.id)
