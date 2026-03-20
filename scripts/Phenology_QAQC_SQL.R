@@ -71,6 +71,11 @@ summary(datNow)
 # datNow$Species <- tolower(datNow$Species)
 # summary(datNow)
 
+# Data in the future
+datNow[datNow$DateObserved>datNow$DateEntered,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
+datNow[datNow$DateObserved>Sys.Date() | datNow$DateEntered>Sys.Date(),c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
+
+
 # Checking for data on some trees reported missing by one observer
 # datNow[datNow$PlantID %in% c("19-2012*1", "5-2018*4", "37-2014*1"),]
 
@@ -80,6 +85,8 @@ dim(datNow[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN"),])
 unique(datNow$ObserverID[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
 oddObservers <- summary(datNow$ObserverID[!datNow$ObserverID %in% c(observers$ObserverID, "UNKNOWN")])
 oddObservers[oddObservers>0]
+
+datNow[datNow$ObserverID=="Johnson\\]",]
 
 # treeLists[treeLists$PlantID=="1261-26*2", ]
 # datNow[datNow$ObserverID=="Haraf" & datNow$DateObserved=="2023-05-09",c("PlantID", "ObserverID", "Genus", "Species")]
@@ -113,6 +120,7 @@ for(OBSID in unique(datNow$ObserverID)){
 }
 dim(datOdd)
 datOdd[,c("PlantID", "ObserverID", "Genus", "Species", "DateEntered", "DateObserved")]
+summary(datOdd)
 
 # Saving the list of trees to check
 write.csv(datOdd, file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations", paste0("CHECK--LivingCollectionPhenology_ObservationData_All_latest.csv")), row.names=F)
