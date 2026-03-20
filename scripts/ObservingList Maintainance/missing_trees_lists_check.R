@@ -103,6 +103,13 @@ not26<- rbind(notqbr26,notubr26,notabr26)
 
 # binding
 not26 <- rbind(notqbr26, notubr26, notabr26)
-#
-write_csv(not26, file = file.path(path.google, "Observing Lists", "trees_present_23_not_removed_brahms.csv"))
+#writing out csvs
+#all trees
+write_csv(not26, file = file.path(path.google, "Observing Lists", "All_trees_present_23_not_removed_brahms.csv"))
+#quercus
+write_csv(notqbr26, file = file.path(path.google, "Observing Lists", "Quercus_trees_present_23_not_removed_brahms.csv"))
+#ulmus
+write_csv(notubr26, file = file.path(path.google, "Observing Lists", "Ulmus_trees_present_23_not_removed_brahms.csv"))
+#Acer
+write_csv(not26, file = file.path(path.google, "Observing Lists", "Acer_trees_present_23_not_removed_brahms.csv"))
 
