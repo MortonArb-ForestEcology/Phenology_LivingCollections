@@ -111,5 +111,5 @@ write_csv(notqbr26, file = file.path(path.google, "Observing Lists", "Quercus_tr
 #ulmus
 write_csv(notubr26, file = file.path(path.google, "Observing Lists", "Ulmus_trees_present_23_not_removed_brahms.csv"))
 #Acer
-write_csv(not26, file = file.path(path.google, "Observing Lists", "Acer_trees_present_23_not_removed_brahms.csv"))
+write_csv(notabr26, file = file.path(path.google, "Observing Lists", "Acer_trees_present_23_not_removed_brahms.csv"))
 
