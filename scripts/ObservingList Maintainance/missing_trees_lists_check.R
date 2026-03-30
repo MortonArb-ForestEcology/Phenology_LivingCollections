@@ -1,4 +1,3 @@
-library(ggplot2)
 library(readr)
 # set path
 path.google <- "~/Google Drive/My Drive/LivingCollections_Phenology/"

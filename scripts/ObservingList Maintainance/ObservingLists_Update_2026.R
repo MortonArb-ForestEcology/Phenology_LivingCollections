@@ -1,16 +1,23 @@
 library(ggplot2)
-
+library(readr)
 # Update the most recent round of observing lists to make sure removed trees are no longer listed
 path.google <- "~/Google Drive/My Drive/LivingCollections_Phenology/"
 
 # 1. Read in the existing lists --> ALWAYS START WITH THIS ----
-quercusObs <- read.csv(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2025.csv"))
-acerObs <- read.csv(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2025.csv"))
-ulmusObs <- read.csv(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2025.csv"))
+#quercusObs <- read.csv(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2025.csv"))
+#acerObs <- read.csv(file.path(path.google, "Observing Lists", "Acer", "ObservingList_Acer_2025.csv"))
+#ulmusObs <- read.csv(file.path(path.google, "Observing Lists", "Ulmus", "ObservingList_Ulmus_2025.csv"))
 
+quercusObs <- read_csv("~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/OLD/Quercus/ObservingList_Quercus_2025.csv")
+ulmusObs <- read_csv("~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/OLD/Ulmus/ObservingList_Ulmus_2025.csv")
+acerObs <- read_csv("~/Google Drive/My Drive/LivingCollections_Phenology/Observing Lists/OLD/Acer/ObservingList_Acer_2025.csv")
 # summary(quercusObs)
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # Quercus: 221, Acer: 165, Ulmus: 140
+
+unique(quercusObs$PlantID[quercusObs$List == 11])
+q11.start <- quercusObs$PlantID[quercusObs$List == 11]
+unique(q11.start$PlantID)
 
 # 2. remove trees no longer in BOL ----
 quercusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-02-20_BRAHMSOnlineData_Quercus.xlsx"))
@@ -23,6 +30,11 @@ ulmusObs <- ulmusObs[ulmusObs$PlantID %in% ulmusAll$PlantNumber,]
 
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # Quercus: 220, Acer: 162, Ulmus: 135
+
+sum(quercusObs$List == 11)
+
+q11.start[q11.start %in% quercusObs$PlantID]
+remov<- quercusObs$PlantID[quercusObs$List == 11]
 
 
 # 3. Check for removed trees ----
@@ -108,6 +120,26 @@ ulmusGoneCt
 ulmusGone <- ulmusGone[ulmusGoneCt$LeafObsSept<2] # Only count it as gone if there are one or fewer observations after August
 ulmusGone
 
+
+# Print all flagged trees and their notes
+
+quercusGoneNotes <- quercus25[quercus25$PlantNumber %in% quercusGone, c("PlantNumber", "Date.Observed", "Notes")]
+View(quercusGoneNotes[order(quercusGoneNotes$PlantNumber),])
+
+acerGoneNotes <- acer25[acer25$PlantNumber %in% acerGone, c("PlantNumber", "Date.Observed", "Notes")]
+acerGoneNotes <- acerGoneNotes[!is.na(acerGoneNotes$Notes) & acerGoneNotes$Notes != "",]
+View(acerGoneNotes[order(acerGoneNotes$PlantNumber),])
+
+ulmusGoneNotes <- ulmus25[ulmus25$PlantNumber %in% ulmusGone, c("PlantNumber", "Date.Observed", "Notes")]
+ulmusGoneNotes <- ulmusGoneNotes[!is.na(ulmusGoneNotes$Notes) & ulmusGoneNotes$Notes != "",]
+View(ulmusGoneNotes[order(ulmusGoneNotes$PlantNumber),])
+
+cat("List 11 trees being removed:\n")
+print(quercusObs[quercusObs$List == 11 & quercusObs$PlantID %in% quercusGone, 
+                 c("PlantID", "Taxon", "List")])
+
+
+
 # Remove form-reported trees from the observing lists
 quercusObs <- quercusObs[!quercusObs$PlantID %in% quercusGone,]
 acerObs <- acerObs[!acerObs$PlantID %in% acerGone,]
@@ -120,6 +152,8 @@ length(unique(quercusObs$Taxon))
 length(unique(acerObs$Taxon))
 length(unique(ulmusObs$Taxon))
 # Quercus: 52, Acer: 47, Ulmus:28
+
+
 
 
 #####################################
@@ -138,7 +172,6 @@ dim(quercusDrop); dim(acerDrop); dim(ulmusDrop)
 write.csv(quercusDrop, file=file.path(path.google, "Observing Lists", "ObservingList_QuercusDropped_2025.csv"), row.names=F)
 write.csv(acerDrop, file=file.path(path.google, "Observing Lists", "ObservingList_AcerDropped_2025.csv"), row.names=F)
 write.csv(ulmusDrop, file=file.path(path.google, "Observing Lists", "ObservingList_UlmusDropped_2025.csv"), row.names=F)
-
 
 #####################################
 # 4. Update the existing lists to remove trees that we know are now gone ----
