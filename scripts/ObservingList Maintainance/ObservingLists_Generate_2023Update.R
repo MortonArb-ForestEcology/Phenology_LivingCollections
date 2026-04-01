@@ -20,7 +20,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 library(ggplot2)
 
-source("HelperFuncitons_ObservingLists.R")
+source("HelperFunctions_ObservingLists.R")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
