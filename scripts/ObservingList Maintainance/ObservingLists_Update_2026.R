@@ -17,14 +17,31 @@ dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # 2025 Quercus: 221, Acer: 165, Ulmus: 140
 # 2023 Quercus: 285, Acer: 191, Ulmus: 142
 
+obsOrig <- rbind(quercusObs, acerObs, ulmusObs)
+
 unique(quercusObs$PlantID[quercusObs$List == 11])
 q11.start <- quercusObs$PlantID[quercusObs$List == 11]
 unique(q11.start)
 
 # 2. remove trees no longer in BOL ----
-quercusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-02-20_BRAHMSOnlineData_Quercus.xlsx"))
-acerAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-02-20_BRAHMSOnlineData_Acer.xlsx"))
-ulmusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-02-20_BRAHMSOnlineData_Ulmus.xlsx"))
+quercusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-04-01_BRAHMSOnlineData_Quercus.xlsx"))
+acerAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-04-01_BRAHMSOnlineData_Acer.xlsx"))
+ulmusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-04-01_BRAHMSOnlineData_Ulmus.xlsx"))
+
+# Doing a quick check for how much gets dropped here
+# # NOTE NOTE NOTE: We're loosing too much here from Brahms Online --> need to compare to Big Brahms
+quercusDropBOL <- quercusObs[!quercusObs$PlantID %in% quercusAll$PlantNumber,]
+acerDropBOL <- acerObs[!acerObs$PlantID %in% acerAll$PlantNumber,]
+ulmusDropBOL <- ulmusObs[!ulmusObs$PlantID %in% ulmusAll$PlantNumber,]
+dropBOL <- rbind(quercusDropBOL, acerDropBOL, ulmusDropBOL)
+dropBOL$Genus <- unlist(lapply(strsplit(dropBOL$Taxon, " "), function(x)(x[1])))
+head(dropBOL)
+dim(dropBOL)
+
+data.frame(dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",])
+
+dropBOLbyList <- aggregate(PlantID ~ List + Genus, data=dropBOL, FUN=length)
+dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",]
 
 quercusObs <- quercusObs[quercusObs$PlantID %in% quercusAll$PlantNumber,]
 acerObs <- acerObs[acerObs$PlantID %in% acerAll$PlantNumber,]
@@ -32,6 +49,8 @@ ulmusObs <- ulmusObs[ulmusObs$PlantID %in% ulmusAll$PlantNumber,]
 
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
 # Quercus: 231, Acer: 169, Ulmus: 135
+
+data.frame(quercusObs[quercusObs$List==3,])
 
 # sum(quercusObs$List == 11)
 
@@ -44,6 +63,20 @@ dim(quercusObs); dim(acerObs); dim(ulmusObs)
 googlesheets4::gs4_auth(email="crollinson@mortonarb.org")
 removed <- googlesheets4::read_sheet("16xMa6MyJlh3zKkELrDToyoPk_GfoN1NSCVji_ttOCoQ", sheet="Removed Trees")
 names(removed)
+
+quercusRemoved <- quercusObs[quercusObs$PlantID %in% removed$PlantNumber,]
+acerRemoved <- acerObs[!acerObs$PlantID %in% removed$PlantNumber,]
+ulmusRemoved <- ulmusObs[!ulmusObs$PlantID %in% removed$PlantNumber,]
+dropRemoved <- rbind(quercusRemoved, acerRemoved, ulmusRemoved)
+dropRemoved$Genus <- unlist(lapply(strsplit(dropRemoved$Taxon, " "), function(x)(x[1])))
+dim(dropRemoved)
+head(dropRemoved)
+
+data.frame(dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",])
+
+dropRemovedbyList <- aggregate(PlantID ~ List + Genus, data=dropRemoved, FUN=length)
+dropRemoved[dropRemoved$List==3 & dropRemoved$Genus=="Quercus",]
+dropRemovedbyList
 
 quercusObs <- quercusObs[!quercusObs$PlantID %in% removed$PlantNumber,]
 acerObs <- acerObs[!acerObs$PlantID %in% removed$PlantNumber,]
