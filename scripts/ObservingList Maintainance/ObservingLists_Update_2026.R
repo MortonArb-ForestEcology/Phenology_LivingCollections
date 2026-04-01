@@ -23,32 +23,38 @@ unique(quercusObs$PlantID[quercusObs$List == 11])
 q11.start <- quercusObs$PlantID[quercusObs$List == 11]
 unique(q11.start)
 
-# 2. remove trees no longer in BOL ----
-quercusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-04-01_BRAHMSOnlineData_Quercus.xlsx"))
-acerAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-04-01_BRAHMSOnlineData_Acer.xlsx"))
-ulmusAll <- readxl::read_xlsx(file.path(path.google, "Observing Lists", "2026-04-01_BRAHMSOnlineData_Ulmus.xlsx"))
+# 2. remove trees no longer in **BIG BRAHMS** -- BOL is incomplete ----
+quercusAll <- read.csv(file.path(path.google, "Observing Lists", "2026-04-01_brahmsFull_Quercus.csv"))
+acerAll <- read.csv(file.path(path.google, "Observing Lists", "2026-04-01_brahmsFull_Acer.csv"))
+ulmusAll <- read.csv(file.path(path.google, "Observing Lists", "2026-04-01_brahmsFull_Ulmus.csv"))
+head(quercusAll)
+summary(as.factor(quercusAll$LivingStatus))
+dim(quercusAll)
+dim(quercusAll[quercusAll$LivingStatus=="A",])
 
 # Doing a quick check for how much gets dropped here
 # # NOTE NOTE NOTE: We're loosing too much here from Brahms Online --> need to compare to Big Brahms
-quercusDropBOL <- quercusObs[!quercusObs$PlantID %in% quercusAll$PlantNumber,]
-acerDropBOL <- acerObs[!acerObs$PlantID %in% acerAll$PlantNumber,]
-ulmusDropBOL <- ulmusObs[!ulmusObs$PlantID %in% ulmusAll$PlantNumber,]
+# # -- Note: Need to filter to just alive trees
+quercusDropBOL <- quercusObs[!quercusObs$PlantID %in% quercusAll$PlantId[quercusAll$LivingStatus=="A"],]
+acerDropBOL <- acerObs[!acerObs$PlantID %in% acerAll$PlantId[acerAll$LivingStatus=="A"],]
+ulmusDropBOL <- ulmusObs[!ulmusObs$PlantID %in% ulmusAll$PlantId[ulmusAll$LivingStatus=="A"],]
 dropBOL <- rbind(quercusDropBOL, acerDropBOL, ulmusDropBOL)
 dropBOL$Genus <- unlist(lapply(strsplit(dropBOL$Taxon, " "), function(x)(x[1])))
 head(dropBOL)
 dim(dropBOL)
 
-data.frame(dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",])
-
-dropBOLbyList <- aggregate(PlantID ~ List + Genus, data=dropBOL, FUN=length)
-dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",]
-
-quercusObs <- quercusObs[quercusObs$PlantID %in% quercusAll$PlantNumber,]
-acerObs <- acerObs[acerObs$PlantID %in% acerAll$PlantNumber,]
-ulmusObs <- ulmusObs[ulmusObs$PlantID %in% ulmusAll$PlantNumber,]
+if(nrow(dropBOL)>0){
+  data.frame(dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",])
+  
+  dropBOLbyList <- aggregate(PlantID ~ List + Genus, data=dropBOL, FUN=length)
+  dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",]
+}
+quercusObs <- quercusObs[quercusObs$PlantID %in% quercusAll$PlantId[quercusAll$LivingStatus=="A"],]
+acerObs <- acerObs[acerObs$PlantID %in% acerAll$PlantId[acerAll$LivingStatus=="A"],]
+ulmusObs <- ulmusObs[ulmusObs$PlantID %in% ulmusAll$PlantId[ulmusAll$LivingStatus=="A"],]
 
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
-# Quercus: 231, Acer: 169, Ulmus: 135
+# Quercus: 285, Acer: 191, Ulmus: 142
 
 data.frame(quercusObs[quercusObs$List==3,])
 
@@ -75,7 +81,7 @@ head(dropRemoved)
 data.frame(dropBOL[dropBOL$List==3 & dropBOL$Genus=="Quercus",])
 
 dropRemovedbyList <- aggregate(PlantID ~ List + Genus, data=dropRemoved, FUN=length)
-dropRemoved[dropRemoved$List==3 & dropRemoved$Genus=="Quercus",]
+# dropRemoved[dropRemoved$List==3 & dropRemoved$Genus=="Quercus",]
 dropRemovedbyList
 
 quercusObs <- quercusObs[!quercusObs$PlantID %in% removed$PlantNumber,]
@@ -83,7 +89,7 @@ acerObs <- acerObs[!acerObs$PlantID %in% removed$PlantNumber,]
 ulmusObs <- ulmusObs[!ulmusObs$PlantID %in% removed$PlantNumber,]
 
 dim(quercusObs); dim(acerObs); dim(ulmusObs)
-# Quercus: 220, Acer: 161, Ulmus: 134
+# Quercus: 279, Acer: 172, Ulmus: 138
 
 unique(quercusObs$PlantID[quercusObs$List==11])
 
@@ -183,13 +189,13 @@ unique(quercusObs$PlantID[quercusObs$List==11])
 # acerObs <- acerObs[!acerObs$PlantID %in% acerGone,]
 # ulmusObs <- ulmusObs[!ulmusObs$PlantID %in% ulmusGone,]
 
-dim(quercusObs); dim(acerObs); dim(ulmusObs)
-# Quercus: 215, Acer: 138, Ulmus: 133
+# dim(quercusObs); dim(acerObs); dim(ulmusObs)
+# # Quercus: 215, Acer: 138, Ulmus: 133
 
 length(unique(quercusObs$Taxon))
 length(unique(acerObs$Taxon))
 length(unique(ulmusObs$Taxon))
-# Quercus: 55, Acer: 50, Ulmus:28
+# Quercus: 60, Acer: 50, Ulmus:28
 
 
 
@@ -215,8 +221,8 @@ length(unique(ulmusObs$Taxon))
 # 4. Update the existing lists to remove trees that we know are now gone ----
 #####################################
 # Check the Distribution of Trees (small list = <15 trees)
-summary(as.factor(quercusObs$List)) # Small List: List 7 (9 trees); List 4 (11 trees); List 1 (12 trees)
-summary(as.factor(acerObs$List)) # Small List: List 2 (10 trees), List 1 (13 trees); List 5 (14 trees), List 7 (14 trees) 
+summary(as.factor(quercusObs$List)) # Small List:
+summary(as.factor(acerObs$List)) # Small List: 
 summary(as.factor(ulmusObs$List)) # No small lists 
 
 png(file.path(path.google, "Observing Lists", "Quercus", "ObservingList_Quercus_2026.png"), height=8, width=8, units="in", res=180)
