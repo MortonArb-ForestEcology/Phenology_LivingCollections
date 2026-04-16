@@ -15,8 +15,7 @@ library(dplyr)
 yr.now    <- lubridate::year(Sys.Date())
 date.now  <- lubridate::date(Sys.Date())
 
-path.out  <- file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations",
-                       paste0("Observation_data_as_of_", date.now))
+path.out  <- file.path("~/Google Drive/My Drive/LivingCollections_Phenology/Data_Observations")
 path.figs <- file.path("~/Google Drive/My Drive/LivingCollections_Phenology/QAQC data check/figures")
 
 if (!dir.exists(path.figs)) dir.create(path.figs, recursive = TRUE)
@@ -64,14 +63,14 @@ datNow <- datAll[!is.na(datAll$DateEntered) &
                    lubridate::year(datAll$DateEntered) == yr.now, ]
 datNow <- droplevels(datNow)
 
-# Add derived time columns
+# Add time columns
 datNow$yday <- lubridate::yday(datNow$DateObserved)
 datNow$week <- lubridate::week(datNow$DateObserved)
 datNow$Year <- yr.now
 # Normalised date for overlaying years on the same x-axis
 datNow$Date <- as.Date(paste0(yr.now, "-", format(datNow$DateObserved, "%m-%d")))
 
-dat.now <- datNow  # alias used throughout figures sections
+dat.now <- datNow  
 
 
 # 3. DATA SNAPSHOT -----------------------------------------------------------
@@ -96,13 +95,6 @@ genera.observed <- data.frame(
   N_observations = tabulate(match(dat.now$Genus, sort(unique(dat.now$Genus))))
 )
 genera.observed
-
-observer.snap <- data.frame(
-  ObserverID       = sort(unique(as.character(dat.now$ObserverID))),
-  InReferenceTable = sort(unique(as.character(dat.now$ObserverID))) %in%
-    as.character(observers$ObserverID)
-)
-observer.snap
 
 
 # 3b. PHENOPHASE SNAPSHOT BY GENUS -------------------------------------------
@@ -146,14 +138,6 @@ pheno.by.genus <- Reduce(
 pheno.by.genus
 
 
-# 4. HELPER: SAVE + DISPLAY --------------------------------------------------
-save.fig <- function(p, filename, w = 9, h = 5.5) {
-  print(p)
-  ggsave(file.path(path.figs, filename), plot = p, width = w, height = h, dpi = 150)
-  invisible(p)
-}
-
-
 # 5. SPRING PHENOPHASE FIGURES -----------------------------------------------
 # Histograms of yday for each spring phenophase, faceted by genus
 
@@ -176,7 +160,9 @@ for (ph in spring.phases) {
   
   if (nrow(now.yes) == 0) next
   
-  p <- ggplot(now.yes, aes(x = yday)) +
+  ggplot(now.yes, aes(x = yday)) +
+    png(file.path(path.figs, paste0(gsub(" ", "_", label), "_", yr.now, ".png")),
+        height = 5.5, width = 9, units = "in", res = 150) +
     geom_histogram(fill = "#2196F3", alpha = 0.8, binwidth = 7, boundary = 1) +
     facet_wrap(~ Genus, scales = "free_y", ncol = 1) +
     scale_x_continuous(
@@ -185,8 +171,7 @@ for (ph in spring.phases) {
     labs(title = paste(label, "—", yr.now, "to", date.now),
          x = "Date", y = "Number of Observations") +
     theme_bw(base_size = 13)
-  
-  save.fig(p, paste0(gsub(" ", "_", label), "_", yr.now, ".png"))
+  dev.off()
 }
 
 
@@ -209,7 +194,9 @@ for (ph in fall.phases) {
   
   if (nrow(now.yes) == 0) next
   
-  p <- ggplot(now.yes, aes(x = yday)) +
+  ggplot(now.yes, aes(x = yday)) +
+    png(file.path(path.figs, paste0(gsub(" ", "_", label), "_", yr.now, ".png")),
+        height = 5.5, width = 9, units = "in", res = 150) +
     geom_histogram(fill = "#E65100", alpha = 0.8, binwidth = 7, boundary = 200) +
     facet_wrap(~ Genus, scales = "free_y", ncol = 1) +
     scale_x_continuous(
@@ -218,8 +205,7 @@ for (ph in fall.phases) {
     labs(title = paste(label, "—", yr.now, "to", date.now),
          x = "Date", y = "Number of Observations") +
     theme_bw(base_size = 13)
-  
-  save.fig(p, paste0(gsub(" ", "_", label), "_", yr.now, ".png"))
+  dev.off()
 }
 
 
@@ -263,8 +249,10 @@ prop.list <- lapply(genera, function(g) {
 prop.dat <- dplyr::bind_rows(prop.list)
 
 if (nrow(prop.dat) > 0 && !all(is.na(prop.dat$Proportion))) {
-  p.prop <- ggplot(prop.dat[!is.na(prop.dat$Proportion), ],
-                   aes(x = week, y = Proportion, color = Phenophase, group = Phenophase)) +
+  ggplot(prop.dat[!is.na(prop.dat$Proportion), ],
+         aes(x = week, y = Proportion, color = Phenophase, group = Phenophase)) +
+    png(file.path(path.figs, paste0("phenophase_proportions_", yr.now, ".png")),
+        height = 10, width = 9, units = "in", res = 150) +
     geom_line(linewidth = 0.9) +
     geom_point(size = 2) +
     facet_wrap(~ Genus, ncol = 1, scales = "free_y") +
@@ -274,15 +262,14 @@ if (nrow(prop.dat) > 0 && !all(is.na(prop.dat$Proportion))) {
          x = "Week of Year", y = "Proportion of Trees", color = NULL) +
     theme_bw(base_size = 13) +
     theme(legend.position = "bottom")
-  
-  save.fig(p.prop, paste0("phenophase_proportions_", yr.now, ".png"), w = 9, h = 10)
+  dev.off()
 }
 
 
 # 8. LEAF COLOR INTENSITY (FALL) ---------------------------------------------
 # Stacked bar of LeafColorIntensity categories by week, per genus
 
-int.col <- "LeafColorIntensity"
+int.col    <- "LeafColorIntensity"
 int.levels <- c("<5%", "5-24%", "25-49%", "50-74%", "75-94%", ">95%")
 
 if (int.col %in% names(dat.now)) {
@@ -294,7 +281,9 @@ if (int.col %in% names(dat.now)) {
     dat.color[[int.col]] <- factor(dat.color[[int.col]],
                                    levels = int.levels[int.levels %in% dat.color[[int.col]]])
     
-    p.color <- ggplot(dat.color, aes(x = factor(week), fill = .data[[int.col]])) +
+    ggplot(dat.color, aes(x = factor(week), fill = .data[[int.col]])) +
+      png(file.path(path.figs, paste0("leaf_color_intensity_", yr.now, ".png")),
+          height = 5.5, width = 9, units = "in", res = 150) +
       geom_bar(position = "fill") +
       facet_wrap(~ Genus, ncol = 1) +
       scale_fill_brewer(palette = "YlOrRd", name = "Color Intensity") +
@@ -303,51 +292,28 @@ if (int.col %in% names(dat.now)) {
            x = "Week of Year", y = "Proportion") +
       theme_bw(base_size = 13) +
       theme(legend.position = "right")
-    
-    save.fig(p.color, paste0("leaf_color_intensity_", yr.now, ".png"))
+    dev.off()
   }
 }
 
 
-# 9. OBSERVER ACTIVITY SUMMARY -----------------------------------------------
-
-obs.sum              <- aggregate(DateObserved ~ ObserverID + Genus, data = dat.now, FUN = length)
-names(obs.sum)[3]    <- "N_observations"
-obs.sum$ObserverID   <- factor(obs.sum$ObserverID,
-                               levels = names(sort(tapply(obs.sum$N_observations,
-                                                          obs.sum$ObserverID, sum),
-                                                   decreasing = TRUE)))
-
-p.obs <- ggplot(obs.sum, aes(x = ObserverID, y = N_observations, fill = Genus)) +
-  geom_col() +
-  scale_fill_manual(values = c(Acer = "#E41A1C", Quercus = "#4DAF4A", Ulmus = "#984EA3")) +
-  labs(title = paste("Observations per Observer by Genus —", yr.now, "to", date.now),
-       x = NULL, y = "Number of Observations") +
-  theme_bw(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "top")
-
-save.fig(p.obs, paste0("observer_summary_", yr.now, ".png"))
-
-
-# 10. EXPORT CORRECTED DATA BY GENUS ------------------------------------------
+# 9. EXPORT CORRECTED DATA BY GENUS ------------------------------------------
 # Writes one CSV per genus from the post-fix DB pull, plus a combined file.
 # These are the authoritative current-year cleaned data files.
 
 for (g in genera) {
-  dat.g    <- dat.now[dat.now$Genus == g, ]
+  dat.g <- dat.now[dat.now$Genus == g, ]
   if (nrow(dat.g) == 0) {
     warning("No records found for genus: ", g)
     next
   }
   out.name <- paste0("LivingCollectionPhenology_ObservationData_",
                      g, "_", yr.now, "_asof_", date.now, ".csv")
-  write.csv(dat.g, file.path(path.dat, out.name), row.names = FALSE)
+  write.csv(dat.g, file.path(path.out, out.name), row.names = FALSE)
   message("Exported: ", out.name, " (", nrow(dat.g), " records)")
 }
 
 # Combined all-genera export
 out.all <- paste0("LivingCollectionPhenology_ObservationData_All_",
                   yr.now, "_asof_", date.now, ".csv")
-write.csv(dat.now, file.path(path.dat, out.all), row.names = FALSE)
-
+write.csv(dat.now, file.path(path.out, out.all), row.names = FALSE)
