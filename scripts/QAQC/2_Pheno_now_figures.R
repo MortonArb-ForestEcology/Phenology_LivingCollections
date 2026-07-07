@@ -160,18 +160,19 @@ for (ph in spring.phases) {
   
   if (nrow(now.yes) == 0) next
   
-  ggplot(now.yes, aes(x = yday)) +
-    png(file.path(path.figs, paste0(gsub(" ", "_", label), "_", yr.now, ".png")),
-        height = 5.5, width = 9, units = "in", res = 150) +
-    geom_histogram(fill = "#2196F3", alpha = 0.8, binwidth = 7, boundary = 1) +
-    facet_wrap(~ Genus, scales = "free_y", ncol = 1) +
-    scale_x_continuous(
-      breaks = c(60, 91, 121, 152, 182),
-      labels = c("Mar 1", "Apr 1", "May 1", "Jun 1", "Jul 1")) +
-    labs(title = paste(label, "—", yr.now, "to", date.now),
-         x = "Date", y = "Number of Observations") +
-    theme_bw(base_size = 13)
-  dev.off()
+  ggsave(
+    file.path(path.figs, paste0(gsub(" ", "_", label), "_", yr.now, ".png")),
+    plot = ggplot(now.yes, aes(x = yday)) +
+      geom_histogram(fill = "#2196F3", alpha = 0.8, binwidth = 7, boundary = 1) +
+      facet_wrap(~ Genus, scales = "free_y", ncol = 1) +
+      scale_x_continuous(
+        breaks = c(60, 91, 121, 152, 182),
+        labels = c("Mar 1", "Apr 1", "May 1", "Jun 1", "Jul 1")) +
+      labs(title = paste(label, "—", yr.now, "to", date.now),
+           x = "Date", y = "Number of Observations") +
+      theme_bw(base_size = 13),
+    height = 5.5, width = 9, units = "in", dpi = 150
+  )
 }
 
 
@@ -194,18 +195,19 @@ for (ph in fall.phases) {
   
   if (nrow(now.yes) == 0) next
   
-  ggplot(now.yes, aes(x = yday)) +
-    png(file.path(path.figs, paste0(gsub(" ", "_", label), "_", yr.now, ".png")),
-        height = 5.5, width = 9, units = "in", res = 150) +
-    geom_histogram(fill = "#E65100", alpha = 0.8, binwidth = 7, boundary = 200) +
-    facet_wrap(~ Genus, scales = "free_y", ncol = 1) +
-    scale_x_continuous(
-      breaks = c(213, 244, 274, 305, 335),
-      labels = c("Aug 1", "Sep 1", "Oct 1", "Nov 1", "Dec 1")) +
-    labs(title = paste(label, "—", yr.now, "to", date.now),
-         x = "Date", y = "Number of Observations") +
-    theme_bw(base_size = 13)
-  dev.off()
+  ggsave(
+    file.path(path.figs, paste0(gsub(" ", "_", label), "_", yr.now, ".png")),
+    plot = ggplot(now.yes, aes(x = yday)) +
+      geom_histogram(fill = "#E65100", alpha = 0.8, binwidth = 7, boundary = 200) +
+      facet_wrap(~ Genus, scales = "free_y", ncol = 1) +
+      scale_x_continuous(
+        breaks = c(213, 244, 274, 305, 335),
+        labels = c("Aug 1", "Sep 1", "Oct 1", "Nov 1", "Dec 1")) +
+      labs(title = paste(label, "—", yr.now, "to", date.now),
+           x = "Date", y = "Number of Observations") +
+      theme_bw(base_size = 13),
+    height = 5.5, width = 9, units = "in", dpi = 150
+  )
 }
 
 
@@ -249,20 +251,21 @@ prop.list <- lapply(genera, function(g) {
 prop.dat <- dplyr::bind_rows(prop.list)
 
 if (nrow(prop.dat) > 0 && !all(is.na(prop.dat$Proportion))) {
-  ggplot(prop.dat[!is.na(prop.dat$Proportion), ],
-         aes(x = week, y = Proportion, color = Phenophase, group = Phenophase)) +
-    png(file.path(path.figs, paste0("phenophase_proportions_", yr.now, ".png")),
-        height = 10, width = 9, units = "in", res = 150) +
-    geom_line(linewidth = 0.9) +
-    geom_point(size = 2) +
-    facet_wrap(~ Genus, ncol = 1, scales = "free_y") +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, 1)) +
-    scale_color_brewer(palette = "Set1") +
-    labs(title = paste("Phenophase Proportions by Week —", yr.now, "to", date.now),
-         x = "Week of Year", y = "Proportion of Trees", color = NULL) +
-    theme_bw(base_size = 13) +
-    theme(legend.position = "bottom")
-  dev.off()
+  ggsave(
+    file.path(path.figs, paste0("phenophase_proportions_", yr.now, ".png")),
+    plot = ggplot(prop.dat[!is.na(prop.dat$Proportion), ],
+                  aes(x = week, y = Proportion, color = Phenophase, group = Phenophase)) +
+      geom_line(linewidth = 0.9) +
+      geom_point(size = 2) +
+      facet_wrap(~ Genus, ncol = 1, scales = "free_y") +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, 1)) +
+      scale_color_brewer(palette = "Set1") +
+      labs(title = paste("Phenophase Proportions by Week —", yr.now, "to", date.now),
+           x = "Week of Year", y = "Proportion of Trees", color = NULL) +
+      theme_bw(base_size = 13) +
+      theme(legend.position = "bottom"),
+    height = 10, width = 9, units = "in", dpi = 150
+  )
 }
 
 
@@ -281,18 +284,19 @@ if (int.col %in% names(dat.now)) {
     dat.color[[int.col]] <- factor(dat.color[[int.col]],
                                    levels = int.levels[int.levels %in% dat.color[[int.col]]])
     
-    ggplot(dat.color, aes(x = factor(week), fill = .data[[int.col]])) +
-      png(file.path(path.figs, paste0("leaf_color_intensity_", yr.now, ".png")),
-          height = 5.5, width = 9, units = "in", res = 150) +
-      geom_bar(position = "fill") +
-      facet_wrap(~ Genus, ncol = 1) +
-      scale_fill_brewer(palette = "YlOrRd", name = "Color Intensity") +
-      scale_y_continuous(labels = scales::percent_format()) +
-      labs(title = paste("Leaf Color Intensity by Week —", yr.now),
-           x = "Week of Year", y = "Proportion") +
-      theme_bw(base_size = 13) +
-      theme(legend.position = "right")
-    dev.off()
+    ggsave(
+      file.path(path.figs, paste0("leaf_color_intensity_", yr.now, ".png")),
+      plot = ggplot(dat.color, aes(x = factor(week), fill = .data[[int.col]])) +
+        geom_bar(position = "fill") +
+        facet_wrap(~ Genus, ncol = 1) +
+        scale_fill_brewer(palette = "YlOrRd", name = "Color Intensity") +
+        scale_y_continuous(labels = scales::percent_format()) +
+        labs(title = paste("Leaf Color Intensity by Week —", yr.now),
+             x = "Week of Year", y = "Proportion") +
+        theme_bw(base_size = 13) +
+        theme(legend.position = "right"),
+      height = 5.5, width = 9, units = "in", dpi = 150
+    )
   }
 }
 
