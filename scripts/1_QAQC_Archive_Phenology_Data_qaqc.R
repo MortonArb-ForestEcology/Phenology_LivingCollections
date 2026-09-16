@@ -14,6 +14,7 @@ library(openxlsx)   # for the multi-tab .xlsx flag workbook  (install.packages("
 path.google <- "~/Google Drive/My Drive"
 path.base   <- file.path(path.google, "LivingCollections_Phenology")
 path.data   <- file.path(path.base, "Data_Observations")  # input: the *_FINAL.csv files
+path.taxon.ref <- file.path(path.base,"Observing Lists/OLD/Old_combined")
 path.clean  <- file.path(path.base, "Data_Cleaned")        # output: cleaned per-file CSVs (input to script 2)
 path.qaqc   <- file.path(path.base, "QAQC_flags")          # output: flag list (created if missing)
 
@@ -86,7 +87,34 @@ pheno <- do.call(rbind, lapply(raw[ok], function(d) d[, c(expected.cols, "File",
 
 M   <- as.matrix(pheno[, expected.cols])   # all-character matrix -> check many columns at once
 
+# #######################################################
+# Build the known/correct species list from reference files
+# #######################################################
+taxon.files <- dir(path.taxon.ref, pattern = "\\.csv$", full.names = TRUE)
+if(length(taxon.files) == 0) stop("No .csv files found in ", path.taxon.ref)
 
+readTaxon <- function(f){
+  d <- tryCatch(
+    read.csv(f, stringsAsFactors = FALSE, check.names = FALSE,
+             colClasses = "character", na.strings = c("", "NA")),
+    error = function(e){ message("FAILED reading taxon ref file: ", basename(f), " -- ", conditionMessage(e)); NULL }
+  )
+  if(is.null(d)) return(NULL)
+  if(!"Taxon" %in% names(d)){
+    message("No 'Taxon' column in: ", basename(f))   # <- check this list is empty; if not, that file is silently skipped
+    return(NULL)
+  }
+  d$Taxon
+}
+
+taxon.raw <- unlist(lapply(taxon.files, readTaxon), use.names = FALSE)
+known.species <- sort(unique(trimws(taxon.raw[!is.na(taxon.raw) & trimws(taxon.raw) != ""])))
+length(known.species)   # <- eyeball: does this look like a plausible count?
+
+# case-insensitive, internal-whitespace-insensitive matching set
+# (collapses runs of internal spaces, e.g. "Acer  davidii" -> "acer davidii",
+#  so double-spaced entries match their single-spaced counterpart)
+known.species.lower <- tolower(gsub("\\s+", " ", trimws(known.species)))
 # #######################################################
 # Eyeball  (run each line and look at what it shows)
 # #######################################################
@@ -161,6 +189,12 @@ flags <- rbind(flags, mkFlags1(r, "Species", pheno$Species[r], "genus does not m
 r <- which(!is.na(pheno$Species) & is.na(gen))
 flags <- rbind(flags, mkFlags1(r, "Species", pheno$Species[r], "could not parse genus from Species"))
 
+# Species not found in known Taxon list (normalize whitespace + case before comparing)
+species.norm <- tolower(gsub("\\s+", " ", trimws(pheno$Species)))
+r <- which(!is.na(pheno$Species) & trimws(pheno$Species) != "" &
+             !(species.norm %in% known.species.lower))
+flags <- rbind(flags, mkFlags1(r, "Species", pheno$Species[r], "Species not found in known Taxon list"))
+
 # date inside the file's Year
 d <- as.Date(pheno$Date.Observed, format = date.format)
 r <- which(!is.na(d) & format(d, "%Y") != pheno$Year)
@@ -211,6 +245,7 @@ tab.names <- c(
   "could not parse genus from Species"                              = "Genus unparseable",
   "date outside file Year"                                          = "Date wrong year",
   "date did not parse under configured date.format"                 = "Date unparseable",
+  "Species not found in known Taxon list"                           = "Unknown species",
   "exact duplicate row"                                             = "Duplicate row")
 
 # one tab per issue, with an "All flags" tab first
