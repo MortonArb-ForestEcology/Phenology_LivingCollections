@@ -181,7 +181,7 @@ dat.ghcn15mean <- aggregate(PRCP.cum ~ YDAY,data=dat.ghcn15, FUN=mean, NA.rm=T)
 #png(file.path(path.figs,"Cumulative Precipitation Since 2007.png"), height=4, width=6, units="in", res=320)
 ggplot(data=dat.ghcn15) +
   geom_line(aes(x=YDAY, y=PRCP.cum, color=as.factor(YEAR)))+
-  gghighlight::gghighlight(YEAR== "2024")     +
+  gghighlight::gghighlight(YEAR== "2026")     +
   geom_smooth(data=dat.ghcn15mean)+ (aes(x=YDAY, y=PRCP.cum))+
   # scale_color_manual(name="Year") +
   # scale_fill_manual(name="Year") +
@@ -361,38 +361,105 @@ ggplot(dat.ghcn3, aes(x = YDAY, y = DaysNoRain_z, fill = as.factor(YEAR))) +
   facet_wrap(~ YEAR,) 
 
 
-####
-# -------------------------------------
-# Calculating SPI
-# -------------------------------------
-# Create a function to calculate SPI
-calc_spi <- function(prcp) {
-  n <- length(prcp)
-  
-  # Convert NA values to 0
-  prcp[is.na(prcp)] <- 0
-  
-  # Calculate cumulative precipitation
-  cum_prcp <- cumsum(prcp)
-  
-  # Calculate SPI using a simple approach
-  spi_values <- (cum_prcp - mean(cum_prcp)) / sd(cum_prcp)
-  
-  # Return SPI values
-  return(spi_values)
-}
 
-# Calculate SPI for the specified precipitation variable
-dat.ghcn3$SPI <- unlist(tapply(dat.ghcn3$PRCP, dat.ghcn3$YEAR, function(x) calc_spi(x)))
 
-# -------------------------------------
-# Plotting SPI by day and year
-# -------------------------------------
-# Plot SPI values by day and year
-ggplot(dat.ghcn3, aes(x = YDAY, y = SPI, color = as.factor(YEAR))) +
-  geom_line(size=0.25) +
-  labs(title = "SPI by Day and Year",
-       x = "Day of Year",
-       y = "SPI",
-      color="Year" ) +
-  theme_minimal()
+
+ # how dry was it compared to other years? 
+dat.ghcn2$PRCP.z <- ave(dat.ghcn2$PRCP.cum, dat.ghcn2$YDAY,
+                        FUN = function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE))
+# Month-start positions for the x-axis
+month.starts <- as.numeric(format(as.Date(paste0("2026-", 1:12, "-01")), "%j"))
+
+#png(file.path(path.figs, "Cumulative Precipitation Anomaly.png"), height=4, width=6, units="in", res=320)
+ggplot(data = dat.ghcn2[is.finite(dat.ghcn2$PRCP.z), ]) +
+  geom_line(aes(x = YDAY, y = PRCP.z, color = as.factor(YEAR))) +
+  gghighlight::gghighlight(YEAR == 2026, use_group_by = FALSE) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -1, ymax = 1, alpha = 0.08) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Cumulative Precipitation Compared to Normal",
+       y = "Standard deviations from normal", x = "Date", color = "Year") +
+  scale_x_continuous(breaks = month.starts, labels = month.abb) +
+  theme_classic()
+
+#SPI
+library(SPEI)
+
+# Monthly totals from the full record (not just 2007+)
+mon <- aggregate(PRCP ~ YEAR + MONTH, data = dat.ghcn, FUN = sum)
+mon <- mon[order(mon$YEAR, mon$MONTH), ]
+
+# Drop the current, incomplete month (a partial month looks falsely dry)
+mon <- mon[!(mon$YEAR == lubridate::year(Sys.Date()) &
+               mon$MONTH == lubridate::month(Sys.Date())), ]
+
+# 3-month SPI
+spi3 <- spi(ts(mon$PRCP, start = c(mon$YEAR[1], mon$MONTH[1]), frequency = 12), scale = 3)
+mon$SPI3 <- as.numeric(spi3$fitted)
+mon$DATE <- as.Date(paste(mon$YEAR, mon$MONTH, 1, sep = "-"))
+
+ggplot(mon[!is.na(mon$SPI3), ], aes(x = DATE, y = SPI3, fill = SPI3 < 0)) +
+  geom_col() +
+  scale_fill_manual(values = c("FALSE" = "steelblue", "TRUE" = "firebrick"), guide = "none") +
+  geom_hline(yintercept = c(-1, -1.5, -2), linetype = "dotted") +
+  labs(title = "3-Month Standardized Precipitation Index", x = NULL, y = "SPI-3") +
+  theme_classic()
+
+#Standard SPI categories
+spi.levels <- c("Extremely dry", "Severely dry", "Moderately dry", "Near normal",
+                "Moderately wet", "Very wet", "Extremely wet")
+spi.labels <- c("Extremely dry (-2 or less)", "Severely dry (-2 to -1.5)",
+                "Moderately dry (-1.5 to -1)", "Near normal (-1 to 1)",
+                "Moderately wet (1 to 1.5)", "Very wet (1.5 to 2)",
+                "Extremely wet (2 or more)")
+# Brown = dry, gray = normal, blue = wet (checked for colorblind separation)
+spi.colors <- c("#8c510a", "#c27c2c", "#e0b468", "#ececec", "#93c0e3", "#4a88c6", "#1f4e8c")
+names(spi.colors) <- spi.levels
+
+mon$SPI.cat <- cut(mon$SPI3, breaks = c(-Inf, -2, -1.5, -1, 1, 1.5, 2, Inf),
+                   labels = spi.levels)
+
+# Years to display (the SPI fit above still uses the full record)
+yr.show <- 2007
+mon.plot <- mon[mon$YEAR >= yr.show & !is.na(mon$SPI3), ]
+mon.plot$YEAR.f <- factor(mon.plot$YEAR)   # newest year ends up on top
+n.yr <- nlevels(mon.plot$YEAR.f)
+
+# Print values only in months outside the normal range
+mon.plot$lab <- ifelse(abs(mon.plot$SPI3) >= 1, sprintf("%.1f", mon.plot$SPI3), "")
+mon.plot$lab.col <- ifelse(mon.plot$SPI.cat %in% c("Extremely dry", "Extremely wet"),
+                           "white", "black")
+
+# Growing season to outline (month numbers) - change if you use a different window
+gs.start <- 4   # April
+gs.end   <- 9   # September
+
+p.spi <- ggplot(mon.plot, aes(x = MONTH, y = YEAR.f)) +
+  geom_tile(aes(fill = SPI.cat), color = "white", linewidth = 0.6, show.legend = TRUE) +
+  geom_text(aes(label = lab, color = lab.col), size = 2.3) +
+  scale_color_identity() +
+  annotate("rect", xmin = gs.start - 0.5, xmax = gs.end + 0.5,
+           ymin = 0.5, ymax = n.yr + 0.5,
+           fill = NA, color = "grey15", linewidth = 0.7) +
+  annotate("text", x = (gs.start + gs.end) / 2, y = n.yr + 0.9,
+           label = "Growing season", size = 3, color = "grey15") +
+  scale_fill_manual(values = spi.colors, breaks = spi.levels, labels = spi.labels,
+                    drop = FALSE, name = "3-month SPI",
+                    guide = guide_legend(reverse = TRUE)) +
+  scale_x_continuous(breaks = 1:12, labels = month.abb, expand = c(0, 0)) +
+  labs(title = paste0("Wet and dry spells, ", min(mon.plot$YEAR), "-", max(mon.plot$YEAR)),
+       subtitle = "Each square = rain in the 3 months ending that month vs. the same months in other years",
+      
+       x = NULL, y = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid = element_blank(),
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+        plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(color = "grey30"),
+        plot.caption = element_text(color = "grey40", hjust = 0),
+        legend.key.size = unit(0.45, "cm"))
+
+
+#png(file.path(path.figs, "SPI3 Heatmap.png"), height = 6.5, width = 8.5, units = "in", res = 320)
+
+#dev.off()
